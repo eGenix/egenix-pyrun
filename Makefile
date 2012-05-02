@@ -187,7 +187,7 @@ interpreter:	$(TMPPYTHON)
 
 Runtime/$(PYRUNPY):	$(TMPPYTHON) Runtime/makepyrun.py Runtime/pyrun_template.py Runtime/pyrun_config_template.py
 	echo "=== Preparing PyRun =================================================================="
-	cd PyRun; \
+	cd Runtime; \
 	unset PYTHONPATH; export PYTHONPATH; \
 	export PYTHONHOME=$(TMPINSTALLDIR); \
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
@@ -198,7 +198,7 @@ Runtime/$(PYRUNPY):	$(TMPPYTHON) Runtime/makepyrun.py Runtime/pyrun_template.py 
 prepare:	Runtime/$(PYRUNPY)
 
 test-makepyrun:
-	cd PyRun; \
+	cd Runtime; \
 	unset PYTHONPATH; export PYTHONPATH; \
 	export PYTHONHOME=$(TMPINSTALLDIR); \
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
@@ -208,7 +208,7 @@ test-makepyrun:
 $(PYRUN):	Runtime/$(PYRUNPY)
 	echo "=== Creating PyRun ==================================================================="
         # Cleanup the PyRun freeze build dir
-	cd PyRun; $(RM) -f *.c *.o
+	cd Runtime; $(RM) -f *.c *.o
         # Run freeze to build pyrun
 	cd Runtime/freeze; \
 	unset PYTHONPATH; export PYTHONPATH; \
