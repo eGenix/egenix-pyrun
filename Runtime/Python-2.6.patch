@@ -1,0 +1,24 @@
+--- Modules/getpath.c.orig	2010-07-24 12:09:36.000000000 +0200
++++ Modules/getpath.c	2012-04-23 01:00:43.650066507 +0200
+@@ -444,10 +444,21 @@ calculate_path(void)
+         if (progpath[0] != SEP && progpath[0] != '\0')
+                 absolutize(progpath);
+         strncpy(argv0_path, progpath, MAXPATHLEN);
+         argv0_path[MAXPATHLEN] = '\0';
+ 
++    /* For PyRun we don't need all the machinery to setup sys.path, since
++       we're doing that in pyrun.py, so just use some sane defaults and
++       return. */
++    if (Py_FrozenFlag) {
++	strncpy(prefix, PREFIX, MAXPATHLEN);
++	strncpy(exec_prefix, EXEC_PREFIX, MAXPATHLEN);
++	module_search_path = (char *)PyMem_Malloc(MAXPATHLEN);
++	strncpy(module_search_path, PREFIX "/lib/python" VERSION, MAXPATHLEN);
++	return;
++    }
++
+ #ifdef WITH_NEXT_FRAMEWORK
+         /* On Mac OS X we have a special case if we're running from a framework.
+         ** This is because the python home should be set relative to the library,
+         ** which is in the framework, not relative to the executable, which may
+         ** be outside of the framework. Except when we're in the build directory...
