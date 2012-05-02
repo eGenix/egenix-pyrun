@@ -40,7 +40,8 @@ PYRUNVERSION = $(PYTHONVERSION)
 PLATFORM := $(shell python Runtime/platform.py)
 
 # Name of the resulting pyrun executable
-PYRUN = pyrun$(PYRUNVERSION)
+PYRUN_GENERIC = pyrun
+PYRUN = $(PYRUN_GENERIC)$(PYRUNVERSION)
 
 # Archive name to create with "make archive"
 ARCHIVE = $(PYRUN)-$(PYRUNFULLVERSION)-$(PLATFORM)
@@ -66,15 +67,23 @@ PYTHONPATCHFILE = Python-$(PYTHONVERSION).patch
 # Name of the temporary installation target dir
 TMPINSTALLDIR = $(PWD)/tmp-$(PYTHONVERSION)
 TMPPYTHON = $(TMPINSTALLDIR)/bin/python$(PYTHONVERSION)
+TMPLIBDIR = $(TMPINSTALLDIR)/lib/python$(PYRUNVERSION)
+TMPSHAREDLIBDIR = $(TMPLIBDIR)/lib-dynload
+TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)
 
 # Target dir of shared modules
 LIBDIR = $(PWD)/lib
 PYRUNLIBDIR = $(LIBDIR)/python$(PYRUNVERSION)
 
+# Target dir for include files
+INCLUDEDIR = $(PWD)/include
+PYRUNINCLUDEDIR = $(INCLUDEDIR)/python$(PYRUNVERSION)
+
 # Installation directories
 PREFIX = /usr/local
 INSTALLBINDIR = $(PREFIX)/bin
 INSTALLLIBDIR = $(PREFIX)/lib
+INSTALLINCLUDEDIR = $(PREFIX)/include
 
 # Packages and modules to exclude from the runtime
 EXCLUDES = 
@@ -180,7 +189,10 @@ $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	cd $(PYTHONDIR); \
 	$(MAKE); \
 	$(MAKE) install; \
-	cp -vf build/lib*/*.so $(PYRUNLIBDIR)
+	if ! test -d $(PYRUNLIBDIR); then mkdir -p $(PYRUNLIBDIR); fi; \
+	cp -vaf	$(TMPSHAREDLIBDIR)/* $(PYRUNLIBDIR); \
+	if ! test -d $(PYRUNINCLUDEDIR); then mkdir -p $(PYRUNINCLUDEDIR); fi; \
+	cp -vaf $(TMPINCLUDEDIR)/* $(PYRUNINCLUDEDIR)
 	touch $@ $(PYTHONDIR)
 
 interpreter:	$(TMPPYTHON)
@@ -235,12 +247,19 @@ runtime:	$(PYRUN)
 ### Installation
 
 install-bin:	$(PYRUN)
+	if ! test -d $(INSTALLBINDIR); then mkdir -p $(INSTALLBINDIR); fi;
 	cp $(PYRUN) $(INSTALLBINDIR)
+	ln -sf $(PYRUN) $(INSTALLBINDIR)/$(PYRUN_GENERIC)
 
 install-lib:
+	if ! test -d $(INSTALLLIBDIR); then mkdir -p $(INSTALLLIBDIR); fi;
 	cp -r $(PYRUNLIBDIR) $(INSTALLLIBDIR)
 
-install:	install-bin install-lib
+install-include:
+	if ! test -d $(INSTALLINCLUDEDIR); then mkdir -p $(INSTALLINCLUDEDIR); fi;
+	cp -r $(PYRUNINCLUDEDIR) $(INSTALLINCLUDEDIR)
+
+install:	install-bin install-lib install-include
 
 ### Packaging
 
