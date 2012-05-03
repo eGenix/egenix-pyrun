@@ -209,7 +209,7 @@ unicodedata unicodedata.c    # static Unicode character database
 
 # access to ISO C locale support
 _locale _localemodule.c  \
-    #@MACOSX@ -framework CoreFoundation \
+    # @if macosx: -framework CoreFoundation \
     #-lintl
 
 # Modules with some UNIX dependencies -- on by default:
@@ -571,4 +571,4 @@ _fileio _fileio.c
 _bytesio _bytesio.c
 
 # _scproxy (used on Mac OS X only)
-#@MACOSX@_scproxy ../Mac/Modules/_scproxy.c -framework SystemConfiguration -framework CoreFoundation
+# @if macosx: _scproxy ../Mac/Modules/_scproxy.c -framework SystemConfiguration -framework CoreFoundation

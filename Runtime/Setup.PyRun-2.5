@@ -209,7 +209,7 @@ unicodedata unicodedata.c    # static Unicode character database
 
 # access to ISO C locale support
 _locale _localemodule.c  \
-    #@MACOSX@ -framework CoreFoundation \
+    # @if macosx: -framework CoreFoundation \
     #-lintl
 
 # Modules with some UNIX dependencies -- on by default:

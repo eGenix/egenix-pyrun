@@ -24,7 +24,7 @@
 PWD := $(shell pwd)
 
 # Python versions to use for pyrun
-PYTHON_27_VERSION = 2.7.2
+PYTHON_27_VERSION = 2.7.3
 PYTHON_26_VERSION = 2.6.7
 PYTHON_25_VERSION = 2.5.6
 
@@ -88,12 +88,6 @@ INSTALLINCLUDEDIR = $(PREFIX)/include
 # Packages and modules to exclude from the runtime
 EXCLUDES = 
 
-# Tools
-TAR = tar
-# Note: MAKE is a pre-defined variable in GNU make
-RM = /bin/rm
-STRIP = strip
-
 # Python configure options
 PYTHON_CONFIGURE_OPTIONS = ""
 PYTHON_25_BUILD := $(shell test PYTHONVERSION = "2.5" && echo "1")
@@ -116,6 +110,14 @@ ifdef MACOSX_INTEL_PLATFORM
  export MACOSX_DEPLOYMENT_TARGET=10.5
  PYTHON_CONFIGURE_OPTIONS = MACOSX_DEPLOYMENT_TARGET=10.5
 endif
+
+# Tools
+TAR = tar
+# Note: MAKE is a pre-defined variable in GNU make
+RM = /bin/rm
+STRIP = strip
+CP = cp
+CP_DIR = $(CP) -pR
 
 # Stripping the executable
 # 
@@ -173,10 +175,11 @@ config: $(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	mkdir -p $(PYRUNLIBDIR)
         # Install the custom Modules/Setup file
 	if test "$(MACOSX_PLATFORM)"; then \
-		sed 	-e 's/#@MACOSX@//' \
+		sed 	-e 's/# @if macosx: *//' \
 			$(PYRUNDIR)/$(MODULESSETUP) > $(PYTHONDIR)/Modules/Setup; \
 	else \
-		cp $(PYRUNDIR)/$(MODULESSETUP) $(PYTHONDIR)/Modules/Setup; \
+		sed 	-e 's/# @if not macosx: *//' \
+			$(PYRUNDIR)/$(MODULESSETUP) > $(PYTHONDIR)/Modules/Setup; \
 	fi;
         # Recreate the Makefile after the above changes
 	cd $(PYTHONDIR); \
@@ -190,9 +193,9 @@ $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	$(MAKE); \
 	$(MAKE) install; \
 	if ! test -d $(PYRUNLIBDIR); then mkdir -p $(PYRUNLIBDIR); fi; \
-	cp -vaf	$(TMPSHAREDLIBDIR)/* $(PYRUNLIBDIR); \
+	$(CP_DIR) -vf $(TMPSHAREDLIBDIR)/* $(PYRUNLIBDIR); \
 	if ! test -d $(PYRUNINCLUDEDIR); then mkdir -p $(PYRUNINCLUDEDIR); fi; \
-	cp -vaf $(TMPINCLUDEDIR)/* $(PYRUNINCLUDEDIR)
+	$(CP_DIR) -vf $(TMPINCLUDEDIR)/* $(PYRUNINCLUDEDIR)
 	touch $@ $(PYTHONDIR)
 
 interpreter:	$(TMPPYTHON)
@@ -232,10 +235,10 @@ $(PYRUN):	Runtime/$(PYRUNPY)
 	        $(PYRUNDIR)/$(PYRUNPY)
 	cd $(PYRUNDIR); \
 	$(MAKE); \
-	cp $(PYRUN) $(PYRUN)-debug; \
+	$(CP) $(PYRUN) $(PYRUN)-debug; \
 	$(STRIP) $(STRIPOPTIONS) $(PYRUN)
-	cp $(PYRUNDIR)/$(PYRUN) .
-	cp $(PYRUNDIR)/$(PYRUN)-debug .
+	$(CP) $(PYRUNDIR)/$(PYRUN) .
+	$(CP) $(PYRUNDIR)/$(PYRUN)-debug .
 	echo "=== Finished ========================================================================="
 	@echo
 	@echo "The eGenix PyRun runtime interpreter is called: ./$(PYRUN)"
@@ -248,16 +251,16 @@ runtime:	$(PYRUN)
 
 install-bin:	$(PYRUN)
 	if ! test -d $(INSTALLBINDIR); then mkdir -p $(INSTALLBINDIR); fi;
-	cp $(PYRUN) $(INSTALLBINDIR)
+	$(CP) $(PYRUN) $(INSTALLBINDIR)
 	ln -sf $(PYRUN) $(INSTALLBINDIR)/$(PYRUN_GENERIC)
 
 install-lib:
 	if ! test -d $(INSTALLLIBDIR); then mkdir -p $(INSTALLLIBDIR); fi;
-	cp -r $(PYRUNLIBDIR) $(INSTALLLIBDIR)
+	$(CP_DIR) $(PYRUNLIBDIR) $(INSTALLLIBDIR)
 
 install-include:
 	if ! test -d $(INSTALLINCLUDEDIR); then mkdir -p $(INSTALLINCLUDEDIR); fi;
-	cp -r $(PYRUNINCLUDEDIR) $(INSTALLINCLUDEDIR)
+	$(CP_DIR) $(PYRUNINCLUDEDIR) $(INSTALLINCLUDEDIR)
 
 install:	install-bin install-lib install-include
 
@@ -267,7 +270,7 @@ $(PYRUN).gz:	$(PYRUN)
 	gzip -9c $(PYRUN) > $(PYRUN).gz
 
 archive:	$(PYRUN).gz
-	cp $(PYRUN).gz $(ARCHIVE).gz
+	$(CP) $(PYRUN).gz $(ARCHIVE).gz
 
 ### Cleanup
 
