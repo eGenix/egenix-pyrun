@@ -74,6 +74,7 @@ TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)
 # Target dir of shared modules
 LIBDIR = $(PWD)/lib
 PYRUNLIBDIR = $(LIBDIR)/python$(PYRUNVERSION)
+PYRUNSHAREDLIBDIR = $(PYRUNLIBDIR)/lib-dynload
 
 # Target dir for include files
 INCLUDEDIR = $(PWD)/include
@@ -83,6 +84,7 @@ PYRUNINCLUDEDIR = $(INCLUDEDIR)/python$(PYRUNVERSION)
 PREFIX = /usr/local
 INSTALLBINDIR = $(PREFIX)/bin
 INSTALLLIBDIR = $(PREFIX)/lib
+INSTALLSHAREDLIBDIR = $(INSTALLLIBDIR)/lib-dynload
 INSTALLINCLUDEDIR = $(PREFIX)/include
 
 # Packages and modules to exclude from the runtime
@@ -172,7 +174,7 @@ config: $(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	if test -d $(TMPINSTALLDIR); then $(RM) -rf $(TMPINSTALLDIR); fi
 	mkdir -p $(TMPINSTALLDIR) $(TMPINSTALLDIR)/lib $(TMPINSTALLDIR)/bin $(TMPINSTALLDIR)/include
 	if test -d $(PYRUNLIBDIR); then $(RM) -rf $(PYRUNLIBDIR); fi
-	mkdir -p $(PYRUNLIBDIR)
+	mkdir -p $(PYRUNLIBDIR) $(PYRUNSHAREDLIBDIR)
         # Install the custom Modules/Setup file
 	if test "$(MACOSX_PLATFORM)"; then \
 		sed 	-e 's/# @if macosx: *//' \
@@ -192,8 +194,8 @@ $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	cd $(PYTHONDIR); \
 	$(MAKE); \
 	$(MAKE) install; \
-	if ! test -d $(PYRUNLIBDIR); then mkdir -p $(PYRUNLIBDIR); fi; \
-	$(CP_DIR) -vf $(TMPSHAREDLIBDIR)/* $(PYRUNLIBDIR); \
+	if ! test -d $(PYRUNSHAREDLIBDIR); then mkdir -p $(PYRUNSHAREDLIBDIR); fi; \
+	$(CP_DIR) -vf $(TMPSHAREDLIBDIR)/* $(PYRUNSHAREDLIBDIR); \
 	if ! test -d $(PYRUNINCLUDEDIR); then mkdir -p $(PYRUNINCLUDEDIR); fi; \
 	$(CP_DIR) -vf $(TMPINCLUDEDIR)/* $(PYRUNINCLUDEDIR)
 	touch $@ $(PYTHONDIR)
@@ -255,7 +257,7 @@ install-bin:	$(PYRUN)
 	ln -sf $(PYRUN) $(INSTALLBINDIR)/$(PYRUN_GENERIC)
 
 install-lib:
-	if ! test -d $(INSTALLLIBDIR); then mkdir -p $(INSTALLLIBDIR); fi;
+	if ! test -d $(INSTALLSHAREDLIBDIR); then mkdir -p $(INSTALLSHAREDLIBDIR); fi;
 	$(CP_DIR) $(PYRUNLIBDIR) $(INSTALLLIBDIR)
 
 install-include:
