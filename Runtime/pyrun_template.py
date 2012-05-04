@@ -111,6 +111,7 @@ Available pyrun options:
 -S:   skip running site.main() and disable support for .pth files
 -O:   ignored (pyrun always runs in optimized mode)
 -u:   open stdout/stderr in unbuffered mode
+-V:   print the pyrun version and exit
 
 Without options, the given <script> file is loaded as Python source
 code and run. Parameters are passed to the script via sys.argv as
@@ -185,7 +186,7 @@ def pyrun_parse_cmdline():
     import getopt
 
     # Parse sys.argv
-    valid_options = 'vmcbiESdOu3h?'
+    valid_options = 'vVmcbiESdOu3h?'
     try:
         parsed_options, remaining_argv = getopt.getopt(sys.argv[1:],
                                                        valid_options)
@@ -245,10 +246,13 @@ def pyrun_parse_cmdline():
             global pyrun_unbuffered
             pyrun_unbuffered = 1
 
+        elif arg == '-V':
+            # Show version and exit
+            sys.stdout.write('pyrun %s\n' % pyrun_version)
+            sys.exit(0)
+
         # XXX Add more standard Python command line options here
 
-        # Add -u, -c, -V
-       
         # Note: There's a general problem with some options, since by
         # the time the frozen interpreter gets to this code, many
         # options would normally already have had some effect. We'd
@@ -257,7 +261,7 @@ def pyrun_parse_cmdline():
         #
         # The following options are simply ignored for this reason:
         #
-        elif arg in ('-O', '-u', '-3'):
+        elif arg in ('-O', '-3'):
             # Ignored option, only here for compatibility with
             # standard Python
             pass
