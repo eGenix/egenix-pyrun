@@ -97,6 +97,8 @@ PYTHON_26_BUILD := $(shell test PYTHONVERSION = "2.6" && echo "1")
 PYTHON_27_BUILD := $(shell test PYTHONVERSION = "2.7" && echo "1")
 
 # Build platform
+LINUX_PLATFORM := $(shell test "`uname -s`" = "Linux" && echo "1")
+FREEBSD_PLATFORM := $(shell test "`uname -s`" = "FreeBSD" && echo "1")
 MACOSX_PLATFORM := $(shell test "`uname -s`" = "Darwin" && echo "1")
 MACOSX_PPC_PLATFORM := $(shell test "`uname -s -p`" = "Darwin powerpc" && echo "1")
 MACOSX_INTEL_PLATFORM := $(shell test "`uname -s -p`" = "Darwin i386" && echo "1")
@@ -179,8 +181,12 @@ config: $(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	if test "$(MACOSX_PLATFORM)"; then \
 		sed 	-e 's/# @if macosx: *//' \
 			$(PYRUNDIR)/$(MODULESSETUP) > $(PYTHONDIR)/Modules/Setup; \
+	elif test "$(FREEBSD_PLATFORM)"; then \
+		sed 	-e 's/# @if freebsd: *//' \
+			$(PYRUNDIR)/$(MODULESSETUP) > $(PYTHONDIR)/Modules/Setup; \
 	else \
 		sed 	-e 's/# @if not macosx: *//' \
+			-e 's/# @if not freebsd: *//' \
 			$(PYRUNDIR)/$(MODULESSETUP) > $(PYTHONDIR)/Modules/Setup; \
 	fi;
         # Recreate the Makefile after the above changes

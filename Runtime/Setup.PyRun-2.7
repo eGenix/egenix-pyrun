@@ -541,6 +541,8 @@ _lsprof _lsprof.c rotatingtree.c
 
 # _sqlite3
 SQLITE_DEFS=-DMODULE_NAME='"sqlite3"' -DSQLITE_OMIT_LOAD_EXTENSION
+# @if freebsd: SQLITE_LIBS=-I/usr/local/include -L/usr/local/lib
+# @if not freebsd: SQLITE_LIBS=
 _sqlite3 \
 	_sqlite/module.c \
 	_sqlite/cache.c \
@@ -552,6 +554,7 @@ _sqlite3 \
 	_sqlite/statement.c \
 	_sqlite/util.c \
 	$(SQLITE_DEFS) -I$(srcdir)/Modules/_sqlite \
+	$(SQLITE_LIBS) \
 	-I$(prefix)/include -L$(exec_prefix)/lib \
 	-lsqlite3
 
