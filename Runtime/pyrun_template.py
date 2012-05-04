@@ -303,9 +303,11 @@ def pyrun_normpath(path,
     # Convert to an absolute path
     return os.path.abspath(path)
 
-def pyrun_prompt(pyrun_script='<stdin>'):
+def pyrun_prompt(pyrun_script='<stdin>', banner=pyrun_banner):
 
     """ Start an interactive pyrun prompt for pyrun_script.
+
+        banner is used as startup text. It defaults to pyrun_banner.
 
     """
     import code
@@ -320,7 +322,7 @@ def pyrun_prompt(pyrun_script='<stdin>'):
     runtime_globals = globals()
     runtime_globals.update(__name__='__main__',
                            __file__=pyrun_script)
-    code.interact(pyrun_banner, raw_input, runtime_globals)
+    code.interact(banner, raw_input, runtime_globals)
 
 def pyrun_enable_unbuffered_mode():
 
@@ -592,8 +594,9 @@ if __name__ == '__main__':
             pyrun_execute_script(pyrun_script, mode)
         except Exception, reason:
             if pyrun_interactive:
-                print '*** Problem: %s' % reason
-                pyrun_prompt()
+                import traceback
+                traceback.print_exc()
+                pyrun_prompt(banner='')
             else:
                 raise
         else:
