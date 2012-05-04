@@ -60,6 +60,7 @@ from pyrun_config import (
 # Banners
 pyrun_banner = (
     '%s %s\n'
+    'Thank you for using eGenix PyRun. Type "help" or "license" for details.\n'
     % (pyrun_name, sys.version))
 
 # Options
@@ -308,6 +309,14 @@ def pyrun_prompt(pyrun_script='<stdin>'):
 
     """
     import code
+
+    # Try to import readline for better keyboard support
+    try:
+        import readline
+    except ImportError:
+        pass
+
+    # Setup globals and run interpreter interactively
     runtime_globals = globals()
     runtime_globals.update(__name__='__main__',
                            __file__=pyrun_script)
@@ -368,6 +377,7 @@ def pyrun_setup_sys_path(pyrun_script=None):
     if not exists(python_lib):
         python_lib = join(pyrun_dir, 'lib', 'python' + pyrun_libversion)
     python_lib = pyrun_normpath(python_lib)
+    python_lib_dynload = join(python_lib, 'lib-dynload')
     python_site_package = join(python_lib, 'site-packages')
     # all path variables should be normalized now
 
@@ -383,8 +393,10 @@ def pyrun_setup_sys_path(pyrun_script=None):
                 pyrun_normpath(path)
                 for path in pythonpath.split(os.pathsep)])
 
-    # Add python_lib (location of additional pyrun shared modules)
+    # Add python_lib and python_lib_dynload (location of additional
+    # pyrun shared modules)
     sys.path.append(python_lib)
+    sys.path.append(python_lib_dynload)
 
     # Add site packages directory
     if pyrun_ignore_pth_files:
