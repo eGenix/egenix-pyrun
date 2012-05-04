@@ -272,10 +272,15 @@ def patch_site_py(libdir=LIBDIR):
         We disable the automatic run of main() in the site module, so
         that we can run it manually in pyrun.py.
 
+        We also adjust the license URL to point to the PyRun license.
+
     """
     patch_module(os.path.join(libdir, 'site.py'),
                  '^main\(\)',
                  '#main()')
+    patch_module(os.path.join(libdir, 'site.py'),
+                 '"See http://www.python.org/%.3s/license.html" % sys.version',
+                 '"See http://egenix.com/products/python/PyRun/license.html"')
 
 def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            outputfile='pyrun_config.py',
