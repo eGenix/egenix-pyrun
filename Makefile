@@ -263,7 +263,7 @@ install-bin:	$(PYRUN)
 	ln -sf $(PYRUN) $(INSTALLBINDIR)/$(PYRUN_GENERIC)
 
 install-lib:
-	if ! test -d $(INSTALLSHAREDLIBDIR); then mkdir -p $(INSTALLSHAREDLIBDIR); fi;
+	if ! test -d $(INSTALLLIBDIR); then mkdir -p $(INSTALLLIBDIR); fi;
 	$(CP_DIR) $(PYRUNLIBDIR) $(INSTALLLIBDIR)
 
 install-include:
