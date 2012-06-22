@@ -20,8 +20,7 @@
 # this is installed as "gmake".
 #
 
-# Project dir
-PWD := $(shell pwd)
+### High-level configuration
 
 # Python versions to use for pyrun
 PYTHON_27_VERSION = 2.7.3
@@ -33,11 +32,26 @@ PYTHONFULLVERSION = $(PYTHON_27_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_26_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_25_VERSION)
 
+# Python Unicode version
+PYTHONUNICODE = ucs2
+
+# Packages and modules to exclude from the runtime
+EXCLUDES = 
+
+# Package details (used for distributions)
+PACKAGENAME = egenix-pyrun
+PACKAGEVERSION = 1.0.0
+
+### Runtime build parameters
+
+# Project dir
+PWD := $(shell pwd)
+
 # Version & Platform
 PYTHONVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\.[0-9]\).*/\1/')
 PYRUNFULLVERSION = $(PYTHONFULLVERSION)
 PYRUNVERSION = $(PYTHONVERSION)
-PLATFORM := $(shell python Runtime/platform.py)
+PLATFORM := $(shell python -c "from distutils.util import get_platform; print get_platform()")
 
 # Name of the resulting pyrun executable
 PYRUN_GENERIC = pyrun
@@ -53,7 +67,7 @@ PYTHONSOURCEURL = http://www.python.org/ftp/python/$(PYTHONFULLVERSION)/Python-$
 WGET = wget
 
 # Directories
-PYTHONDIR = $(PWD)/Python-$(PYTHONFULLVERSION)
+PYTHONDIR = $(PWD)/Python-$(PYTHONFULLVERSION)-$(PYTHONUNICODE)
 PYRUNDIR = $(PWD)/Runtime
 
 # Name of the freeze template and executable
@@ -66,19 +80,25 @@ MODULESSETUP = Setup.PyRun-$(PYTHONVERSION)
 PYTHONPATCHFILE = Python-$(PYTHONVERSION).patch
 
 # Name of the temporary installation target dir
-TMPINSTALLDIR = $(PWD)/tmp-$(PYTHONVERSION)
+TMPINSTALLDIR = $(PWD)/tmp-$(PYTHONVERSION)-$(PYTHONUNICODE)
 TMPPYTHON = $(TMPINSTALLDIR)/bin/python$(PYTHONVERSION)
 TMPLIBDIR = $(TMPINSTALLDIR)/lib/python$(PYRUNVERSION)
 TMPSHAREDLIBDIR = $(TMPLIBDIR)/lib-dynload
 TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)
 
+# Build dir
+BUILDDIR = $(PWD)/build-$(PYTHONVERSION)-$(PYTHONUNICODE)
+
+# Target dir of binaries
+BINDIR = $(BUILDDIR)/bin
+
 # Target dir of shared modules
-LIBDIR = $(PWD)/lib
+LIBDIR = $(BUILDDIR)/lib
 PYRUNLIBDIR = $(LIBDIR)/python$(PYRUNVERSION)
 PYRUNSHAREDLIBDIR = $(PYRUNLIBDIR)/lib-dynload
 
 # Target dir for include files
-INCLUDEDIR = $(PWD)/include
+INCLUDEDIR = $(BUILDDIR)/include
 PYRUNINCLUDEDIR = $(INCLUDEDIR)/python$(PYRUNVERSION)
 
 # Installation directories
@@ -88,8 +108,9 @@ INSTALLLIBDIR = $(PREFIX)/lib
 INSTALLSHAREDLIBDIR = $(INSTALLLIBDIR)/lib-dynload
 INSTALLINCLUDEDIR = $(PREFIX)/include
 
-# Packages and modules to exclude from the runtime
-EXCLUDES = 
+# Binary distributions
+DISTDIR = $(PWD)/dist
+BINARY_DISTRIBUTION = $(PACKAGENAME)-$(PACKAGEVERSION)-$(PYTHONVERSION)_$(PYTHONUNICODE).$(PLATFORM)
 
 # Python configure options
 PYTHON_CONFIGURE_OPTIONS = ""
@@ -150,6 +171,8 @@ $(PYTHONDIR):
 	    echo "Extracting local copy $(PYTHONTARBALL)."; \
 	    $(TAR) xfz $(PYTHONTARBALL) ; \
 	fi
+        # Move source dir to $(PYTHONDIR)
+	mv Python-$(PYTHONFULLVERSION) $(PYTHONDIR)
         # Apply Python patches needed for pyrun
 	cd $(PYTHONDIR); \
 	patch -p0 -F10 < ../Runtime/$(PYTHONPATCHFILE)
@@ -169,6 +192,7 @@ $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 	./configure \
 		--prefix=$(TMPINSTALLDIR) \
 		--exec-prefix=$(TMPINSTALLDIR) \
+		--enable-unicode=$(PYTHONUNICODE) \
 		$(PYTHON_CONFIGURE_OPTIONS)
 	touch $@
 
@@ -176,8 +200,8 @@ config: $(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
         # Create install dir structure
 	if test -d $(TMPINSTALLDIR); then $(RM) -rf $(TMPINSTALLDIR); fi
 	mkdir -p $(TMPINSTALLDIR) $(TMPINSTALLDIR)/lib $(TMPINSTALLDIR)/bin $(TMPINSTALLDIR)/include
-	if test -d $(PYRUNLIBDIR); then $(RM) -rf $(PYRUNLIBDIR); fi
-	mkdir -p $(PYRUNLIBDIR) $(PYRUNSHAREDLIBDIR)
+	if test -d $(BUILDDIR); then $(RM) -rf $(BUILDDIR); fi
+	mkdir -p $(BINDIR) $(PYRUNLIBDIR) $(PYRUNSHAREDLIBDIR) $(PYRUNINCLUDEDIR)
         # Install the custom Modules/Setup file
 	if test "$(MACOSX_PLATFORM)"; then \
 		sed 	-e 's/# @if macosx: *//' \
@@ -229,7 +253,7 @@ test-makepyrun:
 	$(TMPPYTHON) makepyrun.py $(PYRUNPY)
 	echo "Created $(PYRUNPY)."
 
-$(PYRUN):	Runtime/$(PYRUNPY)
+$(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY)
 	echo "=== Creating PyRun ==================================================================="
         # Cleanup the PyRun freeze build dir
 	cd Runtime; $(RM) -f *.c *.o
@@ -246,23 +270,24 @@ $(PYRUN):	Runtime/$(PYRUNPY)
 	$(MAKE); \
 	$(CP) $(PYRUN) $(PYRUN_DEBUG); \
 	$(STRIP) $(STRIPOPTIONS) $(PYRUN)
-	$(CP) $(PYRUNDIR)/$(PYRUN) .
-	$(CP) $(PYRUNDIR)/$(PYRUN_DEBUG) .
+	$(CP) $(PYRUNDIR)/$(PYRUN) $(BINDIR)
+	$(CP) $(PYRUNDIR)/$(PYRUN_DEBUG) $(BINDIR)
 	echo "=== Finished ========================================================================="
 	@echo
-	@echo "The eGenix PyRun runtime interpreter is called: ./$(PYRUN)"
+	@echo "The eGenix PyRun runtime interpreter is called: $(BINDIR)/$(PYRUN)"
 	@echo
 	touch $@
 
-runtime:	$(PYRUN)
+runtime:	$(BINDIR)/$(PYRUN)
 
 ### Installation
 
-install-bin:	$(PYRUN)
+install-bin:	$(BINDIR)/$(PYRUN)
 	if ! test -d $(INSTALLBINDIR); then mkdir -p $(INSTALLBINDIR); fi;
-	$(CP) $(PYRUN) $(INSTALLBINDIR)
-	$(CP) $(PYRUN_DEBUG) $(INSTALLBINDIR)
-	ln -sf $(PYRUN) $(INSTALLBINDIR)/$(PYRUN_GENERIC)
+	$(CP) $(BINDIR)/$(PYRUN) $(INSTALLBINDIR)
+	$(CP) $(BINDIR)/$(PYRUN_DEBUG) $(INSTALLBINDIR)
+	cd $(INSTALLBINDIR); \
+	ln -sf $(PYRUN) $(PYRUN_GENERIC)
 
 install-lib:
 	if ! test -d $(INSTALLLIBDIR); then mkdir -p $(INSTALLLIBDIR); fi;
@@ -276,11 +301,15 @@ install:	install-bin install-lib install-include
 
 ### Packaging
 
-$(PYRUN).gz:	$(PYRUN)
-	gzip -9c $(PYRUN) > $(PYRUN).gz
+$(DISTDIR)/$(BINARY_DISTRIBUTION).tgz:
 
-archive:	$(PYRUN).gz
-	$(CP) $(PYRUN).gz $(ARCHIVE).gz
+	$(MAKE) clean pyrun install PREFIX=$(BUILDDIR)/dist \
+		PYTHONFULLVERSION=$(PYTHONFULLVERSION)
+	mkdir -p $(DISTDIR)
+	cd $(BUILDDIR)/dist; \
+	$(TAR) -c -z -f $@ .
+
+distribution:	$(DISTDIR)/$(BINARY_DISTRIBUTION).tgz
 
 ### Cleanup
 
@@ -297,6 +326,7 @@ clean-runtime:
 clean:	clean-runtime
 	$(RM) -rf \
 		$(TMPINSTALLDIR) \
+		$(BUILDDIR) \
 		$(PYRUNLIBDIR); \
 	true
 
