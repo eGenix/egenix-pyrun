@@ -42,6 +42,7 @@ PLATFORM := $(shell python Runtime/platform.py)
 # Name of the resulting pyrun executable
 PYRUN_GENERIC = pyrun
 PYRUN = $(PYRUN_GENERIC)$(PYRUNVERSION)
+PYRUN_DEBUG = $(PYRUN)-debug
 
 # Archive name to create with "make archive"
 ARCHIVE = $(PYRUN)-$(PYRUNFULLVERSION)-$(PLATFORM)
@@ -243,10 +244,10 @@ $(PYRUN):	Runtime/$(PYRUNPY)
 	        $(PYRUNDIR)/$(PYRUNPY)
 	cd $(PYRUNDIR); \
 	$(MAKE); \
-	$(CP) $(PYRUN) $(PYRUN)-debug; \
+	$(CP) $(PYRUN) $(PYRUN_DEBUG); \
 	$(STRIP) $(STRIPOPTIONS) $(PYRUN)
 	$(CP) $(PYRUNDIR)/$(PYRUN) .
-	$(CP) $(PYRUNDIR)/$(PYRUN)-debug .
+	$(CP) $(PYRUNDIR)/$(PYRUN_DEBUG) .
 	echo "=== Finished ========================================================================="
 	@echo
 	@echo "The eGenix PyRun runtime interpreter is called: ./$(PYRUN)"
@@ -260,6 +261,7 @@ runtime:	$(PYRUN)
 install-bin:	$(PYRUN)
 	if ! test -d $(INSTALLBINDIR); then mkdir -p $(INSTALLBINDIR); fi;
 	$(CP) $(PYRUN) $(INSTALLBINDIR)
+	$(CP) $(PYRUN_DEBUG) $(INSTALLBINDIR)
 	ln -sf $(PYRUN) $(INSTALLBINDIR)/$(PYRUN_GENERIC)
 
 install-lib:
@@ -288,7 +290,7 @@ clean-runtime:
 		$(PYRUNDIR)/*.o \
 		$(PYRUNDIR)/Makefile \
 		$(PYRUNDIR)/$(PYRUN) \
-		$(PYRUNDIR)/$(PYRUN)-debug \
+		$(PYRUNDIR)/$(PYRUN_DEBUG) \
 		$(PYRUNDIR)/$(PYRUNPY); \
 	true
 
@@ -301,7 +303,7 @@ clean:	clean-runtime
 distclean:	clean
 	$(RM) -rf \
 		$(PYRUN) \
-		$(PYRUN)-debug \
+		$(PYRUN_DEBUG) \
 		$(PYTHONDIR) \
 	true
 
