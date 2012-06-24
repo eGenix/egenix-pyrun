@@ -84,6 +84,7 @@ TMPINSTALLDIR = $(PWD)/tmp-$(PYTHONVERSION)-$(PYTHONUNICODE)
 TMPPYTHON = $(TMPINSTALLDIR)/bin/python$(PYTHONVERSION)
 TMPLIBDIR = $(TMPINSTALLDIR)/lib/python$(PYRUNVERSION)
 TMPSHAREDLIBDIR = $(TMPLIBDIR)/lib-dynload
+TMPSITEPACKAGESLIBDIR = $(TMPLIBDIR)/site-packages
 TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)
 
 # Build dir
@@ -96,6 +97,7 @@ BINDIR = $(BUILDDIR)/bin
 LIBDIR = $(BUILDDIR)/lib
 PYRUNLIBDIR = $(LIBDIR)/python$(PYRUNVERSION)
 PYRUNSHAREDLIBDIR = $(PYRUNLIBDIR)/lib-dynload
+PYRUNSITEPACKAGESLIBDIR = $(PYRUNLIBDIR)/site-packages
 
 # Target dir for include files
 INCLUDEDIR = $(BUILDDIR)/include
@@ -201,7 +203,11 @@ config: $(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	if test -d $(TMPINSTALLDIR); then $(RM) -rf $(TMPINSTALLDIR); fi
 	mkdir -p $(TMPINSTALLDIR) $(TMPINSTALLDIR)/lib $(TMPINSTALLDIR)/bin $(TMPINSTALLDIR)/include
 	if test -d $(BUILDDIR); then $(RM) -rf $(BUILDDIR); fi
-	mkdir -p $(BINDIR) $(PYRUNLIBDIR) $(PYRUNSHAREDLIBDIR) $(PYRUNINCLUDEDIR)
+	mkdir -p	$(BINDIR) \
+			$(PYRUNLIBDIR) \
+			$(PYRUNSHAREDLIBDIR) \
+			$(PYRUNSITEPACKAGESLIBDIR) \
+			$(PYRUNINCLUDEDIR)
         # Install the custom Modules/Setup file
 	if test "$(MACOSX_PLATFORM)"; then \
 		sed 	-e 's/# @if macosx: *//' \
@@ -227,6 +233,8 @@ $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	$(MAKE) install; \
 	if ! test -d $(PYRUNSHAREDLIBDIR); then mkdir -p $(PYRUNSHAREDLIBDIR); fi; \
 	$(CP_DIR) -vf $(TMPSHAREDLIBDIR)/* $(PYRUNSHAREDLIBDIR); \
+	if ! test -d $(PYRUNSITEPACKAGESLIBDIR); then mkdir -p $(PYRUNSITEPACKAGESLIBDIR); fi; \
+	$(CP_DIR) -vf $(TMPSITEPACKAGESLIBDIR)/* $(PYRUNSITEPACKAGESLIBDIR); \
 	if ! test -d $(PYRUNINCLUDEDIR); then mkdir -p $(PYRUNINCLUDEDIR); fi; \
 	$(CP_DIR) -vf $(TMPINCLUDEDIR)/* $(PYRUNINCLUDEDIR)
 	touch $@ $(PYTHONDIR)
@@ -302,7 +310,6 @@ install:	install-bin install-lib install-include
 ### Packaging
 
 $(DISTDIR)/$(BINARY_DISTRIBUTION).tgz:
-
 	$(MAKE) clean pyrun install PREFIX=$(BUILDDIR)/dist \
 		PYTHONFULLVERSION=$(PYTHONFULLVERSION)
 	mkdir -p $(DISTDIR)
@@ -332,8 +339,7 @@ clean:	clean-runtime
 
 distclean:	clean
 	$(RM) -rf \
-		$(PYRUN) \
-		$(PYRUN_DEBUG) \
+		$(DISTDIR) \
 		$(PYTHONDIR) \
 	true
 
