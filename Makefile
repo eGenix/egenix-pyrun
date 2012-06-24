@@ -35,12 +35,14 @@ PYTHONFULLVERSION = $(PYTHON_27_VERSION)
 # Python Unicode version
 PYTHONUNICODE = ucs2
 
-# Packages and modules to exclude from the runtime
-EXCLUDES = 
+# Packages and modules to exclude from the runtime (note that each
+# module has to be prefixed with "-x ").
+EXCLUDES = -x test
 
-# Package details (used for distributions)
+# Package details (used for distributions and passed in via the
+# product Makefile)
 PACKAGENAME = egenix-pyrun
-PACKAGEVERSION = 1.0.0
+PACKAGEVERSION = 0.0.0
 
 ### Runtime build parameters
 
@@ -348,11 +350,11 @@ distclean:	clean
 build-all: build-pyrun25 build-pyrun26 build-pyrun27
 
 build-pyrun27:
-	$(MAKE) clean pyrun PYTHONFULLVERSION=$(PYTHON_27_VERSION)
+	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_27_VERSION)
 
 build-pyrun26:
-	$(MAKE) clean pyrun PYTHONFULLVERSION=$(PYTHON_26_VERSION)
+	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_26_VERSION)
 
 build-pyrun25:
-	$(MAKE) clean pyrun PYTHONFULLVERSION=$(PYTHON_25_VERSION)
+	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_25_VERSION)
 

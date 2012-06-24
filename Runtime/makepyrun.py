@@ -108,6 +108,9 @@ exclude_package_list = [
     'distutils.tests',
     'email.test',
     'sqlite3.test',
+    'json.tests',
+    'lib2to3.tests',
+    'unittest.test',
     ]
 
 # Parse a line in Modules/Setup
