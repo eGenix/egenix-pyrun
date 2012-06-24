@@ -99,6 +99,8 @@ def pyrun_help(extra_lines=()):
     help_text = ("""\
 Usage: %s [pyrunoptions] <script> [parameters]
 
+Version: %s
+
 Available pyrun options:
 
 -h:   show this help text
@@ -117,7 +119,9 @@ Without options, the given <script> file is loaded as Python source
 code and run. Parameters are passed to the script via sys.argv as
 normal.
 
-""" % pyrun_name).splitlines()
+""" % (pyrun_name,
+       pyrun_version)
+                 ).splitlines()
     if extra_lines:
         help_text.extend(extra_lines)
     for line in help_text:
@@ -608,7 +612,7 @@ if __name__ == '__main__':
             if pyrun_interactive:
                 pyrun_prompt()
 
-    elif pyrun_interactive:
+    else:
 
         ### Enter interactive mode
 
@@ -622,11 +626,6 @@ if __name__ == '__main__':
 
         # Enter interactive mode
         pyrun_prompt()
-
-    else:
-        # Show help
-        pyrun_help(['*** Error: Missing command line argument'])
-        sys.exit(1)
 
     # Exit
     sys.exit(0)
