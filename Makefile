@@ -92,6 +92,11 @@ TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)
 # Build dir
 BUILDDIR = $(PWD)/build-$(PYTHONVERSION)-$(PYTHONUNICODE)
 
+# Path prefix to use in byte code files embedded into the frozen pyrun
+# binary instead of the build time one
+PYRUNLIBDIRCODEPREFIX = "$(TMPLIBDIR)=<pyrun>"
+PYRUNDIRCODEPREFIX = "$(PYRUNDIR)=<pyrun>"
+
 # Target dir of binaries
 BINDIR = $(BUILDDIR)/bin
 
@@ -274,6 +279,8 @@ $(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY)
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
 	$(TMPPYTHON) -O freeze.py -d \
 		-o $(PYRUNDIR) \
+		-r $(PYRUNLIBDIRCODEPREFIX) \
+		-r $(PYRUNDIRCODEPREFIX) \
 		$(EXCLUDES) \
 	        $(PYRUNDIR)/$(PYRUNPY)
 	cd $(PYRUNDIR); \
