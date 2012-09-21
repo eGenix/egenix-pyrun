@@ -211,11 +211,15 @@ def pyrun_parse_cmdline():
             # Run script as module
             global pyrun_as_module
             pyrun_as_module = 1
+            # -m terminates the option list, just like for Python
+            break
 
         elif arg == '-c':
             # Run argument as command string
             global pyrun_as_string
             pyrun_as_string = 1
+            # -c terminates the option list, just like for Python
+            break
 
         elif arg == '-b':
             # Run script as bytecode
@@ -476,6 +480,8 @@ def pyrun_execute_script(pyrun_script, mode='file'):
 
         if pyrun_verbose:
             pyrun_log('Running %r as module' % pyrun_script)
+        # sys.argv[0]: runpy will set the sys.argv[0] to the absolute
+        # location of the found module
         import runpy
         runpy.run_module(pyrun_script, globals(), '__main__', True)
 
@@ -491,11 +497,15 @@ def pyrun_execute_script(pyrun_script, mode='file'):
                 pyrun_log_error('Could not find/read script file %r' %
                                 pyrun_script)
                 sys.exit(1)
+            # sys.argv[0]: should be the same as pyrun_script
+            assert sys.argv[0] == pyrun_script
             module_file = open(pyrun_script, 'rb')
 
         elif mode == 'codestring':
             if pyrun_verbose:
                 pyrun_log('Running pyrun_script as bytecode string')
+            # sys.argv[0]: We mimic Python when using the -c option
+            sys.argv[0] = '-c'
             import cStringIO
             module_file = cStringIO.StringIO(pyrun_script)
 
@@ -530,6 +540,9 @@ def pyrun_execute_script(pyrun_script, mode='file'):
                             pyrun_script)
             sys.exit(1)
 
+        # sys.argv[0]: should be the same as pyrun_script
+        assert sys.argv[0] == pyrun_script
+
         # Exec script file in globals
         runtime_globals = globals()
         runtime_globals.update(__name__='__main__',
@@ -550,6 +563,9 @@ def pyrun_execute_script(pyrun_script, mode='file'):
             # sorry
             pyrun_script += '\n'
         code = compile(pyrun_script, script_path, 'exec')
+
+        # sys.argv[0]: We mimic Python when using the -c option
+        sys.argv[0] = '-c'
 
         # Exec code in globals
         runtime_globals = globals()
