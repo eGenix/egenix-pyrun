@@ -120,6 +120,10 @@ INSTALLINCLUDEDIR = $(PREFIX)/include
 # Binary distributions
 DISTDIR = $(PWD)/dist
 BINARY_DISTRIBUTION = $(PACKAGENAME)-$(PACKAGEVERSION)-$(PYTHONVERSION)_$(PYTHONUNICODE).$(PLATFORM)
+BINARY_DISTRIBUTION_ARCHIVE = $(DISTDIR)/$(BINARY_DISTRIBUTION).tgz
+
+# Test directory
+TESTDIR = $(PWD)/test-$(PYTHONVERSION)-$(PYTHONUNICODE)
 
 # Python configure options
 PYTHON_CONFIGURE_OPTIONS = ""
@@ -318,14 +322,28 @@ install:	install-bin install-lib install-include
 
 ### Packaging
 
-$(DISTDIR)/$(BINARY_DISTRIBUTION).tgz:
-	$(MAKE) clean pyrun install PREFIX=$(BUILDDIR)/dist \
+$(BINARY_DISTRIBUTION_ARCHIVE):	$(BINDIR)/$(PYRUN)
+	$(MAKE) install PREFIX=$(BUILDDIR)/dist \
 		PYTHONFULLVERSION=$(PYTHONFULLVERSION)
 	mkdir -p $(DISTDIR)
 	cd $(BUILDDIR)/dist; \
 	$(TAR) -c -z -f $@ .
 
-distribution:	$(DISTDIR)/$(BINARY_DISTRIBUTION).tgz
+distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
+
+### Testing
+
+test-distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
+	$(RM) -rf $(TESTDIR)
+	./install-pyrun \
+		--pyrun-distribution=$(BINARY_DISTRIBUTION_ARCHIVE) \
+		$(TESTDIR)
+	cd $(TESTDIR); bin/pip install Genshi
+	cd $(TESTDIR); bin/pip install egenix-mx-base
+	cd $(TESTDIR); bin/pip install numpy
+	cd $(TESTDIR); bin/pip install lxml
+	cd $(TESTDIR); bin/pip install cython
+	cd $(TESTDIR); bin/pip install Django
 
 ### Cleanup
 
@@ -343,6 +361,7 @@ clean:	clean-runtime
 	$(RM) -rf \
 		$(TMPINSTALLDIR) \
 		$(BUILDDIR) \
+		$(TESTDIR) \
 		$(PYRUNLIBDIR); \
 	true
 
