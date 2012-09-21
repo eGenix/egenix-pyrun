@@ -64,8 +64,8 @@ pyrun_banner = (
     % (pyrun_name, sys.version))
 
 # Options
-pyrun_verbose = 0
-pyrun_debug = 0
+pyrun_verbose = int(os.environ.get('PYRUN_VERBOSE', 0))
+pyrun_debug = int(os.environ.get('PYRUN_DEBUG', 0))
 pyrun_as_module = 0
 pyrun_as_string = 0
 pyrun_bytecode = 0
@@ -337,6 +337,8 @@ def pyrun_enable_unbuffered_mode():
     """ Enable unbuffered sys.stdout/stderr.
 
     """
+    if pyrun_debug:
+        pyrun_log('Enabling unbuffered mode')
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'wb', 0)
     sys.stderr = os.fdopen(sys.stderr.fileno(), 'wb', 0)
 
@@ -347,14 +349,15 @@ def pyrun_run_site_main():
 
     """
     if pyrun_debug:
-        pyrun_log('sys.path before importing site:')
+        pyrun_log('Importing site.py')
+        pyrun_log('  sys.path before importing site:')
         for path in sys.path:
             pyrun_log('    %s' % path)
     import site
     site.PREFIXES = [sys.prefix]
     site.main()
     if pyrun_debug:
-        pyrun_log('sys.path after importing site:')
+        pyrun_log('  sys.path after importing site:')
         for path in sys.path:
             pyrun_log('    %s' % path)
 
@@ -370,7 +373,8 @@ def pyrun_setup_sys_path(pyrun_script=None):
     exists = os.path.exists
     join = os.path.join
     if pyrun_debug:
-        pyrun_log('sys.path before adjusting it (compile time version):')
+        pyrun_log('Setting up sys.path')
+        pyrun_log('  sys.path before adjusting it (compile time version):')
         for path in sys.path:
             pyrun_log('    %s' % path)
 
@@ -420,7 +424,7 @@ def pyrun_setup_sys_path(pyrun_script=None):
         #site.addsitedir(another_site_package, known_paths)
 
     if pyrun_debug:
-        pyrun_log('sys.path after adjusting it (before cleanup):')
+        pyrun_log('  sys.path after adjusting it (before cleanup):')
         for path in sys.path:
             pyrun_log('    %s' % path)
 
@@ -431,7 +435,7 @@ def pyrun_setup_sys_path(pyrun_script=None):
                 if exists(dir)]
 
     if pyrun_debug:
-        pyrun_log('sys.path final version:')
+        pyrun_log('  sys.path final version:')
         for path in sys.path:
             pyrun_log('    %s' % path)
 
@@ -454,9 +458,11 @@ def pyrun_execute_script(pyrun_script, mode='file'):
     """
     # Run the pyrun_script
     if pyrun_debug:
-        pyrun_log('sys.argv=%r' % sys.argv)
-        pyrun_log('sys.path=%r' % sys.path)
-        pyrun_log('globals()=%r' % globals())
+        pyrun_log('Executing script %r in mode %r' % (
+            pyrun_script, mode))
+        pyrun_log('  sys.argv=%r' % sys.argv)
+        pyrun_log('  sys.path=%r' % sys.path)
+        pyrun_log('  globals()=%r' % globals())
 
     # Adjust defaults
     if (mode == 'file' and 
