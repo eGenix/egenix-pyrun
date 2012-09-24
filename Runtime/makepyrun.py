@@ -285,6 +285,38 @@ def patch_site_py(libdir=LIBDIR):
                  '"See http://www.python.org/%.3s/license.html" % sys.version',
                  '"See http://egenix.com/products/python/PyRun/license.html"')
 
+def patch_pkgutil_py(libdir=LIBDIR):
+
+    """ Patch pkgutil module.
+
+        The pkgutil module doesn't know how to load the code object of
+        a frozen module. As a result, running PyRun with -m module
+        doesn't work for frozen modules (the -m switch uses the runpy
+        module, which in return uses pkgutil).
+
+        We add the missing support here.
+
+    """
+    module_path = os.path.join(libdir, 'pkgutil.py')
+    patch_module(module_path,
+                 """\
+    def get_code\(self, fullname=None\):
+""",                 
+                 """\
+    def get_code(self, fullname=None):
+        if self.code is not None:
+            return self.code
+        fullname = self._fix_name(fullname)
+        mod_type = self.etc[2]
+        if mod_type == imp.PY_FROZEN:
+            self.code = imp.get_frozen_object(fullname)
+            return self.code
+        else:
+            return self._get_code(fullname)
+        
+    def _get_code(self, fullname=None):
+""")
+
 def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            outputfile='pyrun_config.py',
                            pyrun_name=PYRUN_NAME,
@@ -373,6 +405,9 @@ def main(pyrunfile='pyrun.py',
 
     # Patch site module
     patch_site_py(libdir)
+
+    # Patch pkgutil module
+    patch_pkgutil_py(libdir)
 
 if __name__ == '__main__':
     main(*sys.argv[1:])
