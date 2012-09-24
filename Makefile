@@ -338,6 +338,12 @@ test-distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
 	./install-pyrun \
 		--pyrun-distribution=$(BINARY_DISTRIBUTION_ARCHIVE) \
 		$(TESTDIR)
+	echo "--- Testing basic operation --------------------------------------"
+	cd $(TESTDIR); bin/pyrun ../test.py
+	cd $(TESTDIR); bin/pyrun -c "import sys; print sys.version"
+	cd $(TESTDIR); echo "import sys; print sys.version" | bin/pyrun
+	cd $(TESTDIR); echo "import sys; print sys.version" | bin/pyrun -
+	echo "--- Testing pip installation -------------------------------------"
 	cd $(TESTDIR); bin/pip install Genshi
 	cd $(TESTDIR); bin/pip install egenix-mx-base
 	cd $(TESTDIR); bin/pip install numpy
