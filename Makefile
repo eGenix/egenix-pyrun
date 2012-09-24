@@ -343,11 +343,16 @@ test-distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
 	cd $(TESTDIR); bin/pyrun -c "import sys; print sys.version"
 	cd $(TESTDIR); echo "import sys; print sys.version" | bin/pyrun
 	cd $(TESTDIR); echo "import sys; print sys.version" | bin/pyrun -
-	echo "--- Testing pip installation -------------------------------------"
+	echo "--- Testing module imports ---------------------------------------"
+	cd $(TESTDIR); bin/pyrun -m timeit
+	echo "--- Testing pip installation (pure Python) -----------------------"
 	cd $(TESTDIR); bin/pip install Genshi
+	cd $(TESTDIR); bin/pip install Trac
+	echo "--- Testing pip installation (packages with C extensions) --------"
 	cd $(TESTDIR); bin/pip install egenix-mx-base
 	cd $(TESTDIR); bin/pip install numpy
 	cd $(TESTDIR); bin/pip install lxml
+	echo "--- Testing pip installation (heavy weight packages) -------------"
 	cd $(TESTDIR); bin/pip install cython
 	cd $(TESTDIR); bin/pip install Django
 
