@@ -66,14 +66,14 @@ pyrun_banner = (
 # Options
 pyrun_verbose = int(os.environ.get('PYRUN_VERBOSE', 0))
 pyrun_debug = int(os.environ.get('PYRUN_DEBUG', 0))
-pyrun_as_module = 0
-pyrun_as_string = 0
-pyrun_bytecode = 0
-pyrun_ignore_environment = 0
-pyrun_ignore_pth_files = 0
-pyrun_skip_site_main = 0
-pyrun_interactive = 0
-pyrun_unbuffered = 0
+pyrun_as_module = False
+pyrun_as_string = False
+pyrun_bytecode = False
+pyrun_ignore_environment = False
+pyrun_ignore_pth_files = False
+pyrun_skip_site_main = False
+pyrun_interactive = False
+pyrun_unbuffered = False
 
 ### Helpers
 
@@ -205,54 +205,62 @@ def pyrun_parse_cmdline():
         if arg == '-v':
             # Run in verbose mode
             global pyrun_verbose
-            pyrun_verbose = 1
+            pyrun_verbose = True
 
         elif arg == '-m':
             # Run script as module
             global pyrun_as_module
-            pyrun_as_module = 1
+            pyrun_as_module = True
+            if not remaining_argv:
+                pyrun_log_error(
+                    'Missing argument for -m. Try pyrun -h for help.')
+                sys.exit(1)
             # -m terminates the option list, just like for Python
             break
 
         elif arg == '-c':
             # Run argument as command string
             global pyrun_as_string
-            pyrun_as_string = 1
+            pyrun_as_string = True
+            if not remaining_argv:
+                pyrun_log_error(
+                    'Missing argument for -c. Try pyrun -h for help.')
+                sys.exit(1)
             # -c terminates the option list, just like for Python
             break
 
         elif arg == '-b':
             # Run script as bytecode
             global pyrun_bytecode
-            pyrun_bytecode = 1
+            pyrun_bytecode = True
 
         elif arg == '-i':
             # Enable interactive mode
             global pyrun_interactive
-            pyrun_interactive = 1
+            pyrun_interactive = True
 
         elif arg == '-E':
             # Ignore environment variable settings
             global pyrun_ignore_environment
-            pyrun_ignore_environment = 1
+            pyrun_ignore_environment = True
 
         elif arg == '-S':
             # Ignore site.py; XXX This is not a true emulation, just
             # an approximation, since it only ignores .pth files, but
             # still applies the rest of the site.py processing
             global pyrun_ignore_pth_files, pyrun_skip_site_main
-            pyrun_ignore_pth_files = 1
-            pyrun_skip_site_main = 1
+            pyrun_ignore_pth_files = True
+            pyrun_skip_site_main = True
 
         elif arg == '-d':
             # Show debug info
             global pyrun_debug
-            pyrun_debug = 1
+            pyrun_debug = True
 
         elif arg == '-u':
             # Set stdout and stderr to unbuffered
             global pyrun_unbuffered
-            pyrun_unbuffered = 1
+            pyrun_unbuffered = True
 
         elif arg == '-V':
             # Show version and exit
@@ -595,12 +603,49 @@ if __name__ == '__main__':
         pyrun_info()
 
     # Start the runtime
-    if sys.argv:
+    if not sys.argv and sys.stdin.isatty():
+
+        ### Enter interactive mode
+
+        # Setup sys.path
+        pyrun_setup_sys_path()
         
+        # Import site module and run site.main() (which is not run by
+        # pyrun per default like in standard Python; see makepyrun.py)
+        if not pyrun_skip_site_main:
+            pyrun_run_site_main()
+
+        # Enter interactive mode
+        pyrun_prompt()
+
+    else:
+
         ### Run a script
 
-        # Setup paths
-        pyrun_script = sys.argv[0]
+        # Setup script to run
+        if not sys.argv:
+            # Filter mode: read the script from stdin
+            if pyrun_as_string or pyrun_as_module:
+                # Missing script argument
+                pyrun_log_error(
+                    'Missing argument for -c/-m. Try pyrun -h for help.')
+                sys.exit(1)
+            else:
+                global pyrun_script
+                pyrun_as_string = True
+            pyrun_script = sys.stdin.read()
+            sys.argv = ['']
+        elif sys.argv[0] == '-' and not (pyrun_as_string or pyrun_as_module):
+            # Read the script from stdin
+            global pyrun_script
+            pyrun_as_string = True
+            pyrun_script = sys.stdin.read()
+        else:
+            # Default operation: run the script given as first
+            # argument
+            pyrun_script = sys.argv[0]            
+
+        # Setup paths & mode
         script_path = pyrun_script
         if pyrun_as_module:
             mode = 'module'
@@ -633,21 +678,6 @@ if __name__ == '__main__':
             # Enter interactive mode, in case wanted
             if pyrun_interactive:
                 pyrun_prompt()
-
-    else:
-
-        ### Enter interactive mode
-
-        # Setup sys.path
-        pyrun_setup_sys_path()
-        
-        # Import site module and run site.main() (which is not run by
-        # pyrun per default like in standard Python; see makepyrun.py)
-        if not pyrun_skip_site_main:
-            pyrun_run_site_main()
-
-        # Enter interactive mode
-        pyrun_prompt()
 
     # Exit
     sys.exit(0)
