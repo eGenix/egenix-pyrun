@@ -395,3 +395,8 @@ build-pyrun26:
 build-pyrun25:
 	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_25_VERSION)
 
+### Misc other targets
+
+update-docs:
+	cd Doc; \
+	cp -u orig/eGenix-PyRun.pdf .
