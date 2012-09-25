@@ -22,3 +22,49 @@
  	** This is because the python home should be set relative to the library,
  	** which is in the framework, not relative to the executable, which may
  	** be outside of the framework. Except when we're in the build directory...
+diff -ur ../Python-2.5.6-orig/Makefile.pre.in ./Makefile.pre.in
+--- ../Python-2.5.6-orig/Makefile.pre.in	2008-09-22 02:22:44.000000000 +0200
++++ ./Makefile.pre.in	2012-07-24 10:52:31.000000000 +0200
+@@ -458,7 +458,7 @@
+ 		$(SIGNAL_OBJS) \
+ 		$(MODOBJS) \
+ 		$(srcdir)/Modules/getbuildinfo.c
+-	$(CC) -c $(PY_CFLAGS) -DSVNVERSION=\"`LC_ALL=C $(SVNVERSION)`\" -o $@ $(srcdir)/Modules/getbuildinfo.c
++	$(CC) -c $(PY_CFLAGS) -DSVNVERSION="\"`LC_ALL=C $(SVNVERSION)`\"" -o $@ $(srcdir)/Modules/getbuildinfo.c
+ 
+ Modules/getpath.o: $(srcdir)/Modules/getpath.c Makefile
+ 	$(CC) -c $(PY_CFLAGS) -DPYTHONPATH='"$(PYTHONPATH)"' \
+diff -ur ../Python-2.5.6-orig/Modules/getbuildinfo.c ./Modules/getbuildinfo.c
+--- ../Python-2.5.6-orig/Modules/getbuildinfo.c	2007-06-08 01:56:18.000000000 +0200
++++ ./Modules/getbuildinfo.c	2012-07-24 10:52:31.000000000 +0200
+@@ -48,5 +48,5 @@
+ 	static const char svnversion[] = SVNVERSION;
+ 	if (svnversion[0] != '$')
+ 		return svnversion; /* it was interpolated, or passed on command line */
+-	return "exported";
++	return "Unversioned directory";
+ }
+diff -ur ../Python-2.5.6-orig/Python/sysmodule.c ./Python/sysmodule.c
+--- ../Python-2.5.6-orig/Python/sysmodule.c	2011-04-17 22:36:17.000000000 +0200
++++ ./Python/sysmodule.c	2012-07-24 10:52:31.000000000 +0200
+@@ -1016,7 +1016,7 @@
+ 
+ 
+ 	svnversion = _Py_svnversion();
+-	if (strcmp(svnversion, "exported") != 0)
++	if (strcmp(svnversion, "Unversioned directory") != 0 && strcmp(svnversion, "exported") != 0)
+ 		svn_revision = svnversion;
+ 	else if (istag) {
+ 		len = strlen(_patchlevel_revision);
+diff -ur ../Python-2.5.6-orig/configure.in ./configure.in
+--- ../Python-2.5.6-orig/configure.in	2008-12-13 15:13:52.000000000 +0100
++++ ./configure.in	2012-07-24 10:52:31.000000000 +0200
+@@ -692,7 +692,7 @@
+ then
+ 	SVNVERSION="svnversion \$(srcdir)"
+ else
+-	SVNVERSION="echo exported"
++	SVNVERSION="echo Unversioned directory"
+ fi
+ 
+ case $MACHDEP in
