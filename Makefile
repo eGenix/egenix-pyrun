@@ -166,11 +166,25 @@ CP_DIR = $(CP) -pR
 # on Linux
 STRIPOPTIONS = -S
 
+# ANSI screen codes
+ECHO = /bin/echo
+BOLD = 
+OFF = 
+
 ### Generic targets
 
 all:	pyrun
 
 pyrun:	config interpreter runtime
+
+### Announcements
+
+announce-distribution:
+	$(ECHO) ""
+	$(ECHO) "==============================================================================="
+	$(ECHO) "$(BOLD)Building $(PACKAGENAME) $(PACKAGEVERSION) for Python $(PYTHONFULLVERSION)-$(PYTHONUNICODE) $(OFF)"
+	$(ECHO) "-------------------------------------------------------------------------------"
+	$(ECHO) ""
 
 ### Build process
 
@@ -322,7 +336,7 @@ install:	install-bin install-lib install-include
 
 ### Packaging
 
-$(BINARY_DISTRIBUTION_ARCHIVE):	$(BINDIR)/$(PYRUN)
+$(BINARY_DISTRIBUTION_ARCHIVE):	announce-distribution $(BINDIR)/$(PYRUN)
 	$(MAKE) install PREFIX=$(BUILDDIR)/dist \
 		PYTHONFULLVERSION=$(PYTHONFULLVERSION)
 	mkdir -p $(DISTDIR)
@@ -333,11 +347,15 @@ distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
 
 ### Testing
 
-test-distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
+$(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 	$(RM) -rf $(TESTDIR)
 	./install-pyrun \
 		--pyrun-distribution=$(BINARY_DISTRIBUTION_ARCHIVE) \
 		$(TESTDIR)
+
+test-install-pyrun:	$(TESTDIR)/bin/$(PYRUN)
+
+test-run:	$(TESTDIR)/bin/$(PYRUN)
 	echo "--- Testing basic operation --------------------------------------"
 	cd $(TESTDIR); bin/pyrun ../test.py
 	cd $(TESTDIR); bin/pyrun -c "import sys; print sys.version"
@@ -347,7 +365,7 @@ test-distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
 	cd $(TESTDIR); bin/pyrun -m timeit
 	echo "--- Testing pip installation (pure Python) -----------------------"
 	cd $(TESTDIR); bin/pip install Genshi
-	cd $(TESTDIR); bin/pip install Trac
+	cd $(TESTDIR); bin/pip install Trac==0.12
 	echo "--- Testing pip installation (packages with C extensions) --------"
 	cd $(TESTDIR); bin/pip install egenix-mx-base
 	cd $(TESTDIR); bin/pip install numpy
@@ -355,6 +373,8 @@ test-distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
 	echo "--- Testing pip installation (heavy weight packages) -------------"
 	cd $(TESTDIR); bin/pip install cython
 	cd $(TESTDIR); bin/pip install Django
+
+test-distribution:	test-run
 
 ### Cleanup
 
