@@ -167,9 +167,21 @@ CP_DIR = $(CP) -pR
 STRIPOPTIONS = -S
 
 # ANSI screen codes
-ECHO = @/bin/echo
-BOLD = 
-OFF = 
+ECHO = /bin/echo -e 
+BOLD = \033[1m
+OFF = \033[m
+
+ifdef MACOSX_PLATFORM
+ECHO = /bin/echo 
+BOLD =
+OFF =
+endif
+
+ifdef FREEBSD_PLATFORM
+ECHO = /bin/echo 
+BOLD =
+OFF =
+endif
 
 ### Generic targets
 
@@ -180,22 +192,22 @@ pyrun:	config interpreter runtime
 ### Announcements
 
 announce-distribution:
-	$(ECHO) ""
-	$(ECHO) "==============================================================================="
-	$(ECHO) "$(BOLD)Building $(PACKAGENAME) $(PACKAGEVERSION) for Python $(PYTHONFULLVERSION)-$(PYTHONUNICODE) $(OFF)"
-	$(ECHO) "-------------------------------------------------------------------------------"
-	$(ECHO) ""
+	@$(ECHO) ""
+	@$(ECHO) "==============================================================================="
+	@$(ECHO) "$(BOLD)Building $(PACKAGENAME) $(PACKAGEVERSION) for Python $(PYTHONFULLVERSION)-$(PYTHONUNICODE) $(OFF)"
+	@$(ECHO) "-------------------------------------------------------------------------------"
+	@$(ECHO) ""
 
 ### Build process
 
 $(PYTHONDIR):
-	$(ECHO) "=== Setting up the Python sources ===================================================="
+	@$(ECHO) "=== Setting up the Python sources ===================================================="
 	$(RM) -rf $(PYTHONDIR)
 	if test -z $(PYTHONTARBALL) || ! test -e $(PYTHONTARBALL); then \
-	    $(ECHO) "Downloading and extracting $(PYTHONSOURCEURL)."; \
+	    @$(ECHO) "Downloading and extracting $(PYTHONSOURCEURL)."; \
 	    $(WGET) -O - $(PYTHONSOURCEURL) | tar xz ; \
 	else \
-	    $(ECHO) "Extracting local copy $(PYTHONTARBALL)."; \
+	    @$(ECHO) "Extracting local copy $(PYTHONTARBALL)."; \
 	    $(TAR) xfz $(PYTHONTARBALL) ; \
 	fi
         # Move source dir to $(PYTHONDIR)
@@ -214,7 +226,7 @@ $(PYTHONDIR)/Include/patchlevel.h:
 	$(MAKE) $(PYTHONDIR)
 
 $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
-	$(ECHO) "=== Configuring Python ==============================================================="
+	@$(ECHO) "=== Configuring Python ==============================================================="
 	cd $(PYTHONDIR); \
 	./configure \
 		--prefix=$(TMPINSTALLDIR) \
@@ -251,7 +263,7 @@ config: $(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	$(MAKE) -f Makefile.pre Makefile
 
 $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
-	$(ECHO) "=== Creating Python interpreter ======================================================"
+	@$(ECHO) "=== Creating Python interpreter ======================================================"
 	$(MAKE) config
 	cd $(PYTHONDIR); \
 	$(MAKE); \
@@ -267,13 +279,13 @@ $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 interpreter:	$(TMPPYTHON)
 
 Runtime/$(PYRUNPY):	$(TMPPYTHON) Runtime/makepyrun.py Runtime/pyrun_template.py Runtime/pyrun_config_template.py
-	$(ECHO) "=== Preparing PyRun =================================================================="
+	@$(ECHO) "=== Preparing PyRun =================================================================="
 	cd Runtime; \
 	unset PYTHONPATH; export PYTHONPATH; \
 	export PYTHONHOME=$(TMPINSTALLDIR); \
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
 	$(TMPPYTHON) makepyrun.py $(PYRUNPY)
-	$(ECHO) "Created $(PYRUNPY)."
+	@$(ECHO) "Created $(PYRUNPY)."
 	touch $@
 
 prepare:	Runtime/$(PYRUNPY)
@@ -284,10 +296,10 @@ test-makepyrun:
 	export PYTHONHOME=$(TMPINSTALLDIR); \
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
 	$(TMPPYTHON) makepyrun.py $(PYRUNPY)
-	$(ECHO) "Created $(PYRUNPY)."
+	@$(ECHO) "Created $(PYRUNPY)."
 
 $(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY)
-	$(ECHO) "=== Creating PyRun ==================================================================="
+	@$(ECHO) "=== Creating PyRun ==================================================================="
         # Cleanup the PyRun freeze build dir
 	cd Runtime; $(RM) -f *.c *.o
         # Run freeze to build pyrun
@@ -307,10 +319,10 @@ $(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY)
 	$(STRIP) $(STRIPOPTIONS) $(PYRUN)
 	$(CP) $(PYRUNDIR)/$(PYRUN) $(BINDIR)
 	$(CP) $(PYRUNDIR)/$(PYRUN_DEBUG) $(BINDIR)
-	$(ECHO) "=== Finished ========================================================================="
-	@$(ECHO)
-	@$(ECHO) "The eGenix PyRun runtime interpreter is called: $(BINDIR)/$(PYRUN)"
-	@$(ECHO)
+	@$(ECHO) "=== Finished ========================================================================="
+	@@$(ECHO)
+	@@$(ECHO) "The eGenix PyRun runtime interpreter is called: $(BINDIR)/$(PYRUN)"
+	@@$(ECHO)
 	touch $@
 
 runtime:	$(BINDIR)/$(PYRUN)
@@ -356,21 +368,21 @@ $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 test-install-pyrun:	$(TESTDIR)/bin/$(PYRUN)
 
 test-run:	$(TESTDIR)/bin/$(PYRUN)
-	$(ECHO) "--- Testing basic operation --------------------------------------"
+	@$(ECHO) "--- Testing basic operation --------------------------------------"
 	cd $(TESTDIR); bin/pyrun ../test.py
 	cd $(TESTDIR); bin/pyrun -c "import sys; print sys.version"
 	cd $(TESTDIR); echo "import sys; print sys.version" | bin/pyrun
 	cd $(TESTDIR); echo "import sys; print sys.version" | bin/pyrun -
-	$(ECHO) "--- Testing module imports ---------------------------------------"
+	@$(ECHO) "--- Testing module imports ---------------------------------------"
 	cd $(TESTDIR); bin/pyrun -m timeit
-	$(ECHO) "--- Testing pip installation (pure Python) -----------------------"
+	@$(ECHO) "--- Testing pip installation (pure Python) -----------------------"
 	cd $(TESTDIR); bin/pip install Genshi
 	cd $(TESTDIR); bin/pip install Trac==0.12
-	$(ECHO) "--- Testing pip installation (packages with C extensions) --------"
+	@$(ECHO) "--- Testing pip installation (packages with C extensions) --------"
 	cd $(TESTDIR); bin/pip install egenix-mx-base
 	cd $(TESTDIR); bin/pip install numpy
 	cd $(TESTDIR); bin/pip install lxml
-	$(ECHO) "--- Testing pip installation (heavy weight packages) -------------"
+	@$(ECHO) "--- Testing pip installation (heavy weight packages) -------------"
 	cd $(TESTDIR); bin/pip install cython
 	cd $(TESTDIR); bin/pip install Django
 
