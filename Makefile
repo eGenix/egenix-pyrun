@@ -132,10 +132,11 @@ PYTHON_27_BUILD := $(shell test PYTHONVERSION = "2.7" && echo "1")
 
 # Build platform
 LINUX_PLATFORM := $(shell test "`uname -s`" = "Linux" && echo "1")
-FREEBSD_PLATFORM := $(shell test "`uname -s`" = "FreeBSD" && echo "1")
 MACOSX_PLATFORM := $(shell test "`uname -s`" = "Darwin" && echo "1")
 MACOSX_PPC_PLATFORM := $(shell test "`uname -s -p`" = "Darwin powerpc" && echo "1")
 MACOSX_INTEL_PLATFORM := $(shell test "`uname -s -p`" = "Darwin i386" && echo "1")
+FREEBSD_PLATFORM := $(shell test "`uname -s`" = "FreeBSD" && echo "1")
+RASPI_PLATFORM := $(shell test "`uname -s -m`" = "Linux armv6l" && echo "1")
 
 # Special OS environment setups
 ifdef MACOSX_PPC_PLATFORM
@@ -170,6 +171,10 @@ endif
 
 ifdef FREEBSD_PLATFORM
 ECHO = /bin/echo 
+endif
+
+ifdef RASPI_PLATFORM
+TPUT = tput -T xterm
 endif
 
 # Stripping the executable
