@@ -407,7 +407,7 @@ def pyrun_setup_sys_path(pyrun_script=None):
     python_site_package = join(python_lib, 'site-packages')
     # all path variables should be normalized now
 
-    # Build sys.path; start with the script directory (location of of
+    # Build sys.path; start with the script directory (location of
     # the script to be run)
     sys.path = [pyrun_script_dir]
 
@@ -615,6 +615,10 @@ if __name__ == '__main__':
         if not pyrun_skip_site_main:
             pyrun_run_site_main()
 
+        # Setup sys.argv for interactive mode
+        if not sys.argv:
+            sys.argv = ['']
+
         # Enter interactive mode
         pyrun_prompt()
 
@@ -635,11 +639,13 @@ if __name__ == '__main__':
                 pyrun_as_string = True
             pyrun_script = sys.stdin.read()
             sys.argv = ['']
+
         elif sys.argv[0] == '-' and not (pyrun_as_string or pyrun_as_module):
             # Read the script from stdin
             global pyrun_script
             pyrun_as_string = True
             pyrun_script = sys.stdin.read()
+
         else:
             # Default operation: run the script given as first
             # argument
