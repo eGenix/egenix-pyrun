@@ -60,9 +60,9 @@ from pyrun_config import (
 
 # Banners
 pyrun_banner = (
-    '%s %s\n'
+    '%s %s (release %s)\n'
     'Thank you for using eGenix PyRun. Type "help" or "license" for details.\n'
-    % (pyrun_name, sys.version))
+    % (pyrun_name, pyrun_version, pyrun_release))
 
 # Options
 pyrun_verbose = int(os.environ.get('PYRUN_VERBOSE', 0))
@@ -100,7 +100,7 @@ def pyrun_help(extra_lines=()):
     help_text = ("""\
 Usage: %s [pyrunoptions] <script> [parameters]
 
-Version: %s
+Version: %s (release %s)
 
 Available pyrun options:
 
@@ -121,7 +121,8 @@ code and run. Parameters are passed to the script via sys.argv as
 normal.
 
 """ % (pyrun_name,
-       pyrun_version)
+       pyrun_version,
+       pyrun_release)
                  ).splitlines()
     if extra_lines:
         help_text.extend(extra_lines)
