@@ -496,7 +496,11 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         # sys.argv[0]: runpy will set the sys.argv[0] to the absolute
         # location of the found module
         import runpy
-        runpy.run_module(pyrun_script, globals(), '__main__', True)
+        try:
+            runpy.run_module(pyrun_script, globals(), '__main__', True)
+        except ImportError, reason:
+            pyrun_log_error('Could not run %r: %s' % (pyrun_script, reason))
+            sys.exit(1)
 
     elif mode == 'path':
         
@@ -527,7 +531,11 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         #   places the directory of the .py file in sys.argv[0].
         #
         import runpy
-        runpy.run_path(pyrun_script, globals(), '__main__')
+        try:
+            runpy.run_path(pyrun_script, globals(), '__main__')
+        except ImportError, reason:
+            pyrun_log_error('Could not run %r: %s' % (pyrun_script, reason))
+            sys.exit(1)
 
     elif (mode == 'codefile' or mode == 'codestring'):
 
