@@ -7,6 +7,17 @@
 """
 import sys, os
 
+# This template is used by makepyrun.py to build the pyrun_config.py
+# module used by PyRun.
+#
+# It uses these placeholders (all prefixed with "#$", which are filled
+# in with the appropriate data by makepyrun.py:
+#
+# * pyrun    - name of the pyrun executable
+# * version  - version of the pyrun executable (the supported Python version)
+# * release  - pyrun release version
+# * config   - repr() dict list of sysconfig configuration variables
+
 ### PyRun Configuration
 
 # Since sysconfig.py is imported early by site.py, we cannot rely on
@@ -25,6 +36,7 @@ pyrun_version = '#$version'
 if pyrun_version.startswith('#$'):
     pyrun_version = sys.version.split()[0]
 pyrun_libversion = pyrun_version[:3]
+pyrun_release = '#$release'
 
 # Filenames and paths
 pyrun_executable = os.path.abspath(sys.executable)

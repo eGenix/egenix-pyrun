@@ -31,6 +31,7 @@ import sys, os, re, string, pprint
 
 ### Globals
 
+# PyRun release version
 __version__ = '1.2.0'
 
 # Python module dir
@@ -47,6 +48,9 @@ PYRUN_NAME = 'pyrun'
 
 # PyRun version
 PYRUN_VERSION = sys.version.split()[0]
+
+# PyRun release
+PYRUN_RELEASE = __version__
 
 ### Configuration
 
@@ -207,10 +211,12 @@ def config_vars():
 def format_template(template,
                     pyrun_name=PYRUN_NAME,
                     pyrun_version=PYRUN_VERSION,
+                    pyrun_release=PYRUN_RELEASE,
                     pyrun_imports=''):
 
     code = template.replace('#$pyrun', pyrun_name) \
                    .replace('#$version', pyrun_version) \
+                   .replace('#$release', pyrun_release) \
                    .replace('#$imports', pyrun_imports)
     return code
 
@@ -320,7 +326,8 @@ def patch_pkgutil_py(libdir=LIBDIR):
 def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            outputfile='pyrun_config.py',
                            pyrun_name=PYRUN_NAME,
-                           pyrun_version=PYRUN_VERSION):
+                           pyrun_version=PYRUN_VERSION,
+                           pyrun_release=PYRUN_RELEASE):
 
     f = open(inputfile, 'rb')
     config_src = f.read()
@@ -352,7 +359,8 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
 
     # Add other temlate variables
     config_src = config_src.replace('#$pyrun', pyrun_name) \
-                           .replace('#$version', pyrun_version)
+                           .replace('#$version', pyrun_version) \
+                           .replace('#$release', pyrun_release)
 
     print 'Creating module %s' % outputfile
     f = open(outputfile, 'wb')
@@ -362,7 +370,8 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
 
 def create_pyrun_py(inputfile='pyrun_template.py',
                     outputfile='pyrun.py',
-                    version=sys.version.split()[0],
+                    version=PYRUN_VERSION,
+                    release=PYRUN_RELEASE,
                     libdir=LIBDIR,
                     setupfile=SETUPFILE):
 
@@ -378,6 +387,7 @@ def create_pyrun_py(inputfile='pyrun_template.py',
     f.write(format_template(template,
                             pyrun_name=pyrun_name,
                             pyrun_version=version,
+                            pyrun_release=release,
                             pyrun_imports=imports))
     f.close()
     compile_module(outputfile)
