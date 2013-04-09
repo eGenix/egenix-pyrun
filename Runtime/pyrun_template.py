@@ -527,7 +527,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         #   places the directory of the .py file in sys.argv[0].
         #
         import runpy
-        runpy.run_path(pyrun_script, globals(), '__main__', True)
+        runpy.run_path(pyrun_script, globals(), '__main__')
 
     elif (mode == 'codefile' or mode == 'codestring'):
 
