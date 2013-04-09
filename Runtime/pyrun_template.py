@@ -47,6 +47,7 @@ import pyrun_config
 from pyrun_config import (
     pyrun_name,
     pyrun_version,
+    pyrun_release,
     pyrun_libversion,
     pyrun_copyright,
     pyrun_executable,
