@@ -101,7 +101,7 @@ def test_cmd_line(runtime=PYRUN):
     result = run('%s zipdir.zip' % runtime)
     assert match_result(
         result,
-        ".*: can't find '__main__' module in 'zipdir.zip'\n"
+        ".*: can't find ('__main__' module|'__main__.py') in 'zipdir.zip'\n"
         )
     l.append(result)
 
