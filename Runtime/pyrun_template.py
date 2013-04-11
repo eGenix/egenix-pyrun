@@ -117,9 +117,8 @@ Available pyrun options:
 -u:   open stdout/stderr in unbuffered mode
 -V:   print the pyrun version and exit
 
-Without options, the given <script> file is loaded as Python source
-code and run. Parameters are passed to the script via sys.argv as
-normal.
+Without options, the given <script> file is loaded and run. Parameters
+are passed to the script via sys.argv as normal.
 
 """ % (pyrun_name,
        pyrun_version,
@@ -144,6 +143,7 @@ def pyrun_info(extra_lines=()):
 pyrun_name = %(pyrun_name)r
 pyrun_version = %(pyrun_version)r
 pyrun_libversion = %(pyrun_libversion)r
+pyrun_release = %(pyrun_release)r
 
 # Files and directories
 pyrun_executable = %(pyrun_executable)r
