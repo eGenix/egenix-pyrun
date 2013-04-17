@@ -37,6 +37,9 @@ if pyrun_version.startswith('#$'):
     pyrun_version = sys.version.split()[0]
 pyrun_libversion = pyrun_version[:3]
 pyrun_release = '#$release'
+pyrun_build = '(release %s, %s' % (
+    pyrun_release,
+    sys.version.split(' (', 1)[1])
 
 # Filenames and paths
 pyrun_executable = os.path.abspath(sys.executable)

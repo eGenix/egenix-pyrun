@@ -48,6 +48,7 @@ from pyrun_config import (
     pyrun_name,
     pyrun_version,
     pyrun_release,
+    pyrun_build,
     pyrun_libversion,
     pyrun_copyright,
     pyrun_executable,
@@ -58,12 +59,6 @@ from pyrun_config import (
     )
 
 ### Globals
-
-# Banners
-pyrun_banner = (
-    '%s %s (release %s)\n'
-    'Thank you for using eGenix PyRun. Type "help" or "license" for details.\n'
-    % (pyrun_name, pyrun_version, pyrun_release))
 
 # Options
 pyrun_verbose = int(os.environ.get('PYRUN_VERBOSE', 0))
@@ -91,6 +86,19 @@ def pyrun_update_runtime():
         site.PREFIXES = [sys.prefix]
         site.setcopyright()
 
+def pyrun_banner():
+
+    """ Return the banner text to display when starting up pyrun without
+        any command line options.
+
+    """
+    return (
+        '%s %s %s\n'
+        'Thank you for using eGenix PyRun. Type "help" or "license" for details.\n'
+        % (pyrun_name,
+           pyrun_version,
+           pyrun_build))
+
 def pyrun_help(extra_lines=()):
 
     """ Write help text to stderr.
@@ -98,10 +106,11 @@ def pyrun_help(extra_lines=()):
         extra_lines are shown under the help text.
 
     """
+    # Format the help text
     help_text = ("""\
 Usage: %s [pyrunoptions] <script> [parameters]
 
-Version: %s (release %s)
+Version: %s %s
 
 Available pyrun options:
 
@@ -122,8 +131,7 @@ are passed to the script via sys.argv as normal.
 
 """ % (pyrun_name,
        pyrun_version,
-       pyrun_release)
-                 ).splitlines()
+       pyrun_build)).splitlines()
     if extra_lines:
         help_text.extend(extra_lines)
     for line in help_text:
@@ -144,6 +152,7 @@ pyrun_name = %(pyrun_name)r
 pyrun_version = %(pyrun_version)r
 pyrun_libversion = %(pyrun_libversion)r
 pyrun_release = %(pyrun_release)r
+pyrun_build = %(pyrun_build)r
 
 # Files and directories
 pyrun_executable = %(pyrun_executable)r
@@ -328,11 +337,11 @@ def pyrun_normpath(path,
     # Convert to an absolute path
     return os.path.abspath(path)
 
-def pyrun_prompt(pyrun_script='<stdin>', banner=pyrun_banner):
+def pyrun_prompt(pyrun_script='<stdin>', banner=None):
 
     """ Start an interactive pyrun prompt for pyrun_script.
 
-        banner is used as startup text. It defaults to pyrun_banner.
+        banner is used as startup text. It defaults to pyrun_banner().
 
     """
     import code
@@ -342,6 +351,10 @@ def pyrun_prompt(pyrun_script='<stdin>', banner=pyrun_banner):
         import readline
     except ImportError:
         pass
+
+    # Defaults
+    if banner is None:
+        banner = pyrun_banner()
 
     # Setup globals and run interpreter interactively
     runtime_globals = globals()
