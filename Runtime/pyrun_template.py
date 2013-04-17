@@ -267,7 +267,9 @@ def pyrun_parse_cmdline():
 
         elif arg == '-V':
             # Show version and exit
-            sys.stdout.write('pyrun %s\n' % pyrun_version)
+            sys.stdout.write('pyrun %s (release %s)\n' % (
+                pyrun_version,
+                pyrun_release))
             sys.exit(0)
 
         # XXX Add more standard Python command line options here
