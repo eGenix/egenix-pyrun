@@ -71,6 +71,7 @@ pyrun_ignore_pth_files = False
 pyrun_skip_site_main = False
 pyrun_interactive = False
 pyrun_unbuffered = False
+pyrun_optimized = False
 
 ### Helpers
 
@@ -281,6 +282,14 @@ def pyrun_parse_cmdline():
                 pyrun_release))
             sys.exit(0)
 
+        elif arg == '-O':
+            # Enable optimization
+            global pyrun_optimized
+            pyrun_optimized = True
+            # Adjust the interpreter flag; note that the sys.flag
+            # setting will not get updated by this.
+            sys._setflag('optimize', 1)
+
         # XXX Add more standard Python command line options here
 
         # Note: There's a general problem with some options, since by
@@ -291,7 +300,8 @@ def pyrun_parse_cmdline():
         #
         # The following options are simply ignored for this reason:
         #
-        elif arg in ('-O', '-3'):
+        elif arg in ('-3',
+                     ):
             # Ignored option, only here for compatibility with
             # standard Python
             pass
