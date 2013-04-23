@@ -68,3 +68,69 @@ diff -ur ../Python-2.5.6-orig/configure.in ./configure.in
  fi
  
  case $MACHDEP in
+--- Python-2.5.6/Python/sysmodule.c	2011-04-17 22:36:17.000000000 +0200
++++ Python/sysmodule.c	2013-04-23 19:43:37.130281826 +0200
+@@ -731,10 +731,51 @@ extern PyObject *_Py_GetDXProfile(PyObje
+ 
+ #ifdef __cplusplus
+ }
+ #endif
+ 
++/*** PyRun Extension ***************************************************/
++
++#define SYS_SETFLAG(c_flag, flag_name)		\
++    if (strcmp(flagname, flag_name) == 0) {	\
++	old_value = c_flag;			\
++	if (value != -1)			\
++	    c_flag = value;			\
++    } else
++
++static PyObject *
++sys_setflag(PyObject* self, PyObject* args)
++{
++    char *flagname;
++    int value = -1, old_value = value;
++
++    if (!PyArg_ParseTuple(args, "s|i", &flagname, &value))
++        goto onError;
++
++    SYS_SETFLAG(Py_DebugFlag, "debug")
++    SYS_SETFLAG(Py_OptimizeFlag, "optimize")
++    SYS_SETFLAG(Py_VerboseFlag, "verbose")
++    {
++        PyErr_SetString(PyExc_ValueError,
++                        "unknown flag name");
++	goto onError;
++    }
++    return PyInt_FromLong((long)old_value);
++
++ onError:
++    return NULL;
++}
++
++#undef SYS_SETFLAG
++
++PyDoc_STRVAR(sys_setflag__doc__,
++"_setflag(flagname, value) -> old_value\n\
++Set the given interpreter flag and return its previous value.");
++
++/*** End of PyRun Extension ***********************************************/
++
++
+ static PyMethodDef sys_methods[] = {
+ 	/* Might as well keep this in alphabetic order */
+ 	{"callstats", (PyCFunction)PyEval_GetCallStats, METH_NOARGS,
+ 	 callstats_doc},
+ 	{"_current_frames", sys_current_frames, METH_NOARGS,
+@@ -789,10 +830,11 @@ static PyMethodDef sys_methods[] = {
+ 	 getcheckinterval_doc},
+ #ifdef HAVE_DLOPEN
+ 	{"setdlopenflags", sys_setdlopenflags, METH_VARARGS,
+ 	 setdlopenflags_doc},
+ #endif
++	{"_setflag", sys_setflag, METH_VARARGS, sys_setflag__doc__},
+ 	{"setprofile",	sys_setprofile, METH_O, setprofile_doc},
+ 	{"setrecursionlimit", sys_setrecursionlimit, METH_VARARGS,
+ 	 setrecursionlimit_doc},
+ #ifdef WITH_TSC
+ 	{"settscdump", sys_settscdump, METH_VARARGS, settscdump_doc},

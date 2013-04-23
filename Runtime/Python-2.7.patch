@@ -22,3 +22,71 @@
          ** This is because the python home should be set relative to the library,
          ** which is in the framework, not relative to the executable, which may
          ** be outside of the framework. Except when we're in the build directory...
+--- Python-2.7.4/Python/sysmodule.c	2013-04-06 16:02:40.000000000 +0200
++++ Python/sysmodule.c	2013-04-23 19:38:24.929313095 +0200
+@@ -897,10 +897,53 @@ sys_clear_type_cache(PyObject* self, PyO
+ PyDoc_STRVAR(sys_clear_type_cache__doc__,
+ "_clear_type_cache() -> None\n\
+ Clear the internal type lookup cache.");
+ 
+ 
++/*** PyRun Extension ***************************************************/
++
++#define SYS_SETFLAG(c_flag, flag_name)		\
++    if (strcmp(flagname, flag_name) == 0) {	\
++	old_value = c_flag;			\
++	if (value != -1)			\
++	    c_flag = value;			\
++    } else
++
++static PyObject *
++sys_setflag(PyObject* self, PyObject* args)
++{
++    char *flagname;
++    int value = -1, old_value = value;
++
++    if (!PyArg_ParseTuple(args, "s|i", &flagname, &value))
++        goto onError;
++
++    SYS_SETFLAG(Py_DebugFlag, "debug")
++    SYS_SETFLAG(Py_OptimizeFlag, "optimize")
++    SYS_SETFLAG(Py_DontWriteBytecodeFlag, "dont_write_bytecode")
++    SYS_SETFLAG(Py_VerboseFlag, "verbose")
++    SYS_SETFLAG(Py_HashRandomizationFlag, "hash_randomization")
++    {
++        PyErr_SetString(PyExc_ValueError,
++                        "unknown flag name");
++	goto onError;
++    }
++    return PyInt_FromLong((long)old_value);
++
++ onError:
++    return NULL;
++}
++
++#undef SYS_SETFLAG
++
++PyDoc_STRVAR(sys_setflag__doc__,
++"_setflag(flagname, value) -> old_value\n\
++Set the given interpreter flag and return its previous value.");
++
++/*** End of PyRun Extension ***********************************************/
++
++
+ static PyMethodDef sys_methods[] = {
+     /* Might as well keep this in alphabetic order */
+     {"callstats", (PyCFunction)PyEval_GetCallStats, METH_NOARGS,
+      callstats_doc},
+     {"_clear_type_cache",       sys_clear_type_cache,     METH_NOARGS,
+@@ -959,10 +1002,11 @@ static PyMethodDef sys_methods[] = {
+      getcheckinterval_doc},
+ #ifdef HAVE_DLOPEN
+     {"setdlopenflags", sys_setdlopenflags, METH_VARARGS,
+      setdlopenflags_doc},
+ #endif
++    {"_setflag", sys_setflag, METH_VARARGS, sys_setflag__doc__},
+     {"setprofile",      sys_setprofile, METH_O, setprofile_doc},
+     {"getprofile",      sys_getprofile, METH_NOARGS, getprofile_doc},
+     {"setrecursionlimit", sys_setrecursionlimit, METH_VARARGS,
+      setrecursionlimit_doc},
+ #ifdef WITH_TSC
