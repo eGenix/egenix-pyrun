@@ -123,6 +123,32 @@ def test_O_flag(runtime=PYRUN):
         "(?s).*AssertionError.*"
         )
     
+    result = run('%s -O -c "assert 1==1; print (\'ok\')"' % runtime)
+    assert match_result(
+        result,
+        "ok\n"
+        )
+    
+    result = run('%s -O -c "assert 1==0; print (\'ok\')"' % runtime)
+    assert match_result(
+        result,
+        "ok\n"
+        )
+    
+    result = run('%s -O -c "import sys; print (sys._setflag(\'optimize\'))"' %
+                 runtime)
+    assert match_result(
+        result,
+        "1\n"
+        )
+    
+    result = run('%s -OO -c "import sys; print (sys._setflag(\'optimize\'))"' %
+                 runtime)
+    assert match_result(
+        result,
+        "2\n"
+        )
+    
 ###
 
 if __name__ == '__main__':
