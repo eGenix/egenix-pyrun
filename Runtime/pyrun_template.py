@@ -123,7 +123,7 @@ Available pyrun options:
 -b:   run the given <script> file as bytecode
 -E:   ignore environment variables (only PYTHONPATH)
 -S:   skip running site.main() and disable support for .pth files
--O:   ignored (pyrun always runs in optimized mode)
+-O:   run in optimized mode (-OO also removes doc-strings)
 -u:   open stdout/stderr in unbuffered mode
 -V:   print the pyrun version and exit
 
@@ -171,6 +171,8 @@ pyrun_bytecode = %(pyrun_bytecode)r
 pyrun_ignore_environment = %(pyrun_ignore_environment)r
 pyrun_ignore_pth_files = %(pyrun_ignore_pth_files)r
 pyrun_interactive = %(pyrun_interactive)r
+pyrun_unbuffered = %(pyrun_unbuffered)r
+pyrun_optimized = %(pyrun_optimized)r
 
 """ % globals()).splitlines()
     if extra_lines:
