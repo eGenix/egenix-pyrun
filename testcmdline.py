@@ -11,6 +11,8 @@ PYRUN = 'pyrun'
 PYTHON = 'python2.7'
 TESTDIR = os.path.abspath('Tests')
 
+python_version = sys.version.split()[0]
+
 def run(command):
 
     pipe = subprocess.Popen(command, shell=True,
@@ -68,42 +70,44 @@ def test_cmd_line(runtime=PYRUN):
         )
     l.append(result)
     
-    result = run('%s dir' % runtime)
-    assert match_result(
-        result,
-        "__file__: '.*/dir/__main__.py'\n"
-        "__name__: '__main__'\n"
-        "__path__: not defined\n"
-        "sys.path[0]: 'dir'\n"
-        )
-    l.append(result)
+    # These features are only supported in pyrun 2.7
+    if python_version >= '2.7':
+        result = run('%s dir' % runtime)
+        assert match_result(
+            result,
+            "__file__: '.*/dir/__main__.py'\n"
+            "__name__: '__main__'\n"
+            "__path__: not defined\n"
+            "sys.path[0]: 'dir'\n"
+            )
+        l.append(result)
     
-    result = run('%s zipfiles.zip' % runtime)
-    assert match_result(
-        result,
-        "__file__: 'zipfiles.zip/__main__.py'\n"
-        "__name__: '__main__'\n"
-        "__path__: not defined\n"
-        "sys.path[0]: 'zipfiles.zip'\n"
-        )
-    l.append(result)
+        result = run('%s zipfiles.zip' % runtime)
+        assert match_result(
+            result,
+            "__file__: 'zipfiles.zip/__main__.py'\n"
+            "__name__: '__main__'\n"
+            "__path__: not defined\n"
+            "sys.path[0]: 'zipfiles.zip'\n"
+            )
+        l.append(result)
     
-    result = run('%s zipfiles.abc' % runtime)
-    assert match_result(
-        result,
-        "__file__: 'zipfiles.abc/__main__.py'\n"
-        "__name__: '__main__'\n"
-        "__path__: not defined\n"
-        "sys.path[0]: 'zipfiles.abc'\n"
-        )
-    l.append(result)
-    
-    result = run('%s zipdir.zip' % runtime)
-    assert match_result(
-        result,
-        ".*: can't find ('__main__' module|'__main__.py') in 'zipdir.zip'\n"
-        )
-    l.append(result)
+        result = run('%s zipfiles.abc' % runtime)
+        assert match_result(
+            result,
+            "__file__: 'zipfiles.abc/__main__.py'\n"
+            "__name__: '__main__'\n"
+            "__path__: not defined\n"
+            "sys.path[0]: 'zipfiles.abc'\n"
+            )
+        l.append(result)
+
+        result = run('%s zipdir.zip' % runtime)
+        assert match_result(
+            result,
+            ".*: can't find ('__main__' module|'__main__.py') in 'zipdir.zip'\n"
+            )
+        l.append(result)
 
     return l
 
