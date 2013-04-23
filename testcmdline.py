@@ -9,7 +9,7 @@ import os, sys, subprocess, re
 
 PYRUN = 'pyrun'
 PYTHON = 'python2.7'
-TESTDIR = 'Tests'
+TESTDIR = os.path.abspath('Tests')
 
 def run(command):
 
@@ -106,6 +106,22 @@ def test_cmd_line(runtime=PYRUN):
     l.append(result)
 
     return l
+
+def test_O_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    result = run('%s -c "assert 1==1; print (\'ok\')"' % runtime)
+    assert match_result(
+        result,
+        "ok\n"
+        )
+    
+    result = run('%s -c "assert 1==0; print (\'ok\')"' % runtime)
+    assert match_result(
+        result,
+        "(?s).*AssertionError.*"
+        )
     
 ###
 
@@ -116,4 +132,5 @@ if __name__ == '__main__':
         print '%s <abs path to runtime>' % sys.argv[0]
         sys.exit(1)
     test_cmd_line(runtime)
+    test_O_flag(runtime)
     print '%s passes all command line tests' % runtime
