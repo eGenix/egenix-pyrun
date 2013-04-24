@@ -107,6 +107,7 @@ exclude_list = [
 exclude_package_list = [
     'test',
     'idlelib',
+    'compiler',
     'bsddb.test',
     'ctypes.test',
     'distutils.tests',
