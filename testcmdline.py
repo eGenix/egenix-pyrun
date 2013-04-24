@@ -11,14 +11,17 @@ PYRUN = 'pyrun'
 PYTHON = 'python2.7'
 TESTDIR = os.path.abspath('Tests')
 
-python_version = sys.version.split()[0]
-
 def run(command):
 
     pipe = subprocess.Popen(command, shell=True,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
     return pipe.stdout.read() + pipe.stderr.read()
+
+def python_version(runtime):
+
+    return run('%s "import sys; sys.version.split()[0]"' %
+               runtime).strip()
 
 def match_result(result, pattern):
 
@@ -71,7 +74,7 @@ def test_cmd_line(runtime=PYRUN):
     l.append(result)
     
     # These features are only supported in pyrun 2.7
-    if python_version >= '2.7':
+    if python_version(runtime) >= '2.7':
         result = run('%s dir' % runtime)
         assert match_result(
             result,
@@ -153,6 +156,30 @@ def test_O_flag(runtime=PYRUN):
         "2\n"
         )
     
+def test_d_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    result = run('%s -c "print (\'ok\')"' % runtime)
+    assert match_result(
+        result,
+        "ok\n"
+        )
+    
+    result = run('%s -d -c "import sys; print (sys._setflag(\'debug\'))"' %
+                 runtime)
+    assert match_result(
+        result,
+        "1\n"
+        )
+    
+    result = run('%s -dd -c "import sys; print (sys._setflag(\'debug\'))"' %
+                 runtime)
+    assert match_result(
+        result,
+        "2\n"
+        )
+    
 ###
 
 if __name__ == '__main__':
@@ -163,4 +190,5 @@ if __name__ == '__main__':
         sys.exit(1)
     test_cmd_line(runtime)
     test_O_flag(runtime)
+    test_d_flag(runtime)
     print '%s passes all command line tests' % runtime
