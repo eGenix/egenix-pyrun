@@ -96,7 +96,14 @@ include_list = [
     ]
 
 # List of modules to always exclude from the list of modules
+#
+# Note: These modules are only excluded from the generated
+# pyrun.py. freeze.py may still find them being imported from other
+# modules, so you may also have to exclude them explicitly in the
+# freeze.py call (see EXCLUDES in the top-level Makefile)
+#
 exclude_list = [
+    'Tkinter',
     '_tkinter',
     '_ctypes_test',
     '_testcapi',
@@ -104,6 +111,12 @@ exclude_list = [
     ]
 
 # List of packages to always exclude from the list of modules
+#
+# Note: These packages are only excluded from the generated
+# pyrun.py. freeze.py may still find them being imported from other
+# modules, so you may also have to exclude them explicitly in the
+# freeze.py call (see EXCLUDES in the top-level Makefile)
+#
 exclude_package_list = [
     'test',
     'idlelib',

@@ -37,7 +37,7 @@ PYTHONUNICODE = ucs2
 
 # Packages and modules to exclude from the runtime (note that each
 # module has to be prefixed with "-x ").
-EXCLUDES = -x test
+EXCLUDES = -x test -x Tkinter
 
 # Package details (used for distributions and passed in via the
 # product Makefile)
