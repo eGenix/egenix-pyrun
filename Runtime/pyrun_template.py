@@ -125,6 +125,7 @@ Available pyrun options:
 -S:   skip running site.main() and disable support for .pth files
 -O:   run in optimized mode (-OO also removes doc-strings)
 -u:   open stdout/stderr in unbuffered mode
+-d:   enable debug mode
 -V:   print the pyrun version and exit
 
 Without options, the given <script> file is loaded and run. Parameters
@@ -270,7 +271,7 @@ def pyrun_parse_cmdline():
         elif arg == '-d':
             # Show debug info
             global pyrun_debug
-            pyrun_debug = True
+            pyrun_debug += 1
 
         elif arg == '-u':
             # Set stdout and stderr to unbuffered
@@ -288,9 +289,6 @@ def pyrun_parse_cmdline():
             # Enable optimization
             global pyrun_optimized
             pyrun_optimized += 1
-            # Adjust the interpreter flag; note that the sys.flag
-            # setting will not get updated by this.
-            sys._setflag('optimize', pyrun_optimized)
 
         # XXX Add more standard Python command line options here
 
@@ -319,6 +317,13 @@ def pyrun_parse_cmdline():
             pyrun_help(extra_lines)
             sys.exit(rc)
         i += 1
+
+    # Update Python flags, if needed; note that the sys.flag setting
+    # will not get updated by this.
+    if pyrun_optimized:
+        sys._setflag('optimize', pyrun_optimized)
+    if pyrun_debug:
+        sys._setflag('debug', pyrun_debug)
 
     # Remove pyrun options from sys.argv
     sys.argv[:] = remaining_argv
@@ -379,7 +384,7 @@ def pyrun_enable_unbuffered_mode():
     """ Enable unbuffered sys.stdout/stderr.
 
     """
-    if pyrun_debug:
+    if pyrun_debug > 1:
         pyrun_log('Enabling unbuffered mode')
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'wb', 0)
     sys.stderr = os.fdopen(sys.stderr.fileno(), 'wb', 0)
@@ -390,7 +395,7 @@ def pyrun_run_site_main():
     """ Import the site module
 
     """
-    if pyrun_debug:
+    if pyrun_debug > 1:
         pyrun_log('Importing site.py')
         pyrun_log('  sys.path before importing site:')
         for path in sys.path:
@@ -398,7 +403,7 @@ def pyrun_run_site_main():
     import site
     site.PREFIXES = [sys.prefix]
     site.main()
-    if pyrun_debug:
+    if pyrun_debug > 1:
         pyrun_log('  sys.path after importing site:')
         for path in sys.path:
             pyrun_log('    %s' % path)
@@ -414,7 +419,7 @@ def pyrun_setup_sys_path(pyrun_script=None):
     """
     exists = os.path.exists
     join = os.path.join
-    if pyrun_debug:
+    if pyrun_debug > 1:
         pyrun_log('Setting up sys.path')
         pyrun_log('  sys.path before adjusting it (compile time version):')
         for path in sys.path:
@@ -465,7 +470,7 @@ def pyrun_setup_sys_path(pyrun_script=None):
         known_paths = site.addsitedir(python_site_package)
         #site.addsitedir(another_site_package, known_paths)
 
-    if pyrun_debug:
+    if pyrun_debug > 1:
         pyrun_log('  sys.path after adjusting it (before cleanup):')
         for path in sys.path:
             pyrun_log('    %s' % path)
@@ -476,7 +481,7 @@ def pyrun_setup_sys_path(pyrun_script=None):
                 for dir in sys.path
                 if exists(dir)]
 
-    if pyrun_debug:
+    if pyrun_debug > 1:
         pyrun_log('  sys.path final version:')
         for path in sys.path:
             pyrun_log('    %s' % path)
@@ -501,7 +506,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
 
     """
     # Run the pyrun_script
-    if pyrun_debug:
+    if pyrun_debug > 1:
         pyrun_log('Executing script %r in mode %r' % (
             pyrun_script, mode))
         pyrun_log('  sys.argv=%r' % sys.argv)
@@ -670,7 +675,7 @@ if __name__ == '__main__':
     pyrun_update_runtime()
     
     # Show debug info
-    if pyrun_debug:
+    if pyrun_debug > 1:
         pyrun_info()
 
     # Start the runtime
