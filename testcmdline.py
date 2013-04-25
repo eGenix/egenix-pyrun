@@ -186,8 +186,8 @@ if __name__ == '__main__':
     try:
         runtime = sys.argv[1]
     except IndexError:
-        print '%s <abs path to runtime>' % sys.argv[0]
-        sys.exit(1)
+        runtime = sys.executable
+        print 'Using %s as runtime.' % runtime
     test_cmd_line(runtime)
     test_O_flag(runtime)
     test_d_flag(runtime)
