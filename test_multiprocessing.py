@@ -3,7 +3,7 @@ import os
 
 def worker():
     """worker function"""
-    print 'Worker %i' % os.getpid()
+    print 'Worker %i using %s' % (os.getpid(), sys.executable)
     return
 
 if __name__ == '__main__':
