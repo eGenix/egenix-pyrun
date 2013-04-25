@@ -43,7 +43,7 @@ def test_cmd_line(runtime=PYRUN):
         )
     l.append(result)
     
-    result = run('%s main.py' % runtime)
+    result = run('%s -S main.py' % runtime)
     assert match_result(
         result,
         "__file__: 'main.py'\n"
@@ -53,7 +53,7 @@ def test_cmd_line(runtime=PYRUN):
         )
     l.append(result)
     
-    result = run('%s pkg/main.py' % runtime)
+    result = run('%s -S pkg/main.py' % runtime)
     assert match_result(
         result,
         "__file__: 'pkg/main.py'\n"
@@ -63,7 +63,7 @@ def test_cmd_line(runtime=PYRUN):
         )
     l.append(result)
 
-    result = run('%s pkg/sub/main.py' % runtime)
+    result = run('%s -S pkg/sub/main.py' % runtime)
     assert match_result(
         result,
         "__file__: 'pkg/sub/main.py'\n"
@@ -75,7 +75,7 @@ def test_cmd_line(runtime=PYRUN):
     
     # These features are only supported in pyrun 2.7
     if python_version(runtime) >= '2.7':
-        result = run('%s dir' % runtime)
+        result = run('%s -S dir' % runtime)
         assert match_result(
             result,
             "__file__: '.*/dir/__main__.py'\n"
@@ -85,7 +85,7 @@ def test_cmd_line(runtime=PYRUN):
             )
         l.append(result)
     
-        result = run('%s zipfiles.zip' % runtime)
+        result = run('%s -S zipfiles.zip' % runtime)
         assert match_result(
             result,
             "__file__: 'zipfiles.zip/__main__.py'\n"
@@ -95,7 +95,7 @@ def test_cmd_line(runtime=PYRUN):
             )
         l.append(result)
     
-        result = run('%s zipfiles.abc' % runtime)
+        result = run('%s -S zipfiles.abc' % runtime)
         assert match_result(
             result,
             "__file__: 'zipfiles.abc/__main__.py'\n"
@@ -105,7 +105,7 @@ def test_cmd_line(runtime=PYRUN):
             )
         l.append(result)
 
-        result = run('%s zipdir.zip' % runtime)
+        result = run('%s -S zipdir.zip' % runtime)
         assert match_result(
             result,
             ".*: can't find ('__main__' module|'__main__.py') in 'zipdir.zip'\n"
