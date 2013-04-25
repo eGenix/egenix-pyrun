@@ -1,10 +1,11 @@
 import multiprocessing
-import os
+import os, time
 
 def worker():
-    """worker function"""
+    """
+        Worker function
+    """
     print 'Worker %i using %s' % (os.getpid(), sys.executable)
-    return
 
 if __name__ == '__main__':
     jobs = []
@@ -12,3 +13,8 @@ if __name__ == '__main__':
         p = multiprocessing.Process(target=worker)
         jobs.append(p)
         p.start()
+    while jobs:
+        p = jobs.pop()
+        p.join()
+        print 'Worker %r joined' % p
+    print 'Works.'
