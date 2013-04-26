@@ -39,10 +39,10 @@ PYTHONUNICODE = ucs2
 # module has to be prefixed with "-x ").
 EXCLUDES = -x test -x Tkinter
 
-# Package details (used for distributions and passed in via the
-# product Makefile)
+# Package details (used for distributions and normally passed in via
+# the product Makefile)
 PACKAGENAME = egenix-pyrun
-PACKAGEVERSION = 0.0.0
+PACKAGEVERSION = $(shell cd Runtime; python -c "from makepyrun import __version__; print __version__")
 
 ### Runtime build parameters
 
@@ -390,6 +390,7 @@ test-run:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) "--- Testing basic operation --------------------------------------"
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pyrun ../test.py
+	cp -ar Tests $(TESTDIR); cd $(TESTDIR); bin/pyrun ../testcmdline.py
 	cd $(TESTDIR); bin/pyrun -c "import sys; print sys.version"
 	cd $(TESTDIR); echo "import sys; print sys.version" | bin/pyrun
 	cd $(TESTDIR); echo "import sys; print sys.version" | bin/pyrun -
