@@ -231,6 +231,10 @@ mmap mmapmodule.c
 _csv _csv.c
 
 # Socket module helper for socket(2)
+#
+# Note: Python 2.7.5 added "timemodule.c" here, but we don't need to
+# rebuild this since we already included it for the time module
+# itself.
 _socket socketmodule.c
 
 # Socket module helper for SSL support; you must comment out the other
@@ -568,9 +572,9 @@ _json _json.c
 future_builtins future_builtins.c
 
 # _io
-_io	_io/bufferedio.c _io/bytesio.c _io/fileio.c _io/iobase.c \
-	_io/_iomodule.c _io/stringio.c _io/textio.c \
-	-IModules/_io
+_io	-IModules/_io \
+	_io/bufferedio.c _io/bytesio.c _io/fileio.c _io/iobase.c \
+	_io/_iomodule.c _io/stringio.c _io/textio.c
 
 # _scproxy (used on Mac OS X only)
 # @if macosx: _scproxy ../Mac/Modules/_scproxy.c -framework SystemConfiguration -framework CoreFoundation
