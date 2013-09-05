@@ -711,14 +711,12 @@ if __name__ == '__main__':
                     'Missing argument for -c/-m. Try pyrun -h for help.')
                 sys.exit(1)
             else:
-                global pyrun_script
                 pyrun_as_string = True
             pyrun_script = sys.stdin.read()
             sys.argv = ['']
 
         elif sys.argv[0] == '-' and not (pyrun_as_string or pyrun_as_module):
             # Read the script from stdin
-            global pyrun_script
             pyrun_as_string = True
             pyrun_script = sys.stdin.read()
 
