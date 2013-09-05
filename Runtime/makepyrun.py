@@ -32,7 +32,7 @@ import sys, os, re, string, pprint
 ### Globals
 
 # PyRun release version
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 
 # Python module dir
 LIBDIR = os.path.split(os.__file__)[0]
