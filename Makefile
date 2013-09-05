@@ -60,6 +60,10 @@ PYRUN_GENERIC = pyrun
 PYRUN = $(PYRUN_GENERIC)$(PYRUNVERSION)
 PYRUN_DEBUG = $(PYRUN)-debug
 
+# Symlinks to create for better Python compatibility
+PYRUN_SYMLINK_GENERIC = python
+PYRUN_SYMLINK = $(PYRUN_SYMLINK_GENERIC)$(PYRUNVERSION)
+
 # Archive name to create with "make archive"
 ARCHIVE = $(PYRUN)-$(PYRUNFULLVERSION)-$(PLATFORM)
 
@@ -350,7 +354,9 @@ install-bin:	$(BINDIR)/$(PYRUN)
 	$(CP) $(BINDIR)/$(PYRUN) $(INSTALLBINDIR)
 	$(CP) $(BINDIR)/$(PYRUN_DEBUG) $(INSTALLBINDIR)
 	cd $(INSTALLBINDIR); \
-	ln -sf $(PYRUN) $(PYRUN_GENERIC)
+	ln -sf $(PYRUN) $(PYRUN_GENERIC); \
+	ln -sf $(PYRUN) $(PYRUN_SYMLINK); \
+	ln -sf $(PYRUN) $(PYRUN_SYMLINK_GENERIC)
 
 install-lib:
 	if ! test -d $(INSTALLLIBDIR); then mkdir -p $(INSTALLLIBDIR); fi;
