@@ -464,6 +464,3 @@ build-pyrun25:
 
 ### Misc other targets
 
-update-docs:
-	cd Doc; \
-	cp -u orig/eGenix-PyRun.pdf .
