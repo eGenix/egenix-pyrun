@@ -1,20 +1,20 @@
---- Modules/getpath.c.orig	2012-04-23 00:02:04.266427614 +0200
-+++ Modules/getpath.c	2012-04-23 00:40:49.654193120 +0200
-@@ -448,10 +448,21 @@ calculate_path(void)
+--- Modules/getpath.c.orig      2013-11-10 08:36:41.000000000 +0100
++++ Modules/getpath.c   2013-12-05 17:56:21.015347586 +0100
+@@ -463,10 +463,21 @@ calculate_path(void)
          if (progpath[0] != SEP && progpath[0] != '\0')
                  absolutize(progpath);
          strncpy(argv0_path, progpath, MAXPATHLEN);
          argv0_path[MAXPATHLEN] = '\0';
- 
+
 +    /* For PyRun we don't need all the machinery to setup sys.path, since
 +       we're doing that in pyrun.py, so just use some sane defaults and
 +       return. */
 +    if (Py_FrozenFlag) {
-+	strncpy(prefix, PREFIX, MAXPATHLEN);
-+	strncpy(exec_prefix, EXEC_PREFIX, MAXPATHLEN);
-+	module_search_path = (char *)PyMem_Malloc(MAXPATHLEN);
-+	strncpy(module_search_path, PREFIX "/lib/python" VERSION, MAXPATHLEN);
-+	return;
++       strncpy(prefix, PREFIX, MAXPATHLEN);
++       strncpy(exec_prefix, EXEC_PREFIX, MAXPATHLEN);
++       module_search_path = (char *)PyMem_Malloc(MAXPATHLEN);
++       strncpy(module_search_path, PREFIX "/lib/python" VERSION, MAXPATHLEN);
++       return;
 +    }
 +
  #ifdef WITH_NEXT_FRAMEWORK

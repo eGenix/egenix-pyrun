@@ -23,8 +23,8 @@
 ### High-level configuration
 
 # Python versions to use for pyrun
-PYTHON_27_VERSION = 2.7.5
-PYTHON_26_VERSION = 2.6.8
+PYTHON_27_VERSION = 2.7.6
+PYTHON_26_VERSION = 2.6.9
 PYTHON_25_VERSION = 2.5.6
 
 # Python version to use as basis for pyrun
