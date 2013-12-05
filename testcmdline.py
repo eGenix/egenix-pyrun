@@ -20,7 +20,8 @@ def run(command):
 
 def python_version(runtime):
 
-    return run('%s "import sys; sys.version.split()[0]"' %
+    return run('%s '
+               '-c "import sys; sys.stdout.write(sys.version.split()[0])"' %
                runtime).strip()
 
 def match_result(result, pattern):
@@ -188,6 +189,7 @@ if __name__ == '__main__':
     except IndexError:
         runtime = sys.executable
         print 'Using %s as runtime.' % runtime
+    print 'Testing Python %s' % python_version(runtime)
     test_cmd_line(runtime)
     test_O_flag(runtime)
     test_d_flag(runtime)
