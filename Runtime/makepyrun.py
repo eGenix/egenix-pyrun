@@ -10,7 +10,7 @@
     ---------------------------------------------------------------------
 
     Copyright (c) 1997-2000, Marc-Andre Lemburg; mailto:mal@lemburg.com
-    Copyright (c) 2000-2012, eGenix.com Software GmbH; mailto:info@egenix.com
+    Copyright (c) 2000-2013, eGenix.com Software GmbH; mailto:info@egenix.com
 
                             All Rights Reserved.
 
@@ -32,7 +32,7 @@ import sys, os, re, string, pprint
 ### Globals
 
 # PyRun release version
-__version__ = '1.3.0'
+__version__ = '1.3.1'
 
 # Python module dir
 LIBDIR = os.path.split(os.__file__)[0]
