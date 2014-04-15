@@ -50,8 +50,9 @@ try:
     import array
     import binascii
     import bz2
-    import cPickle
-    import cStringIO
+    if PYTHON_VERSION < '3':
+        import cPickle
+        import cStringIO
     import operator
     import parser
     import select
@@ -71,7 +72,8 @@ print('Try loading a few Python 2.6 stdlib modules...')
 try:
     import ast
     import _json
-    import future_builtins
+    if PYTHON_VERSION < '3':
+        import future_builtins
     if PYTHON_VERSION == '2.6':
         # These only exist in Python 2.6 and not in 2.7
         import _fileio
