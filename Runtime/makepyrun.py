@@ -22,6 +22,8 @@
     received a copy.
 
 """
+# Compatible to Python 2.6, 2.7 and 3.4+
+
 #
 # Note: This script is run by the temporary Python installation
 # created for building pyrun. As such it has access to the
@@ -138,8 +140,8 @@ def find_builtin_modules(setupfile=SETUPFILE):
 
     try:
         setup = open(setupfile).readlines()
-    except IOError,why:
-        print 'Python Modules Setup file %s not found: %s' % (setupfile,why)
+    except IOError as why:
+        print('Python Modules Setup file %s not found: %s' % (setupfile,why))
         sys.exit(1)
     modules = []
     for line in setup:
@@ -156,9 +158,9 @@ def find_modules(libdir=LIBDIR, recurse=1, packageprefix=''):
     # Scan files in libdir
     try:
         files = os.listdir(libdir)
-    except os.error, why:
-        print 'Python Lib dir %s not accessible: %s' % \
-              (libdir, why)
+    except os.error as why:
+        print('Python Lib dir %s not accessible: %s' % \
+              (libdir, why))
         sys.exit(1)
 
     # Find package dirs
@@ -171,7 +173,7 @@ def find_modules(libdir=LIBDIR, recurse=1, packageprefix=''):
 
     # Filter out .py files
     files = filter(lambda x: x[-3:] == '.py', files)
-    files = map(lambda x: packageprefix + x[:-3], files)
+    files = [packageprefix + x[:-3] for x in files]
 
     # Recurse into packages
     if recurse:
@@ -188,10 +190,9 @@ def find_modules(libdir=LIBDIR, recurse=1, packageprefix=''):
 
 def find_imports(libdir=LIBDIR, setupfile=SETUPFILE):
 
-    modules = (include_list
+    modules = sorted((include_list
                + find_modules(libdir)
-               + find_builtin_modules(setupfile))
-    modules.sort()
+               + find_builtin_modules(setupfile)))
     for mod in exclude_list:
         try:
             modules.remove(mod)
@@ -244,14 +245,14 @@ def patch_module(filename, find_re, replacement):
         individual lines of the file.
 
     """
-    print 'Patching module %s' % filename
+    print('Patching module %s' % filename)
     f = open(filename, 'rb')
     mod_src = f.read()
     f.close()
     rx = re.compile(find_re, flags=re.MULTILINE)
     new_mod_src = rx.sub(replacement, mod_src)
     if new_mod_src == mod_src:
-        print '*** WARNING: Module %s not changed' % filename
+        print('*** WARNING: Module %s not changed' % filename)
         return
     f = open(filename, 'wb')
     f.write(new_mod_src)
@@ -349,8 +350,7 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
 
     # Build config vars and replace any occurrance of the PREFIX dir
     # with a variable "prefix"
-    variable_list = config_vars().items()
-    variable_list.sort()
+    variable_list = sorted(config_vars().items())
     repr_list = []
     for name, value in variable_list:
         if not isinstance(value, str):
@@ -376,7 +376,7 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            .replace('#$version', pyrun_version) \
                            .replace('#$release', pyrun_release)
 
-    print 'Creating module %s' % outputfile
+    print('Creating module %s' % outputfile)
     f = open(outputfile, 'wb')
     f.write(config_src)
     f.close()
@@ -396,7 +396,7 @@ def create_pyrun_py(inputfile='pyrun_template.py',
     template = open(inputfile, 'rb').read()
     assert outputfile.endswith('.py'), 'outputfile does not end with .py'
     pyrun_name = outputfile[:-3]
-    print 'Writing freeze script %s' % outputfile
+    print('Writing freeze script %s' % outputfile)
     f = open(outputfile, 'wb')
     f.write(format_template(template,
                             pyrun_name=pyrun_name,

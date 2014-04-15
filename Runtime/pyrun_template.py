@@ -22,12 +22,13 @@
 # All variables you add to this namespace will end up in the globals()
 # namespace of the script that's being run.
 #
+# Compatible to Python 2.6, 2.7 and 3.4+
 
 # Copyright information
 COPYRIGHT = """\
 
     Copyright (c) 1997-2000, Marc-Andre Lemburg; mailto:mal@lemburg.com
-    Copyright (c) 2000-2012, eGenix.com Software GmbH; mailto:info@egenix.com
+    Copyright (c) 2000-2014, eGenix.com Software GmbH; mailto:info@egenix.com
 
                             All Rights Reserved.
 
@@ -73,7 +74,18 @@ pyrun_interactive = False
 pyrun_unbuffered = False
 pyrun_optimized = 0
 
+PY2 = (sys.version_info[0] == 2)
+
 ### Helpers
+
+if PY2:
+    # Emulate Python 3 exec() function
+    def run_code(code, globals_dict):
+        exec('exec code in globals_dict')
+else:
+    # Python 3 and above can use the exec() function
+    import builtins
+    run_code = getattr(builtins, 'exec')
 
 def pyrun_update_runtime():
 
@@ -210,7 +222,7 @@ def pyrun_parse_cmdline():
     try:
         parsed_options, remaining_argv = getopt.getopt(sys.argv[1:],
                                                        valid_options)
-    except getopt.GetoptError, reason:
+    except getopt.GetoptError as reason:
         pyrun_help(['*** Problem parsing command line: %s' % reason])
         sys.exit(1)
 
@@ -530,7 +542,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         import runpy
         try:
             runpy.run_module(pyrun_script, globals(), '__main__', True)
-        except ImportError, reason:
+        except ImportError as reason:
             pyrun_log_error('Could not run %r: %s' % (pyrun_script, reason))
             sys.exit(1)
 
@@ -565,7 +577,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         import runpy
         try:
             runpy.run_path(pyrun_script, globals(), '__main__')
-        except ImportError, reason:
+        except ImportError as reason:
             pyrun_log_error('Could not run %r: %s' % (pyrun_script, reason))
             sys.exit(1)
 
@@ -611,7 +623,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         runtime_globals = globals()
         runtime_globals.update(__name__='__main__',
                                __file__=pyrun_script)
-        exec module_code in runtime_globals
+        run_code(module_code, runtime_globals)
 
     elif mode == 'file':
 
@@ -655,7 +667,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         runtime_globals = globals()
         runtime_globals.update(__name__='__main__',
                                __file__=script_path)
-        exec code in runtime_globals
+        exec(code, runtime_globals)
 
     else:
         raise TypeError('unknown execution mode %r' % mode)
@@ -756,7 +768,7 @@ if __name__ == '__main__':
         # Run the script
         try:
             pyrun_execute_script(pyrun_script, mode)
-        except Exception, reason:
+        except Exception as reason:
             if pyrun_interactive:
                 import traceback
                 traceback.print_exc()
