@@ -1,3 +1,6 @@
+""" Test pyrun in action.
+
+"""
 import sys
 
 PYTHON_VERSION = sys.version[:3]
@@ -6,26 +9,25 @@ def module_name(err):
     return str(err).split()[-1]
 
 def print_modules():
-    loaded_modules = sys.modules.items()
-    loaded_modules.sort()
+    loaded_modules = sorted(sys.modules.items())
     for name, mod in loaded_modules:
-        print 'Module %-20s: %r' % (name, mod)
+        print('Module %-20s: %r' % (name, mod))
 
-print 'Using pyrun executable from:'
-print
-print sys.executable
-print
+print('Using pyrun executable from:')
+print('')
+print(sys.executable)
+print('')
 
-print 'Loaded modules after startup:'
-print
+print('Loaded modules after startup:')
+print('')
 print_modules()
-print
-print 'sys.path after startup:'
-print
-print sys.path
-print
+print('')
+print('sys.path after startup:')
+print('')
+print(sys.path)
+print('')
 
-print 'Try loading a few Python 2.5 stdlib modules...',
+print('Try loading a few Python 2.5 stdlib modules...')
 try:
     import os
     import datetime
@@ -58,14 +60,14 @@ try:
     import mmap
     import _bisect
     import _ssl
-except ImportError, reason:
-    print '%s not found.' % module_name(reason)
+except ImportError as reason:
+    print('%s not found.' % module_name(reason))
     if PYTHON_VERSION >= '2.5':
         sys.exit(1)
 else:
-    print 'done.'
+    print('done.')
 
-print 'Try loading a few Python 2.6 stdlib modules...',
+print('Try loading a few Python 2.6 stdlib modules...')
 try:
     import ast
     import _json
@@ -74,44 +76,44 @@ try:
         # These only exist in Python 2.6 and not in 2.7
         import _fileio
         import _bytesio
-except ImportError, reason:
-    print '%s not found.' % module_name(reason)
+except ImportError as reason:
+    print('%s not found.' % module_name(reason))
     if PYTHON_VERSION >= '2.6':
         sys.exit(1)
 else:
-    print 'done.'
+    print('done.')
 
-print 'Try loading a few Python 2.7 stdlib modules...',
+print('Try loading a few Python 2.7 stdlib modules...')
 try:
     import _io
-except ImportError, reason:
-    print '%s not found.' % module_name(reason)
+except ImportError as reason:
+    print('%s not found.' % module_name(reason))
     if PYTHON_VERSION >= '2.7':
         sys.exit(1)
 else:
-    print 'done.'
+    print('done.')
 
-print 'Try loading ctypes (a shared mod)...',
+print('Try loading ctypes (a shared mod)...')
 try:
     import _ctypes
 except ImportError:
-    print 'ctypes not found.'
+    print('ctypes not found.')
 else:
-    print 'done.'
+    print('done.')
 
-print 'Try loading mxDateTime (a shared mod)...',
+print('Try loading mxDateTime (a shared mod)...')
 try:
     import mx.DateTime
 except ImportError:
-    print 'mxDateTime not found.'
+    print('mxDateTime not found.')
 else:
-    print 'done.'
+    print('done.')
 
-print
-print 'Loaded modules after test run:'
-print
+print('')
+print('Loaded modules after test run:')
+print('')
 print_modules()
-print
+print('')
 
-print
-print 'pyrun works.'
+print('')
+print('pyrun works.')
