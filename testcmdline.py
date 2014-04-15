@@ -5,18 +5,20 @@
 # Note: This test currently only works on Unix platforms and then only
 #       for Python 2.7. See #1076.
 #
+
 import os, sys, subprocess, re
 
 PYRUN = 'pyrun'
 PYTHON = 'python2.7'
 TESTDIR = os.path.abspath('Tests')
 
-def run(command):
+def run(command, encoding='utf-8'):
 
     pipe = subprocess.Popen(command, shell=True,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
-    return pipe.stdout.read() + pipe.stderr.read()
+    result = pipe.stdout.read() + pipe.stderr.read()
+    return result.decode(encoding)
 
 def python_version(runtime):
 
@@ -188,9 +190,9 @@ if __name__ == '__main__':
         runtime = sys.argv[1]
     except IndexError:
         runtime = sys.executable
-        print 'Using %s as runtime.' % runtime
-    print 'Testing Python %s' % python_version(runtime)
+        print('Using %s as runtime.' % runtime)
+    print('Testing Python %s' % python_version(runtime))
     test_cmd_line(runtime)
     test_O_flag(runtime)
     test_d_flag(runtime)
-    print '%s passes all command line tests' % runtime
+    print('%s passes all command line tests' % runtime)
