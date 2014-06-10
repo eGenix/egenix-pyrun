@@ -80,12 +80,25 @@ PY2 = (sys.version_info[0] == 2)
 
 if PY2:
     # Emulate Python 3 exec() function
-    def run_code(code, globals_dict):
-        exec('exec code in globals_dict')
+    def run_code(code, globals_dict, locals_dict=None):
+        if locals_dict is None:
+            locals_dict = globals_dict
+        exec('exec code in globals_dict, locals_dict')
+
+    # We can use execfile() in Python 2
+    run_code_file = execfile
+
 else:
     # Python 3 and above can use the exec() function
     import builtins
     run_code = getattr(builtins, 'exec')
+
+    # Python 3 does not include the execfile() builtin
+    def run_code_file(filename, globals_dict, locals_dict=None):
+        file = open(filename, 'r', encoding='utf-8')
+        source = file.read()
+        file.close()
+        run_code(source, globals_dict, locals_dict)
 
 def pyrun_update_runtime():
 
@@ -643,7 +656,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         runtime_globals = globals()
         runtime_globals.update(__name__='__main__',
                                __file__=pyrun_script)
-        execfile(pyrun_script, runtime_globals, runtime_globals)
+        run_code_file(pyrun_script, runtime_globals, runtime_globals)
 
     elif mode == 'string':
 
@@ -667,7 +680,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         runtime_globals = globals()
         runtime_globals.update(__name__='__main__',
                                __file__=script_path)
-        exec(code, runtime_globals)
+        run_code(code, runtime_globals)
 
     else:
         raise TypeError('unknown execution mode %r' % mode)
