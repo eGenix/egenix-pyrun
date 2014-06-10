@@ -29,18 +29,35 @@
 # created for building pyrun. As such it has access to the
 # configuration of the final pyrun executable.
 #
-import sys, os, re, string, pprint
+import sys, os, re, pprint
+
+try:
+    # sysconfig was added to Python 2.7 as top-level module
+    import sysconfig
+except ImportError:
+    # In Python 2.6 it's still part of the distutils package
+    from distutils import sysconfig
 
 ### Globals
 
 # PyRun release version
 __version__ = '1.4.0'
 
+# Debug level
+_debug = 1
+
+# File encoding to use
+ENCODING = 'utf-8'
+
+# Python version flags
+PY2 = (sys.version_info[0] == 2)
+PY3 = (sys.version_info[0] == 3)
+
 # Python module dir
-LIBDIR = os.path.split(os.__file__)[0]
+LIBDIR = sysconfig.get_config_var('LIBDEST')
 
 # Python module Setup file
-SETUPFILE = os.path.join(LIBDIR, 'config', 'Setup')
+SETUPFILE = os.path.join(sysconfig.get_config_var('LIBPL'), 'Setup')
 
 # Prefix used to build pyrun
 PREFIX = os.path.abspath(os.path.join(LIBDIR, '..', '..'))
@@ -53,6 +70,18 @@ PYRUN_VERSION = sys.version.split()[0]
 
 # PyRun release
 PYRUN_RELEASE = __version__
+
+### Python 2 vs. 3
+
+# Runtime flags
+PY2 = (sys.version_info[0] == 2)
+PY3 = (sys.version_info[0] == 3)
+
+if PY2:
+    # Use the codec.open function instead of the builtin open
+    def open(filename, mode, encoding=ENCODING):
+        import codecs
+        return codecs.open(filename, mode, encoding=encoding)
 
 ### Configuration
 
@@ -105,11 +134,13 @@ include_list = [
 # freeze.py call (see EXCLUDES in the top-level Makefile)
 #
 exclude_list = [
+    # Python 2
     'Tkinter',
     '_tkinter',
     '_ctypes_test',
     '_testcapi',
     'parser',
+    # Python 3
     ]
 
 # List of packages to always exclude from the list of modules
@@ -120,6 +151,7 @@ exclude_list = [
 # freeze.py call (see EXCLUDES in the top-level Makefile)
 #
 exclude_package_list = [
+    # Python 2
     'test',
     'idlelib',
     'compiler',
@@ -131,6 +163,11 @@ exclude_package_list = [
     'json.tests',
     'lib2to3.tests',
     'unittest.test',
+    # Python 3
+    'tkinter',
+    'turtledemo',
+    'setuptools',
+    'pip',
     ]
 
 # Parse a line in Modules/Setup
@@ -139,7 +176,7 @@ SETUP_LINE_RE = re.compile('^(\w+)\s+[a-zA-Z\\\\]+')
 def find_builtin_modules(setupfile=SETUPFILE):
 
     try:
-        setup = open(setupfile).readlines()
+        setup = open(setupfile, 'r', encoding=ENCODING).readlines()
     except IOError as why:
         print('Python Modules Setup file %s not found: %s' % (setupfile,why))
         sys.exit(1)
@@ -198,7 +235,8 @@ def find_imports(libdir=LIBDIR, setupfile=SETUPFILE):
             modules.remove(mod)
         except ValueError:
             pass
-    return string.join(map(lambda x: 'import %s' % x, modules),'\n')
+    return '\n'.join(('import %s' % mod
+                      for mod in modules))
 
 def find_module_source(modname):
 
@@ -246,7 +284,7 @@ def patch_module(filename, find_re, replacement):
 
     """
     print('Patching module %s' % filename)
-    f = open(filename, 'rb')
+    f = open(filename, 'r', encoding=ENCODING)
     mod_src = f.read()
     f.close()
     rx = re.compile(find_re, flags=re.MULTILINE)
@@ -254,7 +292,7 @@ def patch_module(filename, find_re, replacement):
     if new_mod_src == mod_src:
         print('*** WARNING: Module %s not changed' % filename)
         return
-    f = open(filename, 'wb')
+    f = open(filename, 'w', encoding=ENCODING)
     f.write(new_mod_src)
     f.close()
     compile_module(filename)
@@ -299,12 +337,14 @@ def patch_site_py(libdir=LIBDIR):
         We also adjust the license URL to point to the PyRun license.
 
     """
-    patch_module(os.path.join(libdir, 'site.py'),
-                 '^main\(\)',
-                 '#main()')
-    patch_module(os.path.join(libdir, 'site.py'),
-                 '"See http://www.python.org/%.3s/license.html" % sys.version',
-                 '"See http://egenix.com/products/python/PyRun/license.html"')
+    patch_module(
+        os.path.join(libdir, 'site.py'),
+        '^main\(\)',
+        '#main()')
+    patch_module(
+        os.path.join(libdir, 'site.py'),
+        '"See http://www.python.org[-\w/%.]*/license(.html)?" % sys.version',
+        '"See http://egenix.com/products/python/PyRun/license.html"')
 
 def patch_pkgutil_py(libdir=LIBDIR):
 
@@ -344,7 +384,7 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            pyrun_version=PYRUN_VERSION,
                            pyrun_release=PYRUN_RELEASE):
 
-    f = open(inputfile, 'rb')
+    f = open(inputfile, 'r', encoding=ENCODING)
     config_src = f.read()
     f.close()
 
@@ -377,7 +417,7 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            .replace('#$release', pyrun_release)
 
     print('Creating module %s' % outputfile)
-    f = open(outputfile, 'wb')
+    f = open(outputfile, 'w', encoding=ENCODING)
     f.write(config_src)
     f.close()
     compile_module(outputfile)
@@ -393,11 +433,11 @@ def create_pyrun_py(inputfile='pyrun_template.py',
 
     """
     imports = find_imports(libdir, setupfile)
-    template = open(inputfile, 'rb').read()
+    template = open(inputfile, 'r', encoding=ENCODING).read()
     assert outputfile.endswith('.py'), 'outputfile does not end with .py'
     pyrun_name = outputfile[:-3]
     print('Writing freeze script %s' % outputfile)
-    f = open(outputfile, 'wb')
+    f = open(outputfile, 'w', encoding=ENCODING)
     f.write(format_template(template,
                             pyrun_name=pyrun_name,
                             pyrun_version=version,

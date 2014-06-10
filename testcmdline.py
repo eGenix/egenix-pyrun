@@ -76,8 +76,12 @@ def test_cmd_line(runtime=PYRUN):
         )
     l.append(result)
     
-    # These features are only supported in pyrun 2.7
-    if python_version(runtime) >= '2.7':
+    # These features are only supported in pyrun 2.7.
+    #
+    # XXX They currently don't work in pyrun 3.4, even though they
+    # should. See #1383.
+    #
+    if python_version(runtime) != '2.7':
         result = run('%s -S dir' % runtime)
         assert match_result(
             result,

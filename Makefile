@@ -23,11 +23,13 @@
 ### High-level configuration
 
 # Python versions to use for pyrun
+PYTHON_34_VERSION = 3.4.1
 PYTHON_27_VERSION = 2.7.6
 PYTHON_26_VERSION = 2.6.9
 PYTHON_25_VERSION = 2.5.6
 
 # Python version to use as basis for pyrun
+#PYTHONFULLVERSION = $(PYTHON_34_VERSION)
 PYTHONFULLVERSION = $(PYTHON_27_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_26_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_25_VERSION)
@@ -35,9 +37,18 @@ PYTHONFULLVERSION = $(PYTHON_27_VERSION)
 # Python Unicode version
 PYTHONUNICODE = ucs2
 
+# Python ABI flags (Python 3 only; see PEP 3149)
+PYTHONABI = m
+
 # Packages and modules to exclude from the runtime (note that each
-# module has to be prefixed with "-x ").
-EXCLUDES = -x test -x Tkinter
+# module has to be prefixed with "-x ") for both Python 2 and 3.  Note
+# that makepyrun.py has its own predefined list of modules to exclude
+# in the module search. This list of excludes provides extra
+# protection against modules which are still found by the search and
+# should not be included in pyrun. They can also be used to further
+# trim down the module/package list, if needed.
+EXCLUDES = -x test -x Tkinter \
+	   -x tkinter -x setuptools -x pip
 
 # Package details (used for distributions and normally passed in via
 # the product Makefile)
@@ -51,9 +62,26 @@ PWD := $(shell pwd)
 
 # Version & Platform
 PYTHONVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\.[0-9]\).*/\1/')
+PYTHONMAJORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\).*/\1/')
 PYRUNFULLVERSION = $(PYTHONFULLVERSION)
 PYRUNVERSION = $(PYTHONVERSION)
 PLATFORM := $(shell python -c "from distutils.util import get_platform; print get_platform()")
+
+# Python build flags
+PYTHON_25_BUILD := $(shell test "$(PYTHONVERSION)" = "2.5" && echo "1")
+PYTHON_26_BUILD := $(shell test "$(PYTHONVERSION)" = "2.6" && echo "1")
+PYTHON_27_BUILD := $(shell test "$(PYTHONVERSION)" = "2.7" && echo "1")
+PYTHON_2_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "2" && echo "1")
+PYTHON_34_BUILD := $(shell test "$(PYTHONVERSION)" = "3.4" && echo "1")
+PYTHON_3_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "3" && echo "1")
+
+# Special Python environment setups
+ifdef PYTHON_3_BUILD
+ # We support Python 3.4+ only, which no longer has different versions
+ # for Unicode. Since PYTHONUNICODE is used in a lot of places, we
+ # simply assign a generic term to it for Python 3.
+ PYTHONUNICODE := pyrun
+endif
 
 # Name of the resulting pyrun executable
 PYRUN_GENERIC = pyrun
@@ -74,6 +102,11 @@ PYTHONSOURCEURL = http://www.python.org/ftp/python/$(PYTHONFULLVERSION)/Python-$
 # Directories
 PYTHONDIR = $(PWD)/Python-$(PYTHONFULLVERSION)-$(PYTHONUNICODE)
 PYRUNDIR = $(PWD)/Runtime
+ifdef PYTHON_2_BUILD
+ FREEZEDIR = Runtime/freeze-2
+else
+ FREEZEDIR = Runtime/freeze-3
+endif
 
 # Name of the freeze template and executable
 PYRUNPY = $(PYRUN).py
@@ -90,7 +123,11 @@ TMPPYTHON = $(TMPINSTALLDIR)/bin/python$(PYTHONVERSION)
 TMPLIBDIR = $(TMPINSTALLDIR)/lib/python$(PYRUNVERSION)
 TMPSHAREDLIBDIR = $(TMPLIBDIR)/lib-dynload
 TMPSITEPACKAGESLIBDIR = $(TMPLIBDIR)/site-packages
-TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)
+ifdef PYTHON_2_BUILD
+ TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)
+else
+ TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)$(PYTHONABI)
+endif
 
 # Build dir
 BUILDDIR = $(PWD)/build-$(PYTHONVERSION)-$(PYTHONUNICODE)
@@ -130,9 +167,6 @@ TESTDIR = $(PWD)/test-$(PYTHONVERSION)-$(PYTHONUNICODE)
 
 # Python configure options
 PYTHON_CONFIGURE_OPTIONS = ""
-PYTHON_25_BUILD := $(shell test PYTHONVERSION = "2.5" && echo "1")
-PYTHON_26_BUILD := $(shell test PYTHONVERSION = "2.6" && echo "1")
-PYTHON_27_BUILD := $(shell test PYTHONVERSION = "2.7" && echo "1")
 
 # Build platform
 LINUX_PLATFORM := $(shell test "`uname -s`" = "Linux" && echo "1")
@@ -236,6 +270,7 @@ sources: $(PYTHONDIR)
 
 $(PYTHONDIR)/Include/patchlevel.h:	$(PYTHONDIR)
 
+ifdef PYTHON_2_BUILD
 $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Configuring Python ========================================================"
@@ -247,6 +282,19 @@ $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 		--enable-unicode=$(PYTHONUNICODE) \
 		$(PYTHON_CONFIGURE_OPTIONS)
 	touch $@
+else
+$(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
+	@$(ECHO) "$(BOLD)"
+	@$(ECHO) "=== Configuring Python ========================================================"
+	@$(ECHO) "$(OFF)"
+	cd $(PYTHONDIR); \
+	./configure \
+		--prefix=$(TMPINSTALLDIR) \
+		--exec-prefix=$(TMPINSTALLDIR) \
+		--without-ensurepip \
+		$(PYTHON_CONFIGURE_OPTIONS)
+	touch $@
+endif
 
 config: $(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
         # Create install dir structure
@@ -322,7 +370,7 @@ $(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY)
         # Cleanup the PyRun freeze build dir
 	cd Runtime; $(RM) -f *.c *.o
         # Run freeze to build pyrun
-	cd Runtime/freeze; \
+	cd $(FREEZEDIR); \
 	unset PYTHONPATH; export PYTHONPATH; \
 	export PYTHONHOME=$(TMPINSTALLDIR); \
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
@@ -384,12 +432,13 @@ distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
 $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 	$(RM) -rf $(TESTDIR)
 	./install-pyrun \
+		--log \
 		--pyrun-distribution=$(BINARY_DISTRIBUTION_ARCHIVE) \
 		$(TESTDIR)
 
 test-install-pyrun:	$(TESTDIR)/bin/$(PYRUN)
 
-test-run:	$(TESTDIR)/bin/$(PYRUN)
+test-basic:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Running Tests ============================================================="
 	@$(ECHO) "$(OFF)"
@@ -397,14 +446,16 @@ test-run:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pyrun ../test.py
 	cp -ar Tests $(TESTDIR); cd $(TESTDIR); bin/pyrun ../testcmdline.py
-	cd $(TESTDIR); bin/pyrun -c "import sys; print sys.version"
-	cd $(TESTDIR); echo "import sys; print sys.version" | bin/pyrun
-	cd $(TESTDIR); echo "import sys; print sys.version" | bin/pyrun -
+	cd $(TESTDIR); bin/pyrun -c "import sys; print(sys.version)"
+	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun
+	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun -
 	@$(ECHO) ""
 	@$(ECHO) "--- Testing module imports ---------------------------------------"
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pyrun -m timeit
 	@$(ECHO) ""
+
+test-pip:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) "--- Testing pip installation (pure Python) -----------------------"
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pip install Genshi
@@ -421,7 +472,7 @@ test-run:	$(TESTDIR)/bin/$(PYRUN)
 	cd $(TESTDIR); bin/pip install cython
 	cd $(TESTDIR); bin/pip install Django
 
-test-distribution:	test-run
+test-distribution:	test-basic test-pip
 
 ### Cleanup
 
@@ -453,6 +504,9 @@ distclean:	clean
 
 build-all: build-pyrun25 build-pyrun26 build-pyrun27
 
+build-pyrun34:
+	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_27_VERSION)
+
 build-pyrun27:
 	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_27_VERSION)
 
@@ -464,3 +518,9 @@ build-pyrun25:
 
 ### Misc other targets
 
+### Debugging
+
+print-vars:
+	@$(foreach V,\
+		$(sort $(.VARIABLES)), \
+                $(warning $V=$($V)))

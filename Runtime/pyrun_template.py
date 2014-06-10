@@ -74,9 +74,11 @@ pyrun_interactive = False
 pyrun_unbuffered = False
 pyrun_optimized = 0
 
-PY2 = (sys.version_info[0] == 2)
+### Python 2 vs. 3
 
-### Helpers
+# Runtime flags
+PY2 = (sys.version_info[0] == 2)
+PY3 = (sys.version_info[0] == 3)
 
 if PY2:
     # Emulate Python 3 exec() function
@@ -99,6 +101,11 @@ else:
         source = file.read()
         file.close()
         run_code(source, globals_dict, locals_dict)
+
+    # Python 3 no longer has raw_input(). Use input() instead
+    raw_input = input
+
+### Helpers
 
 def pyrun_update_runtime():
 
@@ -413,7 +420,6 @@ def pyrun_enable_unbuffered_mode():
         pyrun_log('Enabling unbuffered mode')
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'wb', 0)
     sys.stderr = os.fdopen(sys.stderr.fileno(), 'wb', 0)
-
 
 def pyrun_run_site_main():
 
