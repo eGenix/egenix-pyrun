@@ -26,13 +26,11 @@
 PYTHON_34_VERSION = 3.4.1
 PYTHON_27_VERSION = 2.7.6
 PYTHON_26_VERSION = 2.6.9
-PYTHON_25_VERSION = 2.5.6
 
 # Python version to use as basis for pyrun
 #PYTHONFULLVERSION = $(PYTHON_34_VERSION)
 PYTHONFULLVERSION = $(PYTHON_27_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_26_VERSION)
-#PYTHONFULLVERSION = $(PYTHON_25_VERSION)
 
 # Python Unicode version
 PYTHONUNICODE = ucs2
@@ -72,7 +70,6 @@ PYRUNVERSION = $(PYTHONVERSION)
 PLATFORM := $(shell python -c "from distutils.util import get_platform; print get_platform()")
 
 # Python build flags
-PYTHON_25_BUILD := $(shell test "$(PYTHONVERSION)" = "2.5" && echo "1")
 PYTHON_26_BUILD := $(shell test "$(PYTHONVERSION)" = "2.6" && echo "1")
 PYTHON_27_BUILD := $(shell test "$(PYTHONVERSION)" = "2.7" && echo "1")
 PYTHON_2_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "2" && echo "1")
@@ -511,7 +508,7 @@ distclean:	clean
 
 ### Special build targets
 
-build-all: build-pyrun25 build-pyrun26 build-pyrun27
+build-all: build-pyrun26 build-pyrun27 build-pyrun34
 
 build-pyrun34:
 	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_27_VERSION)
@@ -521,9 +518,6 @@ build-pyrun27:
 
 build-pyrun26:
 	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_26_VERSION)
-
-build-pyrun25:
-	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_25_VERSION)
 
 ### Misc other targets
 
