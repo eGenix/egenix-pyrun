@@ -1,32 +1,40 @@
---- Modules/getpath.c.orig      2013-11-10 08:36:41.000000000 +0100
-+++ Modules/getpath.c   2013-12-05 17:56:21.015347586 +0100
-@@ -463,10 +463,21 @@ calculate_path(void)
-         if (progpath[0] != SEP && progpath[0] != '\0')
-                 absolutize(progpath);
+diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Modules/getpath.c ./Modules/getpath.c
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Modules/getpath.c	2013-11-10 08:36:41.000000000 +0100
++++ ./Modules/getpath.c	2014-06-11 17:18:58.971742209 +0200
+@@ -465,6 +465,17 @@
          strncpy(argv0_path, progpath, MAXPATHLEN);
          argv0_path[MAXPATHLEN] = '\0';
-
+ 
 +    /* For PyRun we don't need all the machinery to setup sys.path, since
 +       we're doing that in pyrun.py, so just use some sane defaults and
 +       return. */
 +    if (Py_FrozenFlag) {
-+       strncpy(prefix, PREFIX, MAXPATHLEN);
-+       strncpy(exec_prefix, EXEC_PREFIX, MAXPATHLEN + 1);
-+       module_search_path = (char *)PyMem_Malloc(MAXPATHLEN);
-+       strncpy(module_search_path, PREFIX "/lib/python" VERSION, MAXPATHLEN);
-+       return;
++        strncpy(prefix, PREFIX, MAXPATHLEN);
++        strncpy(exec_prefix, EXEC_PREFIX, MAXPATHLEN);
++        module_search_path = (char *)PyMem_Malloc(MAXPATHLEN + 1);
++        strncpy(module_search_path, PREFIX "/lib/python" VERSION, MAXPATHLEN);
++        return;
 +    }
 +
  #ifdef WITH_NEXT_FRAMEWORK
          /* On Mac OS X we have a special case if we're running from a framework.
          ** This is because the python home should be set relative to the library,
-         ** which is in the framework, not relative to the executable, which may
-         ** be outside of the framework. Except when we're in the build directory...
---- Python-2.7.4/Python/sysmodule.c	2013-04-06 16:02:40.000000000 +0200
-+++ Python/sysmodule.c	2013-04-23 19:38:24.929313095 +0200
-@@ -897,10 +897,53 @@ sys_clear_type_cache(PyObject* self, PyO
- PyDoc_STRVAR(sys_clear_type_cache__doc__,
- "_clear_type_cache() -> None\n\
+diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/import.c ./Python/import.c
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/import.c	2013-11-10 08:36:41.000000000 +0100
++++ ./Python/import.c	2014-06-11 17:04:39.612180817 +0200
+@@ -2102,7 +2102,7 @@
+         if (err != 0)
+             goto err_return;
+     }
+-    m = PyImport_ExecCodeModuleEx(name, co, "<frozen>");
++    m = PyImport_ExecCodeModule(name, co);
+     if (m == NULL)
+         goto err_return;
+     Py_DECREF(co);
+diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/sysmodule.c ./Python/sysmodule.c
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/sysmodule.c	2013-11-10 08:36:41.000000000 +0100
++++ ./Python/sysmodule.c	2013-12-05 17:56:21.015347586 +0100
+@@ -899,6 +899,49 @@
  Clear the internal type lookup cache.");
  
  
@@ -76,11 +84,7 @@
  static PyMethodDef sys_methods[] = {
      /* Might as well keep this in alphabetic order */
      {"callstats", (PyCFunction)PyEval_GetCallStats, METH_NOARGS,
-      callstats_doc},
-     {"_clear_type_cache",       sys_clear_type_cache,     METH_NOARGS,
-@@ -959,10 +1002,11 @@ static PyMethodDef sys_methods[] = {
-      getcheckinterval_doc},
- #ifdef HAVE_DLOPEN
+@@ -961,6 +1004,7 @@
      {"setdlopenflags", sys_setdlopenflags, METH_VARARGS,
       setdlopenflags_doc},
  #endif
@@ -88,5 +92,3 @@
      {"setprofile",      sys_setprofile, METH_O, setprofile_doc},
      {"getprofile",      sys_getprofile, METH_NOARGS, getprofile_doc},
      {"setrecursionlimit", sys_setrecursionlimit, METH_VARARGS,
-      setrecursionlimit_doc},
- #ifdef WITH_TSC

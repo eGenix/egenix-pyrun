@@ -1,8 +1,7 @@
---- Modules/getpath.c.orig	2010-07-24 12:09:36.000000000 +0200
-+++ Modules/getpath.c	2012-04-23 01:00:43.650066507 +0200
-@@ -444,10 +444,21 @@ calculate_path(void)
-         if (progpath[0] != SEP && progpath[0] != '\0')
-                 absolutize(progpath);
+diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Modules/getpath.c ./Modules/getpath.c
+--- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Modules/getpath.c	2013-10-29 16:04:38.000000000 +0100
++++ ./Modules/getpath.c	2014-06-11 17:17:56.283185279 +0200
+@@ -446,6 +446,17 @@
          strncpy(argv0_path, progpath, MAXPATHLEN);
          argv0_path[MAXPATHLEN] = '\0';
  
@@ -20,13 +19,22 @@
  #ifdef WITH_NEXT_FRAMEWORK
          /* On Mac OS X we have a special case if we're running from a framework.
          ** This is because the python home should be set relative to the library,
-         ** which is in the framework, not relative to the executable, which may
-         ** be outside of the framework. Except when we're in the build directory...
---- Python-2.6.7/Python/sysmodule.c	2010-05-21 19:22:43.000000000 +0200
-+++ Python/sysmodule.c	2013-04-23 19:44:25.455751130 +0200
-@@ -858,10 +858,52 @@ sys_clear_type_cache(PyObject* self, PyO
- PyDoc_STRVAR(sys_clear_type_cache__doc__,
- "_clear_type_cache() -> None\n\
+diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Python/import.c ./Python/import.c
+--- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Python/import.c	2013-10-29 16:04:39.000000000 +0100
++++ ./Python/import.c	2014-06-11 17:16:23.262358742 +0200
+@@ -2017,7 +2017,7 @@
+         if (err != 0)
+             goto err_return;
+     }
+-    m = PyImport_ExecCodeModuleEx(name, co, "<frozen>");
++    m = PyImport_ExecCodeModule(name, co);
+     if (m == NULL)
+         goto err_return;
+     Py_DECREF(co);
+diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Python/sysmodule.c ./Python/sysmodule.c
+--- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Python/sysmodule.c	2013-10-29 16:04:39.000000000 +0100
++++ ./Python/sysmodule.c	2013-12-05 18:47:41.059022637 +0100
+@@ -860,6 +860,48 @@
  Clear the internal type lookup cache.");
  
  
@@ -75,11 +83,7 @@
  static PyMethodDef sys_methods[] = {
      /* Might as well keep this in alphabetic order */
      {"callstats", (PyCFunction)PyEval_GetCallStats, METH_NOARGS,
-      callstats_doc},
-     {"_clear_type_cache",       sys_clear_type_cache,     METH_NOARGS,
-@@ -920,10 +962,11 @@ static PyMethodDef sys_methods[] = {
-      getcheckinterval_doc},
- #ifdef HAVE_DLOPEN
+@@ -922,6 +964,7 @@
      {"setdlopenflags", sys_setdlopenflags, METH_VARARGS,
       setdlopenflags_doc},
  #endif
@@ -87,5 +91,3 @@
      {"setprofile",      sys_setprofile, METH_O, setprofile_doc},
      {"getprofile",      sys_getprofile, METH_NOARGS, getprofile_doc},
      {"setrecursionlimit", sys_setrecursionlimit, METH_VARARGS,
-      setrecursionlimit_doc},
- #ifdef WITH_TSC
