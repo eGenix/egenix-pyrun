@@ -37,7 +37,11 @@ PYTHONFULLVERSION = $(PYTHON_27_VERSION)
 # Python Unicode version
 PYTHONUNICODE = ucs2
 
-# Python ABI flags (Python 3 only; see PEP 3149)
+# Python 3 ABI flags (see PEP 3149)
+#
+# These should probably be determined by running a standard Python 3
+# and checking sys.abiflags. Hardcoding them here for now, since they
+# rarely change.
 PYTHONABI = m
 
 # Packages and modules to exclude from the runtime (note that each
@@ -100,6 +104,7 @@ PYTHONTARBALL = /downloads/egenix-build-environment/Python-$(PYTHONFULLVERSION).
 PYTHONSOURCEURL = http://www.python.org/ftp/python/$(PYTHONFULLVERSION)/Python-$(PYTHONFULLVERSION).tgz
 
 # Directories
+PYTHONORIGDIR = $(PWD)/Python-$(PYTHONFULLVERSION)
 PYTHONDIR = $(PWD)/Python-$(PYTHONFULLVERSION)-$(PYTHONUNICODE)
 PYRUNDIR = $(PWD)/Runtime
 ifdef PYTHON_2_BUILD
@@ -244,11 +249,7 @@ announce-distribution:
 
 ### Build process
 
-$(PYTHONDIR):
-	@$(ECHO) "$(BOLD)"
-	@$(ECHO) "=== Setting up the Python sources ============================================="
-	@$(ECHO) "$(OFF)"
-	$(RM) -rf $(PYTHONDIR)
+$(PYTHONORIGDIR):
 	if test -z $(PYTHONTARBALL) || ! test -e $(PYTHONTARBALL); then \
 	    $(ECHO) "Downloading and extracting $(PYTHONSOURCEURL)."; \
 	    $(WGET) -O - $(PYTHONSOURCEURL) | tar xz ; \
@@ -256,8 +257,15 @@ $(PYTHONDIR):
 	    $(ECHO) "Extracting local copy $(PYTHONTARBALL)."; \
 	    $(TAR) xfz $(PYTHONTARBALL) ; \
 	fi
+
+$(PYTHONDIR):
+	@$(ECHO) "$(BOLD)"
+	@$(ECHO) "=== Setting up the Python sources ============================================="
+	@$(ECHO) "$(OFF)"
+	$(RM) -rf $(PYTHONDIR)
+	$(MAKE) $(PYTHONORIGDIR)
         # Move source dir to $(PYTHONDIR)
-	mv Python-$(PYTHONFULLVERSION) $(PYTHONDIR)
+	mv $(PYTHONORIGDIR) $(PYTHONDIR)
         # Apply Python patches needed for pyrun
 	cd $(PYTHONDIR); \
 	patch -p0 -F10 < ../Runtime/$(PYTHONPATCHFILE)
@@ -497,6 +505,7 @@ clean:	clean-runtime
 distclean:	clean
 	$(RM) -rf \
 		$(DISTDIR) \
+		$(PYTHONORIGDIR) \
 		$(PYTHONDIR) \
 	true
 
@@ -517,6 +526,11 @@ build-pyrun25:
 	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_25_VERSION)
 
 ### Misc other targets
+
+create-python-patch:	$(PYTHONORIGDIR)
+	cd $(PYTHONDIR); \
+	diff -ur $(PYTHONORIGDIR) . | sed '/Only in .*/d' \
+		>  ../Runtime/$(PYTHONPATCHFILE)
 
 ### Debugging
 
