@@ -1,8 +1,7 @@
---- Lib/logging/__init__.py	2014-05-19 07:19:38.000000000 +0200
-+++ Lib/logging/__init__.py	2014-06-10 23:30:06.551728955 +0200
-@@ -53,10 +53,14 @@ __date__    = "07 February 2010"
- 
- #
+diff -ur /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/logging/__init__.py ./Lib/logging/__init__.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/logging/__init__.py	2014-05-19 07:19:38.000000000 +0200
++++ ./Lib/logging/__init__.py	2014-06-10 23:30:06.551728955 +0200
+@@ -55,6 +55,10 @@
  # _srcfile is used when walking the stack to check when we've got the first
  # caller stack frame.
  #
@@ -13,5 +12,100 @@
  if hasattr(sys, 'frozen'): #support for py2exe
      _srcfile = "logging%s__init__%s" % (os.sep, __file__[-4:])
  else:
-     _srcfile = __file__
- _srcfile = os.path.normcase(_srcfile)
+diff -ur /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules/getpath.c ./Modules/getpath.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules/getpath.c	2014-05-19 07:19:39.000000000 +0200
++++ ./Modules/getpath.c	2014-06-11 13:35:53.378999027 +0200
+@@ -566,6 +566,24 @@
+     wcsncpy(argv0_path, progpath, MAXPATHLEN);
+     argv0_path[MAXPATHLEN] = '\0';
+ 
++    /* For PyRun we don't need all the machinery to setup sys.path, since
++       we're doing that in pyrun.py, so just use some sane defaults and
++       return. */
++    if (Py_FrozenFlag) {
++	wcsncpy(prefix, _prefix, MAXPATHLEN);
++	wcsncpy(exec_prefix, _exec_prefix, MAXPATHLEN);
++	module_search_path = (wchar_t *)PyMem_Malloc(
++	    (MAXPATHLEN + 1) * sizeof(wchar_t));
++	if (!module_search_path) {
++	    Py_FatalError(
++		"Unable to setup sys.path in getpath.c: "
++		"memory error");
++	}
++	wcsncpy(module_search_path, _prefix, MAXPATHLEN);
++	joinpath(module_search_path, lib_python);
++	goto finish;
++    }
++
+ #ifdef WITH_NEXT_FRAMEWORK
+     /* On Mac OS X we have a special case if we're running from a framework.
+     ** This is because the python home should be set relative to the library,
+@@ -811,6 +829,7 @@
+     else
+         wcsncpy(exec_prefix, _exec_prefix, MAXPATHLEN);
+ 
++  finish:
+     PyMem_RawFree(_pythonpath);
+     PyMem_RawFree(_prefix);
+     PyMem_RawFree(_exec_prefix);
+diff -ur /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/sysmodule.c ./Python/sysmodule.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/sysmodule.c	2014-05-19 07:19:40.000000000 +0200
++++ ./Python/sysmodule.c	2014-06-11 12:06:16.593638606 +0200
+@@ -1109,6 +1109,49 @@
+ Clear the internal type lookup cache.");
+ 
+ 
++/*** PyRun Extension ***************************************************/
++
++#define SYS_SETFLAG(c_flag, flag_name)		\
++    if (strcmp(flagname, flag_name) == 0) {	\
++	old_value = c_flag;			\
++	if (value != -1)			\
++	    c_flag = value;			\
++    } else
++
++static PyObject *
++sys_setflag(PyObject* self, PyObject* args)
++{
++    char *flagname;
++    int value = -1, old_value = value;
++
++    if (!PyArg_ParseTuple(args, "s|i", &flagname, &value))
++        goto onError;
++
++    SYS_SETFLAG(Py_DebugFlag, "debug")
++    SYS_SETFLAG(Py_OptimizeFlag, "optimize")
++    SYS_SETFLAG(Py_DontWriteBytecodeFlag, "dont_write_bytecode")
++    SYS_SETFLAG(Py_VerboseFlag, "verbose")
++    SYS_SETFLAG(Py_HashRandomizationFlag, "hash_randomization")
++    {
++        PyErr_SetString(PyExc_ValueError,
++                        "unknown flag name");
++	goto onError;
++    }
++    return PyLong_FromLong((long)old_value);
++
++ onError:
++    return NULL;
++}
++
++#undef SYS_SETFLAG
++
++PyDoc_STRVAR(sys_setflag__doc__,
++"_setflag(flagname, value) -> old_value\n\
++Set the given interpreter flag and return its previous value.");
++
++/*** End of PyRun Extension ***********************************************/
++
++
+ static PyMethodDef sys_methods[] = {
+     /* Might as well keep this in alphabetic order */
+     {"callstats", (PyCFunction)PyEval_GetCallStats, METH_NOARGS,
+@@ -1171,6 +1214,7 @@
+     {"setdlopenflags", sys_setdlopenflags, METH_VARARGS,
+      setdlopenflags_doc},
+ #endif
++    {"_setflag", sys_setflag, METH_VARARGS, sys_setflag__doc__},
+     {"setprofile",      sys_setprofile, METH_O, setprofile_doc},
+     {"getprofile",      sys_getprofile, METH_NOARGS, getprofile_doc},
+     {"setrecursionlimit", sys_setrecursionlimit, METH_VARARGS,
