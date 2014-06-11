@@ -27,7 +27,7 @@ import sys, os
 # Copyright
 pyrun_copyright = (
     "Copyright (c) 1997-2000, Marc-Andre Lemburg; mailto:mal@lemburg.com\n"
-    "Copyright (c) 2000-2012, eGenix.com Software GmbH; mailto:info@egenix.com\n"
+    "Copyright (c) 2000-2014, eGenix.com Software GmbH; mailto:info@egenix.com\n"
     "All Rights Reserved.\n\n")
 
 # Name and version
