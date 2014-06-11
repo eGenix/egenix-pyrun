@@ -12,7 +12,7 @@
 +    if (Py_FrozenFlag) {
 +	strncpy(prefix, PREFIX, MAXPATHLEN);
 +	strncpy(exec_prefix, EXEC_PREFIX, MAXPATHLEN);
-+	module_search_path = (char *)PyMem_Malloc(MAXPATHLEN);
++	module_search_path = (char *)PyMem_Malloc(MAXPATHLEN + 1);
 +	strncpy(module_search_path, PREFIX "/lib/python" VERSION, MAXPATHLEN);
 +	return;
 +    }
