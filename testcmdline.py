@@ -81,7 +81,7 @@ def test_cmd_line(runtime=PYRUN):
     # XXX They currently don't work in pyrun 3.4, even though they
     # should. See #1383.
     #
-    if python_version(runtime) != '2.7':
+    if python_version(runtime) == '2.7':
         result = run('%s -S dir' % runtime)
         assert match_result(
             result,
