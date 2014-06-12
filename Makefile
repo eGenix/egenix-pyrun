@@ -523,7 +523,9 @@ build-pyrun26:
 
 create-python-patch:	$(PYTHONORIGDIR)
 	cd $(PYTHONDIR); \
-	diff -ur $(PYTHONORIGDIR) . | sed '/Only in .*/d' \
+	diff -ur \
+		-x 'importlib.h' \
+		$(PYTHONORIGDIR) . | sed '/Only in .*/d' \
 		>  ../Runtime/$(PYTHONPATCHFILE)
 
 ### Debugging
