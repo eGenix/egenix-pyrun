@@ -378,6 +378,10 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
         else:
             repr_list.append('%r: %r,' % (name, value))
 
+    # Build list of included lib2to3 fixers
+    import lib2to3.refactor
+    fixes = lib2to3.refactor.get_all_fix_names('lib2to3.fixes')
+
     # Add other temlate variables
     print('Creating module %s' % outputfile)
     f = open(outputfile, 'w', encoding=ENCODING)
@@ -385,7 +389,8 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                             config='\n    '.join(repr_list),
                             pyrun=pyrun_name,
                             version=pyrun_version,
-                            release=pyrun_release))
+                            release=pyrun_release,
+                            lib2to3_fixes=repr(fixes)))
     f.close()
     compile_module(outputfile)
 

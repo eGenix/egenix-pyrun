@@ -76,3 +76,10 @@ pyrun = pyrun_binary
 config_vars = {
     #$config
 }
+
+### Misc configuration data
+
+# lib2to3.refactor.get_all_fix_names()
+lib2to3_fixes = (
+    #$lib2to3_fixes
+    )
