@@ -1,7 +1,29 @@
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/importlib/_bootstrap.py	2014-05-19 07:19:38.000000000 +0200
-+++ ./Lib/importlib/_bootstrap.py	2014-06-12 02:10:37.486673987 +0200
-@@ -1356,6 +1356,7 @@
++++ ./Lib/importlib/_bootstrap.py	2014-06-12 17:45:06.192649090 +0200
+@@ -1335,6 +1335,10 @@
+ 
+     @classmethod
+     def find_spec(cls, fullname, path=None, target=None):
++        if fullname == '__main__':
++            # The main module will be loaded by the import.c loader
++            # and doesn't need to be loaded again.
++            return None
+         if _imp.is_frozen(fullname):
+             return spec_from_loader(fullname, cls, origin='frozen')
+         else:
+@@ -1347,6 +1351,10 @@
+         This method is deprecated.  Use find_spec() instead.
+ 
+         """
++        if fullname == '__main__':
++            # The main module will be loaded by the import.c loader
++            # and doesn't need to be loaded again.
++            return None
+         return cls if _imp.is_frozen(fullname) else None
+ 
+     @staticmethod
+@@ -1356,6 +1364,7 @@
              raise ImportError('{!r} is not a frozen module'.format(name),
                                name=name)
          code = _call_with_frames_removed(_imp.get_frozen_object, name)

@@ -516,36 +516,6 @@ def pyrun_setup_sys_path(pyrun_script=None):
         for path in sys.path:
             pyrun_log('    %s' % path)
 
-import imp
-import importlib._bootstrap as implib
-
-class PyRunFrozenImporter(implib.FrozenImporter):
-
-    @classmethod
-    def find_spec(cls, fullname, path=None, target=None):
-        if fullname == '__main__':
-            return None
-        if imp.is_frozen(fullname):
-            return implib.spec_from_loader(fullname, cls, origin='frozen')
-        else:
-            return None
-
-    @classmethod
-    def find_module(cls, fullname, path=None):
-        if fullname == '__main__':
-            return None
-        return cls if imp.is_frozen(fullname) else None
-
-    @classmethod
-    def is_package(cls, fullname):
-        """Return True if the frozen module is a package."""
-        if fullname == '__main__':
-            return False
-        if not imp.is_frozen(fullname):
-            raise ImportError('{!r} is not a frozen module'.format(fullname),
-                              name=fullname)
-        return imp.is_frozen_package(fullname)
-
 def pyrun_execute_script(pyrun_script, mode='file'):
 
     """ Run pyrun_script with pyrun.
@@ -624,22 +594,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         #
         import runpy
         try:
-            if PY2:
-                # Python 2 removes the __main__ module from
-                # sys.modules before running the path
-                runpy.run_path(pyrun_script, globals(), '__main__')
-            else:
-                # Python 3 has a changed logic, which doesn't seem to
-                # work as in Python 2 anymore
-                if 1:
-                    # Replace the FrozenImporter with a special one
-                    # that doesn't allow reloading the __main__ module
-                    # as frozen module. See #1383.
-                    for i, importer in enumerate(sys.meta_path):
-                        if issubclass(importer, implib.FrozenImporter):
-                            sys.meta_path[i] = PyRunFrozenImporter
-                    print ('sys.meta_path = %r' % sys.meta_path)
-                runpy.run_path(pyrun_script, globals(), '__main__')
+            runpy.run_path(pyrun_script, globals(), '__main__')
         except ImportError as reason:
             pyrun_log_error('Could not run %r: %s' % (pyrun_script, reason))
             sys.exit(1)
