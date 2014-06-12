@@ -1,6 +1,30 @@
-diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Modules/getpath.c ./Modules/getpath.c
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/pkgutil.py ./Lib/pkgutil.py
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/pkgutil.py	2013-11-10 08:36:40.000000000 +0100
++++ ./Lib/pkgutil.py	2014-06-12 11:42:13.469251260 +0200
+@@ -275,6 +275,20 @@
+         return self.etc[2]==imp.PKG_DIRECTORY
+ 
+     def get_code(self, fullname=None):
++        # eGenix PyRun needs pkgutil to also work for frozen modules,
++        # since pkgutil is used by the runpy module, which is needed
++        # to implement the -m command line switch.
++        if self.code is not None:
++            return self.code
++        fullname = self._fix_name(fullname)
++        mod_type = self.etc[2]
++        if mod_type == imp.PY_FROZEN:
++            self.code = imp.get_frozen_object(fullname)
++            return self.code
++        else:
++            return self._get_code(fullname)
++        
++    def _get_code(self, fullname=None):
+         fullname = self._fix_name(fullname)
+         if self.code is None:
+             mod_type = self.etc[2]
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Modules/getpath.c ./Modules/getpath.c
 --- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Modules/getpath.c	2013-11-10 08:36:41.000000000 +0100
-+++ ./Modules/getpath.c	2014-06-11 17:18:58.971742209 +0200
++++ ./Modules/getpath.c	2014-06-11 17:27:56.760518024 +0200
 @@ -465,6 +465,17 @@
          strncpy(argv0_path, progpath, MAXPATHLEN);
          argv0_path[MAXPATHLEN] = '\0';
@@ -19,9 +43,9 @@ diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Modules/getpath.c ./Mo
  #ifdef WITH_NEXT_FRAMEWORK
          /* On Mac OS X we have a special case if we're running from a framework.
          ** This is because the python home should be set relative to the library,
-diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/import.c ./Python/import.c
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/import.c ./Python/import.c
 --- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/import.c	2013-11-10 08:36:41.000000000 +0100
-+++ ./Python/import.c	2014-06-11 17:04:39.612180817 +0200
++++ ./Python/import.c	2014-06-11 17:27:56.760518024 +0200
 @@ -2102,7 +2102,7 @@
          if (err != 0)
              goto err_return;
@@ -31,9 +55,9 @@ diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/import.c ./Pyth
      if (m == NULL)
          goto err_return;
      Py_DECREF(co);
-diff -ur /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/sysmodule.c ./Python/sysmodule.c
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/sysmodule.c ./Python/sysmodule.c
 --- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Python/sysmodule.c	2013-11-10 08:36:41.000000000 +0100
-+++ ./Python/sysmodule.c	2013-12-05 17:56:21.015347586 +0100
++++ ./Python/sysmodule.c	2014-06-11 17:27:56.760518024 +0200
 @@ -899,6 +899,49 @@
  Clear the internal type lookup cache.");
  

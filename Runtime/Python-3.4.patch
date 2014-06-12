@@ -27,6 +27,30 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/lib
      if gp is None:
          head, tail = os.path.splitext(gt)
          if tail == ".txt":
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/pkgutil.py ./Lib/pkgutil.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/pkgutil.py	2014-05-19 07:19:38.000000000 +0200
++++ ./Lib/pkgutil.py	2014-06-12 11:42:05.273179253 +0200
+@@ -307,6 +307,20 @@
+         return self.etc[2]==imp.PKG_DIRECTORY
+ 
+     def get_code(self, fullname=None):
++        # eGenix PyRun needs pkgutil to also work for frozen modules,
++        # since pkgutil is used by the runpy module, which is needed
++        # to implement the -m command line switch.
++        if self.code is not None:
++            return self.code
++        fullname = self._fix_name(fullname)
++        mod_type = self.etc[2]
++        if mod_type == imp.PY_FROZEN:
++            self.code = imp.get_frozen_object(fullname)
++            return self.code
++        else:
++            return self._get_code(fullname)
++        
++    def _get_code(self, fullname=None):
+         fullname = self._fix_name(fullname)
+         if self.code is None:
+             mod_type = self.etc[2]
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules/getpath.c ./Modules/getpath.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules/getpath.c	2014-05-19 07:19:39.000000000 +0200
 +++ ./Modules/getpath.c	2014-06-12 00:54:26.929428034 +0200
