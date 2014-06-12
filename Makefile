@@ -150,7 +150,11 @@ PYRUNSITEPACKAGESLIBDIR = $(PYRUNLIBDIR)/site-packages
 
 # Target dir for include files
 INCLUDEDIR = $(BUILDDIR)/include
-PYRUNINCLUDEDIR = $(INCLUDEDIR)/python$(PYRUNVERSION)
+ifdef PYTHON_2_BUILD
+ PYRUNINCLUDEDIR = $(INCLUDEDIR)/python$(PYRUNVERSION)
+else
+ PYRUNINCLUDEDIR = $(INCLUDEDIR)/python$(PYRUNVERSION)$(PYTHONABI)
+endif
 
 # Installation directories
 PREFIX = /usr/local
