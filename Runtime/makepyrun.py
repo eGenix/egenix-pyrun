@@ -343,8 +343,9 @@ def patch_site_py(libdir=LIBDIR):
         '#main()')
     patch_module(
         os.path.join(libdir, 'site.py'),
-        '"See http://www.python.org[-\w/%.]*/license(.html)?" % sys.version',
-        '"See http://egenix.com/products/python/PyRun/license.html"')
+        """"See http://www.python.org[-\w/%.]*/license(.html)?" % sys.version,
+        files, dirs\)""",
+        '"See http://egenix.com/products/python/PyRun/license.html")')
 
 def patch_pkgutil_py(libdir=LIBDIR):
 
