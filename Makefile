@@ -346,7 +346,7 @@ $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 
 interpreter:	$(TMPPYTHON)
 
-Runtime/$(PYRUNPY):	$(TMPPYTHON) Runtime/makepyrun.py Runtime/pyrun_template.py Runtime/pyrun_config_template.py
+Runtime/$(PYRUNPY):	$(TMPPYTHON) Runtime/makepyrun.py Runtime/pyrun_template.py Runtime/pyrun_config_template.py Runtime/pyrun_grammar_template.py
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Preparing PyRun ==========================================================="
 	@$(ECHO) "$(OFF)"

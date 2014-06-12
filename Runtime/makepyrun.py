@@ -83,6 +83,11 @@ if PY2:
         import codecs
         return codecs.open(filename, mode, encoding=encoding)
 
+    import cPickle as pickle
+    
+else:
+    import pickle
+    
 ### Configuration
 
 # List of modules to always include
@@ -261,16 +266,11 @@ def config_vars():
         from distutils import sysconfig
     return sysconfig.get_config_vars()
 
-def format_template(template,
-                    pyrun_name=PYRUN_NAME,
-                    pyrun_version=PYRUN_VERSION,
-                    pyrun_release=PYRUN_RELEASE,
-                    pyrun_imports=''):
+def format_template(template, **kws):
 
-    code = template.replace('#$pyrun', pyrun_name) \
-                   .replace('#$version', pyrun_version) \
-                   .replace('#$release', pyrun_release) \
-                   .replace('#$imports', pyrun_imports)
+    code = template
+    for name, value in kws.items():
+        code = code.replace('#$%s' % name, value)
     return code
 
 def patch_module(filename, find_re, replacement):
@@ -385,7 +385,7 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            pyrun_release=PYRUN_RELEASE):
 
     f = open(inputfile, 'r', encoding=ENCODING)
-    config_src = f.read()
+    template = f.read()
     f.close()
 
     # Build config vars and replace any occurrance of the PREFIX dir
@@ -408,17 +408,37 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
             repr_list.append("%r: '', # not supported" % name)
         else:
             repr_list.append('%r: %r,' % (name, value))
-    config_src = config_src.replace('#$config',
-                                    '\n    '.join(repr_list))
 
     # Add other temlate variables
-    config_src = config_src.replace('#$pyrun', pyrun_name) \
-                           .replace('#$version', pyrun_version) \
-                           .replace('#$release', pyrun_release)
-
     print('Creating module %s' % outputfile)
     f = open(outputfile, 'w', encoding=ENCODING)
-    f.write(config_src)
+    f.write(format_template(template,
+                            config='\n    '.join(repr_list),
+                            pyrun=pyrun_name,
+                            version=pyrun_version,
+                            release=pyrun_release))
+    f.close()
+    compile_module(outputfile)
+
+def create_pyrun_grammar_py(inputfile='pyrun_grammar_template.py',
+                            outputfile='pyrun_grammar.py'):
+
+    f = open(inputfile, 'r', encoding=ENCODING)
+    template = f.read()
+    f.close()
+
+    # Build grammar
+    import lib2to3.pygram
+    python_grammar_pickle = pickle.dumps(
+        lib2to3.pygram.python_grammar)
+    pattern_grammar_pickle = pickle.dumps(
+        lib2to3.pygram.pattern_grammar)
+    
+    print('Creating module %s' % outputfile)
+    f = open(outputfile, 'w', encoding=ENCODING)
+    f.write(format_template(template,
+                            python_grammar_pickle=repr(python_grammar_pickle),
+                            pattern_grammar_pickle=repr(pattern_grammar_pickle)))
     f.close()
     compile_module(outputfile)
 
@@ -433,16 +453,20 @@ def create_pyrun_py(inputfile='pyrun_template.py',
 
     """
     imports = find_imports(libdir, setupfile)
-    template = open(inputfile, 'r', encoding=ENCODING).read()
+    f = open(inputfile, 'r', encoding=ENCODING)
+    template = f.read()
+    f.close()
+    
     assert outputfile.endswith('.py'), 'outputfile does not end with .py'
     pyrun_name = outputfile[:-3]
+    
     print('Writing freeze script %s' % outputfile)
     f = open(outputfile, 'w', encoding=ENCODING)
     f.write(format_template(template,
-                            pyrun_name=pyrun_name,
-                            pyrun_version=version,
-                            pyrun_release=release,
-                            pyrun_imports=imports))
+                            pyrun=pyrun_name,
+                            version=version,
+                            release=release,
+                            imports=imports))
     f.close()
     compile_module(outputfile)
 
@@ -463,6 +487,10 @@ def main(pyrunfile='pyrun.py',
     # Create pyrun_config module
     create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            outputfile=os.path.join(libdir, 'pyrun_config.py'))
+
+    # Create pyrun_grammar module
+    create_pyrun_grammar_py(inputfile='pyrun_grammar_template.py',
+                            outputfile=os.path.join(libdir, 'pyrun_grammar.py'))
 
     # Patch sysconfig module
     patch_sysconfig_py(libdir)

@@ -1,20 +1,35 @@
-diff -ur /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/logging/__init__.py ./Lib/logging/__init__.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/logging/__init__.py	2014-05-19 07:19:38.000000000 +0200
-+++ ./Lib/logging/__init__.py	2014-06-10 23:30:06.551728955 +0200
-@@ -55,6 +55,10 @@
- # _srcfile is used when walking the stack to check when we've got the first
- # caller stack frame.
- #
-+
-+# Work-around for pyrun:
-+__file__ = '<pyrun>/logging/__init__.pyc'
-+
- if hasattr(sys, 'frozen'): #support for py2exe
-     _srcfile = "logging%s__init__%s" % (os.sep, __file__[-4:])
- else:
-diff -ur /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules/getpath.c ./Modules/getpath.c
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/importlib/_bootstrap.py	2014-05-19 07:19:38.000000000 +0200
++++ ./Lib/importlib/_bootstrap.py	2014-06-12 02:10:37.486673987 +0200
+@@ -1356,6 +1356,7 @@
+             raise ImportError('{!r} is not a frozen module'.format(name),
+                               name=name)
+         code = _call_with_frames_removed(_imp.get_frozen_object, name)
++        module.__file__ = code.co_filename
+         exec(code, module.__dict__)
+ 
+     @classmethod
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/lib2to3/pgen2/driver.py	2014-05-19 07:19:38.000000000 +0200
++++ ./Lib/lib2to3/pgen2/driver.py	2014-06-12 02:18:40.239001169 +0200
+@@ -111,6 +111,14 @@
+     """Load the grammar (maybe from a pickle)."""
+     if logger is None:
+         logger = logging.getLogger()
++    # eGenix PyRun support using pyrun_grammar.py to avoid having to
++    # carry around the grammar files
++    if gt == '<pyrun>/lib2to3/Grammar.txt':
++        import pyrun_grammar
++        return pyrun_grammar.load_python_grammar()
++    elif gt == '<pyrun>/lib2to3/PatternGrammar.txt':
++        import pyrun_grammar
++        return pyrun_grammar.load_pattern_grammar()
+     if gp is None:
+         head, tail = os.path.splitext(gt)
+         if tail == ".txt":
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules/getpath.c ./Modules/getpath.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules/getpath.c	2014-05-19 07:19:39.000000000 +0200
-+++ ./Modules/getpath.c	2014-06-11 13:35:53.378999027 +0200
++++ ./Modules/getpath.c	2014-06-12 00:54:26.929428034 +0200
 @@ -566,6 +566,24 @@
      wcsncpy(argv0_path, progpath, MAXPATHLEN);
      argv0_path[MAXPATHLEN] = '\0';
@@ -48,9 +63,36 @@ diff -ur /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules/getpath.c ./Mo
      PyMem_RawFree(_pythonpath);
      PyMem_RawFree(_prefix);
      PyMem_RawFree(_exec_prefix);
-diff -ur /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/sysmodule.c ./Python/sysmodule.c
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/import.c ./Python/import.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/import.c	2014-05-19 07:19:40.000000000 +0200
++++ ./Python/import.c	2014-06-12 02:12:33.739715917 +0200
+@@ -1268,6 +1268,23 @@
+     if (d == NULL) {
+         goto err_return;
+     }
++
++    /* Remember the filename as the __file__ attribute, for all frozen modules
++       except the special _frozen_importlib one (doing this breaks
++       bootstrapping for some reason)
++
++       Note: this function is only called during startup of the interpreter
++       and by C extensions. All other imports of frozen modules are handled by
++       the importlib. See importlib._bootstrap.FrozenImporter for details.
++
++    */
++    if (PyUnicode_CompareWithASCIIString(name, "_frozen_importlib") != 0) {
++	if (PyDict_SetItemString(d,
++				 "__file__",
++				 ((PyCodeObject *)co)->co_filename))
++	    PyErr_Clear(); /* Not important enough to report */
++    }
++
+     m = exec_code_in_module(name, d, co);
+     if (m == NULL)
+         goto err_return;
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/sysmodule.c ./Python/sysmodule.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/sysmodule.c	2014-05-19 07:19:40.000000000 +0200
-+++ ./Python/sysmodule.c	2014-06-11 12:06:16.593638606 +0200
++++ ./Python/sysmodule.c	2014-06-12 00:54:26.929428034 +0200
 @@ -1109,6 +1109,49 @@
  Clear the internal type lookup cache.");
  
