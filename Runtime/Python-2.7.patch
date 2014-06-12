@@ -1,3 +1,21 @@
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/lib2to3/pgen2/driver.py	2013-11-10 08:36:40.000000000 +0100
++++ ./Lib/lib2to3/pgen2/driver.py	2014-06-12 11:57:28.109196990 +0200
+@@ -111,6 +111,14 @@
+     """Load the grammar (maybe from a pickle)."""
+     if logger is None:
+         logger = logging.getLogger()
++    # eGenix PyRun support using pyrun_grammar.py to avoid having to
++    # carry around the grammar files
++    if gt == '<pyrun>/lib2to3/Grammar.txt':
++        import pyrun_grammar
++        return pyrun_grammar.load_python_grammar()
++    elif gt == '<pyrun>/lib2to3/PatternGrammar.txt':
++        import pyrun_grammar
++        return pyrun_grammar.load_pattern_grammar()
+     if gp is None:
+         head, tail = os.path.splitext(gt)
+         if tail == ".txt":
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/pkgutil.py ./Lib/pkgutil.py
 --- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/pkgutil.py	2013-11-10 08:36:40.000000000 +0100
 +++ ./Lib/pkgutil.py	2014-06-12 11:42:13.469251260 +0200

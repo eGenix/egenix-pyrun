@@ -1,3 +1,40 @@
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
+--- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib2to3/pgen2/driver.py	2013-10-29 16:04:37.000000000 +0100
++++ ./Lib/lib2to3/pgen2/driver.py	2014-06-12 11:57:05.665001642 +0200
+@@ -118,6 +118,14 @@
+     """Load the grammar (maybe from a pickle)."""
+     if logger is None:
+         logger = logging.getLogger()
++    # eGenix PyRun support using pyrun_grammar.py to avoid having to
++    # carry around the grammar files
++    if gt == '<pyrun>/lib2to3/Grammar.txt':
++        import pyrun_grammar
++        return pyrun_grammar.load_python_grammar()
++    elif gt == '<pyrun>/lib2to3/PatternGrammar.txt':
++        import pyrun_grammar
++        return pyrun_grammar.load_pattern_grammar()
+     if gp is None:
+         head, tail = os.path.splitext(gt)
+         if tail == ".txt":
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib2to3/pygram.py ./Lib/lib2to3/pygram.py
+--- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib2to3/pygram.py	2013-10-29 16:04:37.000000000 +0100
++++ ./Lib/lib2to3/pygram.py	2014-06-12 11:58:09.525557546 +0200
+@@ -13,6 +13,8 @@
+ 
+ # The grammar file
+ _GRAMMAR_FILE = os.path.join(os.path.dirname(__file__), "Grammar.txt")
++_PATTERN_GRAMMAR_FILE = os.path.join(os.path.dirname(__file__),
++                                     "PatternGrammar.txt")
+ 
+ 
+ class Symbols(object):
+@@ -33,3 +35,6 @@
+ 
+ python_grammar_no_print_statement = python_grammar.copy()
+ del python_grammar_no_print_statement.keywords["print"]
++
++pattern_grammar = driver.load_grammar(_PATTERN_GRAMMAR_FILE)
++pattern_symbols = Symbols(pattern_grammar)
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/pkgutil.py ./Lib/pkgutil.py
 --- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/pkgutil.py	2013-10-29 16:04:37.000000000 +0100
 +++ ./Lib/pkgutil.py	2014-06-12 11:43:52.202116108 +0200
