@@ -72,6 +72,8 @@ print('Try loading a few Python 2.6 stdlib modules...')
 try:
     import ast
     import _json
+    import lib2to3
+    import lib2to3.pygram
     if PYTHON_VERSION < '3':
         import future_builtins
     if PYTHON_VERSION == '2.6':
