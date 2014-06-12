@@ -126,10 +126,9 @@ def pyrun_banner():
 
     """
     return (
-        '%s %s %s\n'
+        'eGenix PyRun %s %s\n'
         'Thank you for using eGenix PyRun. Type "help" or "license" for details.\n'
-        % (pyrun_name,
-           pyrun_version,
+        % (pyrun_version,
            pyrun_build))
 
 def pyrun_help(extra_lines=()):
