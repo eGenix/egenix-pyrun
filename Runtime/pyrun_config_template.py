@@ -1,8 +1,8 @@
 """ eGenix PyRun Configuration Data.
 
-    This was generated at the time eGenix PyRun was used to create the
-    pyrun binary. It will not include the dynamically added or
-    modified variables of the regular Python sysconfig module.
+    This was generated at the time eGenix PyRun was compiled.  It will
+    not include the dynamically added or modified variables of the
+    regular Python sysconfig module.
 
 """
 import sys, os
