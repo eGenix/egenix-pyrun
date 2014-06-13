@@ -396,6 +396,32 @@ xxsubtype xxsubtype.c
 
 ### Built-in extensions for which there are no entries in Setup.dist:
 
+# _decimal needs more complex setup, punting on this for now
+#DECIMAL_DEFS=-DCONFIG_64=1 -DASM=1
+#_decimal \
+#	_decimal/_decimal.c \
+#	_decimal/libmpdec/basearith.c \
+#	_decimal/libmpdec/constants.c \
+#	_decimal/libmpdec/context.c \
+#	_decimal/libmpdec/convolute.c \
+#	_decimal/libmpdec/crt.c \
+#	_decimal/libmpdec/difradix2.c \
+#	_decimal/libmpdec/fnt.c \
+#	_decimal/libmpdec/fourstep.c \
+#	_decimal/libmpdec/io.c \
+#	_decimal/libmpdec/memory.c \
+#	_decimal/libmpdec/mpdecimal.c \
+#	_decimal/libmpdec/numbertheory.c \
+#	_decimal/libmpdec/sixstep.c \
+#	_decimal/libmpdec/transpose.c \
+#	$(DECIMAL_DEFS) \
+#	-I$(srcdir)/Modules/_decimal \
+#	-I$(srcdir)/Modules/_decimal/libmpdec \
+#	-I$(prefix)/include -L$(exec_prefix)/lib
+
+# _opcode
+_opcode _opcode.c
+
 # _ctypes needs to build libffi first - punting on this
 
 # _hashlib
