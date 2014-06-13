@@ -488,11 +488,13 @@ test-basic:	$(TESTDIR)/bin/$(PYRUN)
 	cd $(TESTDIR); bin/pyrun -m timeit
 	@$(ECHO) ""
 
+ifdef PYTHON_2_BUILD
 test-pip:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) "--- Testing pip installation (pure Python) -----------------------"
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pip install Genshi
 	cd $(TESTDIR); bin/pip install Trac==0.12
+	cd $(TESTDIR); bin/pip install requests
 	@$(ECHO) ""
 	@$(ECHO) "--- Testing pip installation (packages with C extensions) --------"
 	@$(ECHO) ""
@@ -504,12 +506,35 @@ test-pip:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pip install cython
 	cd $(TESTDIR); bin/pip install Django
+else
+test-pip:	$(TESTDIR)/bin/$(PYRUN)
+	@$(ECHO) "--- Testing pip installation (pure Python) -----------------------"
+	@$(ECHO) ""
+	cd $(TESTDIR); bin/pip install requests
+	cd $(TESTDIR); bin/pip install Werkzeug
+	@$(ECHO) ""
+	@$(ECHO) "--- Testing pip installation (packages with C extensions) --------"
+	@$(ECHO) ""
+	cd $(TESTDIR); bin/pip install flask
+	cd $(TESTDIR); bin/pip install numpy
+	cd $(TESTDIR); bin/pip install lxml
+	@$(ECHO) ""
+	@$(ECHO) "--- Testing pip installation (heavy weight packages) -------------"
+	@$(ECHO) ""
+	cd $(TESTDIR); bin/pip install cython
+	cd $(TESTDIR); bin/pip install Django
+endif
 
 test-distribution:	test-basic test-pip
 
-test-all:
+test-all-pyruns:
 	@for i in $(PYTHONVERSIONS); do \
 	  $(MAKE) test-basic PYTHONFULLVERSION=$$i; $(ECHO) ""; \
+	done
+
+test-all-distributions:
+	@for i in $(PYTHONVERSIONS); do \
+	  $(MAKE) test-distribution PYTHONFULLVERSION=$$i; $(ECHO) ""; \
 	done
 
 ### Cleanup
