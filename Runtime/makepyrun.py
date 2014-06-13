@@ -56,10 +56,16 @@ PY3 = (sys.version_info[0] == 3)
 # Python module dir
 LIBDIR = sysconfig.get_config_var('LIBDEST')
 
+# Python build dir
+BUILDDIR = sysconfig.get_config_vars().get(
+    'abs_builddir',
+    os.path.abspath(os.environ.get('PYTHONDIR', '')))
+
 # Python module Setup file
 SETUPFILE = os.path.join(sysconfig.get_config_var('LIBPL'), 'Setup')
 
-# Prefix used to build pyrun
+# Prefix used for building pyrun; this is replaced in pyrun_config.py
+# with logic to dynamically determine the prefix at runtime.
 PREFIX = os.path.abspath(os.path.join(LIBDIR, '..', '..'))
 
 # PyRun name
@@ -373,8 +379,15 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
         elif PREFIX in value:
             value = value.replace('%', '%%').replace(PREFIX, '%(prefix)s')
             repr_list.append('%r: %r %% globals(),' % (name, value))
+        elif value.startswith(BUILDDIR):
+            # Since the pyrun build dir will most likely not be
+            # available at runtime, we point the settings to a most
+            # likely non-existing directory.
+            value = '/pyrun-build-dir' + value[len(BUILDDIR):]
+            repr_list.append('%r: %r, # dir does not exist' % (name, value))
         elif name == 'userbase':
-            repr_list.append("%r: '', # not supported" % name)
+            repr_list.append("%r: '', # userbase is not supported by pyrun" %
+                             name)
         else:
             repr_list.append('%r: %r,' % (name, value))
 
