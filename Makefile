@@ -32,6 +32,12 @@ PYTHON_26_VERSION = 2.6.9
 PYTHONFULLVERSION = $(PYTHON_27_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_26_VERSION)
 
+# All target versions
+PYTHONVERSIONS = \
+	$(PYTHON_26_VERSION) \
+	$(PYTHON_27_VERSION) \
+	$(PYTHON_34_VERSION)
+
 # Python Unicode version
 PYTHONUNICODE = ucs2
 
@@ -404,6 +410,13 @@ $(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY)
 
 runtime:	$(BINDIR)/$(PYRUN)
 
+build:	clean distribution
+
+build-all:
+	@for i in $(PYTHONVERSIONS); do \
+	  $(MAKE) build PYTHONFULLVERSION=$$i; $(ECHO) ""; \
+	done
+
 ### Installation
 
 install-bin:	$(BINDIR)/$(PYRUN)
@@ -428,17 +441,28 @@ install:	install-bin install-lib install-include
 ### Packaging
 
 $(BINARY_DISTRIBUTION_ARCHIVE):	announce-distribution $(BINDIR)/$(PYRUN)
+	@$(ECHO) "$(BOLD)"
+	@$(ECHO) "=== Creating PyRun Distribution =============================================="
+	@$(ECHO) "$(OFF)"
 	$(MAKE) install PREFIX=$(BUILDDIR)/dist \
 		PYTHONFULLVERSION=$(PYTHONFULLVERSION)
 	mkdir -p $(DISTDIR)
 	cd $(BUILDDIR)/dist; \
 	$(TAR) -c -z -f $@ .
+	@$(ECHO) "$(BOLD)"
+	@$(ECHO) "=== Finished =================================================================="
+	@$(ECHO) "$(OFF)"
+	@$(ECHO) "The eGenix PyRun Distribution is called: $(BINARY_DISTRIBUTION_ARCHIVE)"
+	@$(ECHO) ""
 
 distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
 
 ### Testing
 
 $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
+	@$(ECHO) "$(BOLD)"
+	@$(ECHO) "=== Installing PyRun for Tests ==============================================="
+	@$(ECHO) "$(OFF)"
 	$(RM) -rf $(TESTDIR)
 	./install-pyrun \
 		--log \
@@ -483,6 +507,11 @@ test-pip:	$(TESTDIR)/bin/$(PYRUN)
 
 test-distribution:	test-basic test-pip
 
+test-all:
+	@for i in $(PYTHONVERSIONS); do \
+	  $(MAKE) test-basic PYTHONFULLVERSION=$$i; $(ECHO) ""; \
+	done
+
 ### Cleanup
 
 clean-runtime:
@@ -510,19 +539,6 @@ distclean:	clean
 		$(PYTHONDIR) \
 	true
 
-### Special build targets
-
-build-all: build-pyrun26 build-pyrun27 build-pyrun34
-
-build-pyrun34:
-	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_27_VERSION)
-
-build-pyrun27:
-	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_27_VERSION)
-
-build-pyrun26:
-	$(MAKE) distribution PYTHONFULLVERSION=$(PYTHON_26_VERSION)
-
 ### Misc other targets
 
 create-python-patch:	$(PYTHONORIGDIR)
@@ -531,6 +547,11 @@ create-python-patch:	$(PYTHONORIGDIR)
 		-x 'importlib.h' \
 		$(PYTHONORIGDIR) . | sed '/Only in .*/d' \
 		>  ../Runtime/$(PYTHONPATCHFILE)
+
+create-all-patches:
+	@for i in $(PYTHONVERSIONS); do \
+	  $(MAKE) create-python-patch PYTHONFULLVERSION=$$i; $(ECHO) ""; \
+	done
 
 ### Debugging
 
