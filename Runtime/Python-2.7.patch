@@ -16,6 +16,26 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/lib
      if gp is None:
          head, tail = os.path.splitext(gt)
          if tail == ".txt":
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/lib2to3/refactor.py	2013-11-10 08:36:40.000000000 +0100
++++ ./Lib/lib2to3/refactor.py	2014-06-13 20:09:17.015709161 +0200
+@@ -32,6 +32,16 @@
+ 
+ def get_all_fix_names(fixer_pkg, remove_prefix=True):
+     """Return a sorted list of all available fix names in the given package."""
++
++    # For eGenix PyRun we read the list from the config module
++    if __file__.startswith('<pyrun>') and fixer_pkg == 'lib2to3.fixes':
++        import pyrun_config
++        if remove_prefix:
++            return pyrun_config.lib2to3_fixes
++        else:
++            return ['fix_%s' % name
++                    for name in pyrun_config.lib2to3_fixes]
++
+     pkg = __import__(fixer_pkg, [], [], ["*"])
+     fixer_dir = os.path.dirname(pkg.__file__)
+     fix_names = []
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/pkgutil.py ./Lib/pkgutil.py
 --- /home/lemburg/egenix/projects/PyRun/Python-2.7.6/Lib/pkgutil.py	2013-11-10 08:36:40.000000000 +0100
 +++ ./Lib/pkgutil.py	2014-06-13 19:30:36.981231376 +0200
