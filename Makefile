@@ -87,7 +87,7 @@ ifdef PYTHON_3_BUILD
  # We support Python 3.4+ only, which no longer has different versions
  # for Unicode. Since PYTHONUNICODE is used in a lot of places, we
  # simply assign a generic term to it for Python 3.
- PYTHONUNICODE := pyrun
+ PYTHONUNICODE := ucs4
 endif
 
 # Name of the resulting pyrun executable
