@@ -37,8 +37,8 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib
 +pattern_symbols = Symbols(pattern_grammar)
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/pkgutil.py ./Lib/pkgutil.py
 --- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/pkgutil.py	2013-10-29 16:04:37.000000000 +0100
-+++ ./Lib/pkgutil.py	2014-06-12 11:43:52.202116108 +0200
-@@ -267,6 +267,20 @@
++++ ./Lib/pkgutil.py	2014-06-13 19:31:06.989487246 +0200
+@@ -267,20 +267,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
      def get_code(self, fullname=None):
@@ -47,18 +47,38 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/pkg
 +        # to implement the -m command line switch.
 +        if self.code is not None:
 +            return self.code
-+        fullname = self._fix_name(fullname)
+         fullname = self._fix_name(fullname)
+-        if self.code is None:
+-            mod_type = self.etc[2]
+-            if mod_type==imp.PY_SOURCE:
+-                source = self.get_source(fullname)
+-                self.code = compile(source, self.filename, 'exec')
+-            elif mod_type==imp.PY_COMPILED:
+-                self._reopen()
+-                try:
+-                    self.code = read_code(self.file)
+-                finally:
+-                    self.file.close()
+-            elif mod_type==imp.PKG_DIRECTORY:
+-                self.code = self._get_delegate().get_code()
 +        mod_type = self.etc[2]
 +        if mod_type == imp.PY_FROZEN:
 +            self.code = imp.get_frozen_object(fullname)
 +            return self.code
-+        else:
-+            return self._get_code(fullname)
-+        
-+    def _get_code(self, fullname=None):
-         fullname = self._fix_name(fullname)
-         if self.code is None:
-             mod_type = self.etc[2]
++        elif mod_type==imp.PY_SOURCE:
++            source = self.get_source(fullname)
++            self.code = compile(source, self.filename, 'exec')
++        elif mod_type==imp.PY_COMPILED:
++            self._reopen()
++            try:
++                self.code = read_code(self.file)
++            finally:
++                self.file.close()
++        elif mod_type==imp.PKG_DIRECTORY:
++            self.code = self._get_delegate().get_code()
+         return self.code
+ 
+     def get_source(self, fullname=None):
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Modules/getpath.c ./Modules/getpath.c
 --- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Modules/getpath.c	2013-10-29 16:04:38.000000000 +0100
 +++ ./Modules/getpath.c	2014-06-11 17:29:57.893593256 +0200
