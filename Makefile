@@ -542,6 +542,7 @@ distclean:	clean
 ### Misc other targets
 
 create-python-patch:	$(PYTHONORIGDIR)
+	@$(ECHO) "Creating patch for $(PYTHONVERSION)"
 	cd $(PYTHONDIR); \
 	diff -ur \
 		-x 'importlib.h' \
