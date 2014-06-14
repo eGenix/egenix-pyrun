@@ -96,8 +96,13 @@ PYRUN = $(PYRUN_GENERIC)$(PYRUNVERSION)
 PYRUN_DEBUG = $(PYRUN)-debug
 
 # Symlinks to create for better Python compatibility
-PYRUN_SYMLINK_GENERIC = python
-PYRUN_SYMLINK = $(PYRUN_SYMLINK_GENERIC)$(PYRUNVERSION)
+ifdef PYTHON_2_BUILD
+ PYRUN_SYMLINK_GENERIC = python
+ PYRUN_SYMLINK = python$(PYRUNVERSION)
+else
+ PYRUN_SYMLINK_GENERIC = python3
+ PYRUN_SYMLINK = python$(PYRUNVERSION)
+endif
 
 # Archive name to create with "make archive"
 ARCHIVE = $(PYRUN)-$(PYRUNFULLVERSION)-$(PLATFORM)
