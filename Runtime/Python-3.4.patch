@@ -1,6 +1,6 @@
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/importlib/_bootstrap.py	2014-05-19 07:19:38.000000000 +0200
-+++ ./Lib/importlib/_bootstrap.py	2014-06-12 17:45:06.192649090 +0200
++++ ./Lib/importlib/_bootstrap.py	2014-06-13 23:06:18.565067586 +0200
 @@ -1335,6 +1335,10 @@
  
      @classmethod
@@ -33,7 +33,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/imp
      @classmethod
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/lib2to3/pgen2/driver.py	2014-05-19 07:19:38.000000000 +0200
-+++ ./Lib/lib2to3/pgen2/driver.py	2014-06-12 02:18:40.239001169 +0200
++++ ./Lib/lib2to3/pgen2/driver.py	2014-06-13 23:06:18.565067586 +0200
 @@ -111,6 +111,14 @@
      """Load the grammar (maybe from a pickle)."""
      if logger is None:
@@ -51,7 +51,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/lib
          if tail == ".txt":
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/lib2to3/refactor.py	2014-05-19 07:19:38.000000000 +0200
-+++ ./Lib/lib2to3/refactor.py	2014-06-12 19:14:09.429472229 +0200
++++ ./Lib/lib2to3/refactor.py	2014-06-13 23:06:18.565067586 +0200
 @@ -32,6 +32,16 @@
  
  def get_all_fix_names(fixer_pkg, remove_prefix=True):
@@ -71,7 +71,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/lib
      fix_names = []
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/pkgutil.py ./Lib/pkgutil.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/pkgutil.py	2014-05-19 07:19:38.000000000 +0200
-+++ ./Lib/pkgutil.py	2014-06-13 19:23:16.081487056 +0200
++++ ./Lib/pkgutil.py	2014-06-13 23:06:18.565067586 +0200
 @@ -307,20 +307,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
@@ -115,7 +115,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Lib/pkg
      def get_source(self, fullname=None):
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules/getpath.c ./Modules/getpath.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules/getpath.c	2014-05-19 07:19:39.000000000 +0200
-+++ ./Modules/getpath.c	2014-06-12 00:54:26.929428034 +0200
++++ ./Modules/getpath.c	2014-06-13 23:06:18.565067586 +0200
 @@ -566,6 +566,24 @@
      wcsncpy(argv0_path, progpath, MAXPATHLEN);
      argv0_path[MAXPATHLEN] = '\0';
@@ -151,7 +151,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Modules
      PyMem_RawFree(_exec_prefix);
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/import.c ./Python/import.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/import.c	2014-05-19 07:19:40.000000000 +0200
-+++ ./Python/import.c	2014-06-12 02:12:33.739715917 +0200
++++ ./Python/import.c	2014-06-13 23:06:18.565067586 +0200
 @@ -1268,6 +1268,23 @@
      if (d == NULL) {
          goto err_return;
@@ -176,9 +176,27 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/
      m = exec_code_in_module(name, d, co);
      if (m == NULL)
          goto err_return;
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/pythonrun.c ./Python/pythonrun.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/pythonrun.c	2014-05-19 07:19:40.000000000 +0200
++++ ./Python/pythonrun.c	2014-06-14 17:55:41.609746813 +0200
+@@ -1180,6 +1180,14 @@
+                 encoding = pythonioencoding;
+             }
+         }
++	else {
++	    /* For eGenix PyRun we use a fixed PYTHONIOENCODING default of
++	       "utf-8:surrogateescape". This should provide a better user
++	       experience than the Python default of using the locale settings
++	       for determining the stdin/stdout encodings. */
++	    encoding = "utf-8";
++	    errors = "surrogateescape";
++	}
+     }
+ 
+     /* Set sys.stdin */
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/sysmodule.c ./Python/sysmodule.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.1/Python/sysmodule.c	2014-05-19 07:19:40.000000000 +0200
-+++ ./Python/sysmodule.c	2014-06-12 00:54:26.929428034 +0200
++++ ./Python/sysmodule.c	2014-06-13 23:06:18.589067807 +0200
 @@ -1109,6 +1109,49 @@
  Clear the internal type lookup cache.");
  
