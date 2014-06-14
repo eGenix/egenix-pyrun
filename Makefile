@@ -70,7 +70,7 @@ PWD := $(shell pwd)
 
 # Version & Platform
 PYTHONVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\.[0-9]\).*/\1/')
-PYTHONMAJORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\).*/\1/')
+PYTHONMAJORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\)\..*/\1/')
 PYRUNFULLVERSION = $(PYTHONFULLVERSION)
 PYRUNVERSION = $(PYTHONVERSION)
 PLATFORM := $(shell python -c "from distutils.util import get_platform; print get_platform()")
@@ -218,9 +218,6 @@ ECHO = /bin/echo -e
 
 ifdef MACOSX_PLATFORM
 ECHO = /bin/echo 
-endif
-
-ifdef MACOSX_PPC_PLATFORM
 TPUT = tput -T xterm
 endif
 
