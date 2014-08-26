@@ -41,7 +41,7 @@ except ImportError:
 ### Globals
 
 # PyRun release version
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 
 # Debug level
 _debug = 1
@@ -349,9 +349,11 @@ def patch_site_py(libdir=LIBDIR):
         '#main()')
     patch_module(
         os.path.join(libdir, 'site.py'),
-        """"See http://www.python.org[-\w/%.]*/license(.html)?" % sys.version,
-        files, dirs\)""",
-        '"See http://egenix.com/products/python/PyRun/license.html")')
+        '('
+        '"See https?://www\.python\.org[^"]*/license(\.html)?" % sys\.version|'
+        '"See https?://www\.python\.org[^"%]*/license/?"'
+        ')',
+        '"See http://egenix.com/products/python/PyRun/license.html"')
 
 def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            outputfile='pyrun_config.py',
