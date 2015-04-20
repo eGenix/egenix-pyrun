@@ -24,7 +24,7 @@
 
 # Python versions to use for pyrun
 PYTHON_34_VERSION = 3.4.1
-PYTHON_27_VERSION = 2.7.8
+PYTHON_27_VERSION = 2.7.9
 PYTHON_26_VERSION = 2.6.9
 
 # Python version to use as basis for pyrun
