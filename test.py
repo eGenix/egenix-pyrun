@@ -2,8 +2,7 @@
 
 """
 import sys
-
-PYTHON_VERSION = sys.version[:3]
+PYTHON_VERSION = sys.version_info
 
 def module_name(err):
     return str(err).split()[-1]
@@ -50,7 +49,7 @@ try:
     import array
     import binascii
     import bz2
-    if PYTHON_VERSION < '3':
+    if PYTHON_VERSION[0] < 3:
         import cPickle
         import cStringIO
     import operator
@@ -63,7 +62,7 @@ try:
     import _ssl
 except ImportError as reason:
     print('%s not found.' % module_name(reason))
-    if PYTHON_VERSION >= '2.5':
+    if PYTHON_VERSION[:1] >= (2, 5):
         sys.exit(1)
 else:
     print('done.')
@@ -74,15 +73,15 @@ try:
     import _json
     import lib2to3
     import lib2to3.pygram
-    if PYTHON_VERSION < '3':
+    if PYTHON_VERSION[0] < 3:
         import future_builtins
-    if PYTHON_VERSION == '2.6':
+    if PYTHON_VERSION[:1] == (2, 6):
         # These only exist in Python 2.6 and not in 2.7
         import _fileio
         import _bytesio
 except ImportError as reason:
     print('%s not found.' % module_name(reason))
-    if PYTHON_VERSION >= '2.6':
+    if PYTHON_VERSION[:1] >= (2, 6):
         sys.exit(1)
 else:
     print('done.')
@@ -92,7 +91,7 @@ try:
     import _io
 except ImportError as reason:
     print('%s not found.' % module_name(reason))
-    if PYTHON_VERSION >= '2.7':
+    if PYTHON_VERSION[:1] >= (2, 7):
         sys.exit(1)
 else:
     print('done.')
