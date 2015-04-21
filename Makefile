@@ -167,6 +167,22 @@ else
  PYRUNINCLUDEDIR = $(INCLUDEDIR)/python$(PYRUNVERSION)$(PYTHONABI)
 endif
 
+# PyRun rpath setting (used to hardwire linker paths into the binary)
+#
+# See man ld for details. $ORIGIN refers to the location of the binary
+# at run time. This can be used to avoid having to set LD_LIBRARY_PATH
+# before invking pyrun.
+#
+# $ORIGIN/../lib
+#     This setting allows easily shipping external shared libs
+#     together with pyrun in the lib/ dir
+# $ORIGIN/../lib/pythonX.X/site-packages/OpenSSL
+#     We use this to enable using egenix-pyopenssl with pyrun and without
+#     having to set LD_LIBRARY_PATH
+#
+PYRUNORIGIN := $$ORIGIN
+PYRUNRPATH = '$(PYRUNORIGIN)/../lib:$(PYRUNORIGIN)/../lib/python$(PYRUNVERSION)/site-packages/OpenSSL'
+
 # Installation directories
 PREFIX = /usr/local
 INSTALLBINDIR = $(PREFIX)/bin
@@ -314,15 +330,12 @@ $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 endif
 
 config: $(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
-        # Create install dir structure
+        # Create tmp install dir structure
 	if test -d $(TMPINSTALLDIR); then $(RM) -rf $(TMPINSTALLDIR); fi
 	mkdir -p $(TMPINSTALLDIR) $(TMPINSTALLDIR)/lib $(TMPINSTALLDIR)/bin $(TMPINSTALLDIR)/include
+        # Create build dir structure
 	if test -d $(BUILDDIR); then $(RM) -rf $(BUILDDIR); fi
-	mkdir -p	$(BINDIR) \
-			$(PYRUNLIBDIR) \
-			$(PYRUNSHAREDLIBDIR) \
-			$(PYRUNSITEPACKAGESLIBDIR) \
-			$(PYRUNINCLUDEDIR)
+	$(MAKE) $(BUILDDIR)
         # Install the custom Modules/Setup file
 	if test "$(MACOSX_PLATFORM)"; then \
 		sed 	-e 's/# @if macosx: *//' \
@@ -380,7 +393,14 @@ test-makepyrun:
 	$(TMPPYTHON) makepyrun.py $(PYRUNPY)
 	@$(ECHO) "Created $(PYRUNPY)."
 
-$(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY)
+$(BUILDDIR):
+	mkdir -p	$(BINDIR) \
+			$(PYRUNLIBDIR) \
+			$(PYRUNSHAREDLIBDIR) \
+			$(PYRUNSITEPACKAGESLIBDIR) \
+			$(PYRUNINCLUDEDIR)
+
+$(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY) $(BUILDDIR)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating PyRun ============================================================"
 	@$(ECHO) "$(OFF)"
@@ -398,6 +418,7 @@ $(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY)
 		$(EXCLUDES) \
 	        $(PYRUNDIR)/$(PYRUNPY)
 	cd $(PYRUNDIR); \
+	export LD_RUN_PATH=$(PYRUNRPATH); \
 	$(MAKE); \
 	$(CP) $(PYRUN) $(PYRUN_DEBUG); \
 	$(STRIP) $(STRIPOPTIONS) $(PYRUN)
@@ -488,6 +509,15 @@ test-basic:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) "--- Testing module imports ---------------------------------------"
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pyrun -m timeit
+	@$(ECHO) ""
+
+test-ssl:	$(TESTDIR)/bin/$(PYRUN)
+	@$(ECHO) "--- Testing SSL installation  ------------------------------------"
+	@$(ECHO) ""
+ifdef PYTHON_2_BUILD
+	cd $(TESTDIR); export EGENIX_CRYPTO_CONFIRM=1; bin/pip install egenix-pyopenssl
+endif
+	cd $(TESTDIR); bin/pyrun ../test_ssl.py
 	@$(ECHO) ""
 
 ifdef PYTHON_2_BUILD
