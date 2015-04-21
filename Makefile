@@ -173,6 +173,9 @@ endif
 # at run time. This can be used to avoid having to set LD_LIBRARY_PATH
 # before invking pyrun.
 #
+# $ORIGIN
+#     First look up shared libs in the same dir as pyrun. This
+#     mimics the logic used on Windows for EXEs.
 # $ORIGIN/../lib
 #     This setting allows easily shipping external shared libs
 #     together with pyrun in the lib/ dir
@@ -181,7 +184,7 @@ endif
 #     having to set LD_LIBRARY_PATH
 #
 PYRUNORIGIN := $$ORIGIN
-PYRUNRPATH = '$(PYRUNORIGIN)/../lib:$(PYRUNORIGIN)/../lib/python$(PYRUNVERSION)/site-packages/OpenSSL'
+PYRUNRPATH = '$(PYRUNORIGIN):$(PYRUNORIGIN)/../lib:$(PYRUNORIGIN)/../lib/python$(PYRUNVERSION)/site-packages/OpenSSL'
 
 # Installation directories
 PREFIX = /usr/local
