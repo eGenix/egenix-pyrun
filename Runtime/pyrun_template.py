@@ -147,7 +147,7 @@ Version: %s %s
 Available pyrun options:
 
 -h:   show this help text
--v:   run in verbose mode
+-v:   run in verbose mode (-vv for level 2)
 -i:   enable interactive mode
 -m:   import and run a module <script> available on PYTHONPATH
 -c:   compile and run <script> directly as Python code
@@ -156,7 +156,7 @@ Available pyrun options:
 -S:   skip running site.main() and disable support for .pth files
 -O:   run in optimized mode (-OO also removes doc-strings)
 -u:   open stdout/stderr in unbuffered mode
--d:   enable debug mode
+-d:   enable debug mode (-dd for level 2)
 -V:   print the pyrun version and exit
 
 Without options, the given <script> file is loaded and run. Parameters
