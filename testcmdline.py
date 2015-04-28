@@ -12,12 +12,18 @@ PYRUN = 'pyrun'
 PYTHON = 'python2.7'
 TESTDIR = os.path.abspath('Tests')
 
+# Enable debug output ?
+_debug = 0
+
 def run(command, encoding='utf-8'):
 
+    if _debug:
+        print ('Running %s' % command)
     pipe = subprocess.Popen(command, shell=True,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
-    result = pipe.stdout.read() + pipe.stderr.read()
+    stdout_data, stderr_data = pipe.communicate()
+    result = stdout_data + stderr_data
     return result.decode(encoding)
 
 def python_version(runtime):
@@ -183,6 +189,34 @@ def test_d_flag(runtime=PYRUN):
         "2\n"
         )
     
+def test_v_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    result = run('%s -c "print (\'ok\')"' % runtime)
+    assert match_result(
+        result,
+        "ok\n"
+        )
+    
+    result = run('%s -v -c '
+                 '"import sys; '
+                 'print (\'verbose=%%r\' %% sys._setflag(\'verbose\'))"' %
+                 runtime)
+    assert match_result(
+        result,
+        "verbose=1\nimport .*"
+        )
+    
+    result = run('%s -vv -c '
+                 '"import sys; '
+                 'print (\'verbose=%%r\' %% sys._setflag(\'verbose\'))"' %
+                 runtime)
+    assert match_result(
+        result,
+        "verbose=2\nimport .*"
+        )
+    
 ###
 
 if __name__ == '__main__':
@@ -191,8 +225,9 @@ if __name__ == '__main__':
     except IndexError:
         runtime = sys.executable
         print('Using %s as runtime.' % runtime)
-    print('Testing Python %s' % python_version(runtime))
+    print('Testing Python %s command line emulation' % python_version(runtime))
     test_cmd_line(runtime)
     test_O_flag(runtime)
     test_d_flag(runtime)
+    test_v_flag(runtime)
     print('%s passes all command line tests' % runtime)

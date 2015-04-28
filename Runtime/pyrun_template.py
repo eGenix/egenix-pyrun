@@ -252,7 +252,7 @@ def pyrun_parse_cmdline():
         if arg == '-v':
             # Run in verbose mode
             global pyrun_verbose
-            pyrun_verbose = True
+            pyrun_verbose += 1
 
         elif arg == '-m':
             # Run script as module
@@ -353,6 +353,8 @@ def pyrun_parse_cmdline():
     # will not get updated by this.
     if pyrun_optimized:
         sys._setflag('optimize', pyrun_optimized)
+    if pyrun_verbose:
+        sys._setflag('verbose', pyrun_verbose)
     if pyrun_debug:
         sys._setflag('debug', pyrun_debug)
 
