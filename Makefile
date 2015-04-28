@@ -55,8 +55,12 @@ PYTHONABI = m
 # protection against modules which are still found by the search and
 # should not be included in pyrun. They can also be used to further
 # trim down the module/package list, if needed.
-EXCLUDES = -x test -x Tkinter \
-	   -x tkinter -x setuptools -x pip
+#
+EXCLUDES = 	-x test \
+		-x Tkinter \
+		-x tkinter \
+		-x setuptools \
+		-x pip
 
 # Package details (used for distributions and normally passed in via
 # the product Makefile)
