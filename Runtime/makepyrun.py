@@ -327,6 +327,10 @@ def patch_sysconfig_py(libdir=LIBDIR):
         patch_module(os.path.join(libdir, 'distutils', 'sysconfig.py'),
                      '_config_vars += +None',
                      'import pyrun_config; _config_vars = pyrun_config.config_vars')
+        # Disable is_python_build() check during startup.
+        patch_module(os.path.join(libdir, 'sysconfig.py'),
+                     '_PYTHON_BUILD += +is_python_build\(.*\)',
+                     '_PYTHON_BUILD = False')
     else:
         # Python 2.5 and 2.6: sysconfig is a distutils package module
         patch_module(os.path.join(libdir, 'distutils', 'sysconfig.py'),
@@ -343,10 +347,12 @@ def patch_site_py(libdir=LIBDIR):
         We also adjust the license URL to point to the PyRun license.
 
     """
+    # Disable automatic run of main()
     patch_module(
         os.path.join(libdir, 'site.py'),
-        '^main\(\)',
-        '#main()')
+        '^( *)main\(\)',
+        '\\1pass #main()')
+    # Add license URL
     patch_module(
         os.path.join(libdir, 'site.py'),
         '('
@@ -354,6 +360,11 @@ def patch_site_py(libdir=LIBDIR):
         '"See https?://www\.python\.org[^"%]*/license/?"'
         ')',
         '"See http://egenix.com/products/python/PyRun/license.html"')
+    # Disable use of lib/site-python
+    patch_module(
+        os.path.join(libdir, 'site.py'),
+        'sitepackages.append\(os.path.join\(prefix, "lib", "site-python"\)\)',
+        '#sitepackages.append(os.path.join(prefix, "lib", "site-python"))')
 
 def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            outputfile='pyrun_config.py',
