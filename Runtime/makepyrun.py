@@ -365,6 +365,12 @@ def patch_site_py(libdir=LIBDIR):
         os.path.join(libdir, 'site.py'),
         'sitepackages.append\(os.path.join\(prefix, "lib", "site-python"\)\)',
         '#sitepackages.append(os.path.join(prefix, "lib", "site-python"))')
+    # Disable ENABLE_USER_SITE, since we don't want PyRun to install
+    # things in the user's site-packages dir
+    patch_module(
+        os.path.join(libdir, 'site.py'),
+        'ENABLE_USER_SITE = None',
+        'ENABLE_USER_SITE = False')
 
 def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            outputfile='pyrun_config.py',
