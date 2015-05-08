@@ -2,9 +2,14 @@
 
 """
 
-import sys
+import sys, os
+
+### Constants
+
 PYTHON_VERSION = sys.version_info
 PY3 = (PYTHON_VERSION[0] == 3)
+
+###
 
 # Try to load egenix-pyopenssl (with embedded SSL libs)
 if not PY3:
@@ -56,7 +61,12 @@ for url in ('https://www.cacert.org/',
     webpage.close()
 if PYTHON_VERSION < (2, 7):
     assert failures == 0
+elif not int(os.environ.get('PYRUN_HTTPSVERIFY', 1)):
+    print ('Note: PYRUN_HTTPSVERIFY is set to 0')
+    assert failures == 0
 else:
     assert failures == 2
-    
+
+print ('')
 print ('Works.')
+print ('')

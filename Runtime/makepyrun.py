@@ -372,6 +372,25 @@ def patch_site_py(libdir=LIBDIR):
         'ENABLE_USER_SITE = None',
         'ENABLE_USER_SITE = False')
 
+def patch_ssl_py(libdir=LIBDIR):
+
+    """ Patch ssl module.
+
+        We add support for the PYRUNHTTPSVERIFY OS environment
+        variable.
+
+    """
+    # Add support for PYRUNHTTPSVERIFY
+    patch_module(
+        os.path.join(libdir, 'ssl.py'),
+        '^_create_default_https_context = create_default_context',
+        "#_create_default_https_context = create_default_context\n"
+        "if int(os.environ.get('PYRUN_HTTPSVERIFY', 1)):\n"
+        "    _create_default_https_context = create_default_context\n"
+        "else:\n"
+        "    _create_default_https_context = _create_unverified_context\n"
+        )
+
 def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                            outputfile='pyrun_config.py',
                            pyrun_name=PYRUN_NAME,
@@ -503,6 +522,9 @@ def main(pyrunfile='pyrun.py',
 
     # Patch site module
     patch_site_py(libdir)
+
+    # Patch ssl module
+    patch_ssl_py(libdir)
 
 if __name__ == '__main__':
     main(*sys.argv[1:])
