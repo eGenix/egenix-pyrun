@@ -307,8 +307,8 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.3/Python/
      /* Set sys.stdin */
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.3/Python/sysmodule.c ./Python/sysmodule.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.4.3/Python/sysmodule.c	2015-02-25 12:27:46.000000000 +0100
-+++ ./Python/sysmodule.c	2015-04-21 15:45:39.371652027 +0200
-@@ -1122,6 +1122,49 @@
++++ ./Python/sysmodule.c	2015-05-08 20:02:48.249434932 +0200
+@@ -1122,6 +1122,50 @@
  Clear the internal type lookup cache.");
  
  
@@ -335,6 +335,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.3/Python/
 +    SYS_SETFLAG(Py_DontWriteBytecodeFlag, "dont_write_bytecode")
 +    SYS_SETFLAG(Py_VerboseFlag, "verbose")
 +    SYS_SETFLAG(Py_HashRandomizationFlag, "hash_randomization")
++    SYS_SETFLAG(Py_InspectFlag, "inspect")
 +    {
 +        PyErr_SetString(PyExc_ValueError,
 +                        "unknown flag name");
@@ -358,7 +359,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.4.3/Python/
  static PyMethodDef sys_methods[] = {
      /* Might as well keep this in alphabetic order */
      {"callstats", (PyCFunction)PyEval_GetCallStats, METH_NOARGS,
-@@ -1184,6 +1227,7 @@
+@@ -1184,6 +1228,7 @@
      {"setdlopenflags", sys_setdlopenflags, METH_VARARGS,
       setdlopenflags_doc},
  #endif
