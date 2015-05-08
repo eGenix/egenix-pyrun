@@ -401,7 +401,8 @@ test-makepyrun:
 	@$(ECHO) "Created $(PYRUNPY)."
 
 $(BUILDDIR):
-	mkdir -p	$(BINDIR) \
+	mkdir -p	$(BUILDDIR) \
+			$(BINDIR) \
 			$(PYRUNLIBDIR) \
 			$(PYRUNSHAREDLIBDIR) \
 			$(PYRUNSITEPACKAGESLIBDIR) \
@@ -498,6 +499,7 @@ $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 		--log \
 		--pyrun-distribution=$(BINARY_DISTRIBUTION_ARCHIVE) \
 		$(TESTDIR)
+	touch $@
 
 test-install-pyrun:	$(TESTDIR)/bin/$(PYRUN)
 
