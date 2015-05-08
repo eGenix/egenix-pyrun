@@ -2,11 +2,10 @@
 #
 # Test the pyrun cmd line interface.
 #
-# Note: This test currently only works on Unix platforms and then only
-#       for Python 2.7. See #1076.
+# Note: This test currently only works on Unix platforms.
 #
 
-import os, sys, subprocess, re
+import os, sys, subprocess, re, shutil
 
 PYRUN = 'pyrun'
 PYTHON = 'python2.7'
@@ -14,6 +13,14 @@ TESTDIR = os.path.abspath('Tests')
 
 # Enable debug output ?
 _debug = 0
+
+# Double check that asserts work
+try:
+    assert False
+except AssertionError:
+    pass
+else:
+    raise RuntimeError('asserts are disabled - cannot run tests')
 
 def run(command, encoding='utf-8'):
 
@@ -34,7 +41,7 @@ def python_version(runtime):
 
 def match_result(result, pattern):
 
-    m = re.match(pattern.replace('[0]', '\[0\]'), result)
+    m = re.match(pattern.replace('[0]', '\[0\]'), result, re.MULTILINE)
     if m is None:
         print ('*** Result  %r does not match\n'
                '    pattern %r' % (result, pattern))
@@ -87,7 +94,11 @@ def test_cmd_line(runtime=PYRUN):
         result = run('%s -S dir' % runtime)
         assert match_result(
             result,
-            "__file__: '.*/dir/__main__.py'\n"
+            # XXX Note: In Python 3.4, the __file__ attribute for
+            #     dir imports is relative, not absolute as for
+            #     Python 2.7. Not sure whether this is a bug in
+            #     PyRun or just a different behavior in Python 3.
+            "__file__: '.*/?dir/__main__.py'\n"
             "__name__: '__main__'\n"
             "__path__: not defined\n"
             "sys.path[0]: 'dir'\n"
@@ -205,7 +216,7 @@ def test_v_flag(runtime=PYRUN):
                  runtime)
     assert match_result(
         result,
-        "verbose=1\nimport .*"
+        "verbose=1\n(import .*|# zipimport: found .*)"
         )
     
     result = run('%s -vv -c '
@@ -214,8 +225,63 @@ def test_v_flag(runtime=PYRUN):
                  runtime)
     assert match_result(
         result,
-        "verbose=2\nimport .*"
+        "verbose=2\n(import .*|# zipimport: found .*)"
         )
+    
+def test_s_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    result = run('%s -s -c "print (\'ok\')"' % runtime)
+    assert match_result(
+        result,
+        "ok\n"
+        )
+    
+def test_B_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    PYC_FILE = 'testmod.pyc'
+    PYC_CACHE = '__pycache__'
+    if os.path.exists(PYC_FILE):
+        os.remove(PYC_FILE)
+    if os.path.exists(PYC_CACHE):
+        shutil.rmtree(PYC_CACHE)
+    open('testmod.py', 'w').write('print("ok")\n')
+
+    result = run('%s -B -c "import testmod"' % runtime)
+    assert match_result(
+        result,
+        "ok\n"
+        )
+    assert not os.path.exists(PYC_FILE)
+    assert not os.path.exists(PYC_CACHE)
+    
+def test_R_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    if 0:
+        # These test would work, but pythonrun.c implements the
+        # randomization in a way which doesn't allow PyRun to set the
+        # flag (and let it have an effect) after Python
+        # initialization.
+        result1 = run('%s -c "print (hash("a"))"' % runtime)
+        result2 = run('%s -c "print (hash("a"))"' % runtime)
+        assert result1 == result2
+
+        result1 = run('%s -R -c "print (hash("a"))"' % runtime)
+        result2 = run('%s -R -c "print (hash("a"))"' % runtime)
+        assert result1 != result2
+
+    else:
+        # Just check for error message
+        result = run('%s -R -c "1"' % runtime)
+        assert match_result(
+            result,
+            "(?s).*PYTHONHASHSEED.*"
+            )
     
 ###
 
@@ -230,4 +296,7 @@ if __name__ == '__main__':
     test_O_flag(runtime)
     test_d_flag(runtime)
     test_v_flag(runtime)
+    test_s_flag(runtime)
+    test_B_flag(runtime)
+    test_R_flag(runtime)
     print('%s passes all command line tests' % runtime)

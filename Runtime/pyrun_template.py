@@ -73,6 +73,8 @@ pyrun_skip_site_main = False
 pyrun_interactive = False
 pyrun_unbuffered = False
 pyrun_optimized = 0
+pyrun_dontwritebytecode = False
+pyrun_hashrandomization = False
 
 ### Python 2 vs. 3
 
@@ -146,18 +148,24 @@ Version: %s %s
 
 Available pyrun options:
 
+-b:   run the given <script> file as bytecode
+-c:   compile and run <script> directly as Python code
+-d:   enable debug mode (-dd for level 2)
 -h:   show this help text
--v:   run in verbose mode (-vv for level 2)
 -i:   enable interactive mode
 -m:   import and run a module <script> available on PYTHONPATH
--c:   compile and run <script> directly as Python code
--b:   run the given <script> file as bytecode
--E:   ignore environment variables (only PYTHONPATH)
--S:   skip running site.main() and disable support for .pth files
--O:   run in optimized mode (-OO also removes doc-strings)
+-s:   ignore user site; PyRun always ignores user site configs
 -u:   open stdout/stderr in unbuffered mode
--d:   enable debug mode (-dd for level 2)
+-v:   run in verbose mode (-vv for level 2)
+-B:   don't write byte code files
+-E:   ignore environment variables (only PYTHONPATH)
+-O:   run in optimized mode (-OO also removes doc-strings)
+-R:   not implemented; use PYTHONHASHSEED instead
+-S:   skip running site.main() and disable support for .pth files
 -V:   print the pyrun version and exit
+-3:   not implemented; only for compatibility with Python
+
+Most Python environment variables are supported.
 
 Without options, the given <script> file is loaded and run. Parameters
 are passed to the script via sys.argv as normal.
@@ -205,6 +213,8 @@ pyrun_ignore_pth_files = %(pyrun_ignore_pth_files)r
 pyrun_interactive = %(pyrun_interactive)r
 pyrun_unbuffered = %(pyrun_unbuffered)r
 pyrun_optimized = %(pyrun_optimized)r
+pyrun_dontwritebytecode = %(pyrun_dontwritebytecode)r
+pyrun_hashrandomization = %(pyrun_hashrandomization)r
 
 """ % globals()).splitlines()
     if extra_lines:
@@ -237,7 +247,7 @@ def pyrun_parse_cmdline():
     import getopt
 
     # Parse sys.argv
-    valid_options = 'vVmcbiESdOu3h?'
+    valid_options = 'vVmcbiESdOu3h?sBR'
     try:
         parsed_options, remaining_argv = getopt.getopt(sys.argv[1:],
                                                        valid_options)
@@ -321,6 +331,21 @@ def pyrun_parse_cmdline():
             global pyrun_optimized
             pyrun_optimized += 1
 
+        elif arg == '-B':
+            # Disable writing byte code files
+            global pyrun_dontwritebytecode
+            pyrun_dontwritebytecode = True
+
+        elif arg == '-R':
+            # Enable hash randomization; this doesn't work in PyRun
+            # due to the way the randomization is initialized in
+            # pythonrun.c
+            rc = 1
+            pyrun_log_error(
+                'Command line option -R is not supported.\n'
+                'Please use PYTHONHASHSEED to enable hash randomization')
+            sys.exit(rc)
+
         # XXX Add more standard Python command line options here
 
         # Note: There's a general problem with some options, since by
@@ -332,6 +357,7 @@ def pyrun_parse_cmdline():
         # The following options are simply ignored for this reason:
         #
         elif arg in ('-3',
+                     '-s',
                      ):
             # Ignored option, only here for compatibility with
             # standard Python
@@ -357,6 +383,13 @@ def pyrun_parse_cmdline():
         sys._setflag('verbose', pyrun_verbose)
     if pyrun_debug:
         sys._setflag('debug', pyrun_debug)
+    if pyrun_hashrandomization:
+        sys._setflag('hash_randomization', pyrun_hashrandomization)
+    if pyrun_interactive:
+        sys._setflag('inspect', pyrun_interactive)
+    if pyrun_dontwritebytecode:
+        sys._setflag('dont_write_bytecode', pyrun_dontwritebytecode)
+        sys.dont_write_bytecode = pyrun_dontwritebytecode
 
     # Remove pyrun options from sys.argv
     sys.argv[:] = remaining_argv
