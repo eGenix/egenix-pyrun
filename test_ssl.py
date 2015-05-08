@@ -35,5 +35,28 @@ for url in ('https://www.python.org/',
     data = webpage.read(chunk)
     assert len(data) == chunk, 'URL %s did not return enough data' % url
     webpage.close()
+
+# Try URLs which are not using a trusted certificate
+chunk = 1024
+failures = 0
+for url in ('https://www.cacert.org/',
+            'https://www.pcwebshop.co.uk/',
+            ):
+    try:
+        webpage = urlopen(url)
+    except IOError:
+        print ('URL %r could not be opened: %s' % (url, sys.exc_info()))
+        failures += 1
+        continue
+    else:
+        print ('URL %r could be opened, even though it is not trusted' %
+               url)
+    data = webpage.read(chunk)
+    assert len(data) == chunk, 'URL %s did not return enough data' % url
+    webpage.close()
+if PYTHON_VERSION < (2, 7):
+    assert failures == 0
+else:
+    assert failures == 2
     
 print ('Works.')
