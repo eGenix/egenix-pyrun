@@ -99,10 +99,10 @@ else:
 
     # Python 3 does not include the execfile() builtin
     def run_code_file(filename, globals_dict, locals_dict=None):
-        file = open(filename, 'r', encoding='utf-8')
-        source = file.read()
-        file.close()
-        run_code(source, globals_dict, locals_dict)
+        with open(filename, 'r', encoding='utf-8') as file:
+            source = file.read()
+        code = compile(source, filename, 'exec', optimize=pyrun_optimized)
+        run_code(code, globals_dict, locals_dict)
 
     # Python 3 no longer has raw_input(). Use input() instead
     raw_input = input
