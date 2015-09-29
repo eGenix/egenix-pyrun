@@ -61,6 +61,12 @@ else:
 sys.executable = pyrun_executable
 sys.prefix = pyrun_prefix
 sys.exec_prefix = pyrun_prefix
+# For Python 3 (won't hurt in Python 2)
+sys.base_prefix = pyrun_prefix
+sys.base_exec_prefix = pyrun_prefix
+
+# Save the path to the pyrun binary; can also be used to detect
+# running pyrun.
 sys.pyrun = pyrun_binary
 
 # Add copyright lines
