@@ -279,21 +279,22 @@ def format_template(template, **kws):
         code = code.replace('#$%s' % name, value)
     return code
 
-def patch_module(filename, find_re, replacement):
+def patch_module(filename, find_re, replacement, flags=re.MULTILINE):
 
     """ Patch module file filename.
 
         Replaces all occurences of the RE find_re with replacement.
 
-        The search is done in MULTILINE mode, so '^' and '$' match on
-        individual lines of the file.
+        The search is done using flags as re flags. flags defaults to
+        re.MULTILINE mode, so '^' and '$' match on individual lines of
+        the file.
 
     """
     print('Patching module %s' % filename)
     f = open(filename, 'r', encoding=ENCODING)
     mod_src = f.read()
     f.close()
-    rx = re.compile(find_re, flags=re.MULTILINE)
+    rx = re.compile(find_re, flags=flags)
     new_mod_src = rx.sub(replacement, mod_src)
     if new_mod_src == mod_src:
         print('*** WARNING: Module %s not changed' % filename)
@@ -336,6 +337,19 @@ def patch_sysconfig_py(libdir=LIBDIR):
         patch_module(os.path.join(libdir, 'distutils', 'sysconfig.py'),
                      '_config_vars += +None',
                      'import pyrun_config; _config_vars = pyrun_config.config_vars')
+
+def patch__sysconfigdata_py(libdir=LIBDIR):
+
+    """ Patch the new _sysconfigdata module in Python 2.7 and 3.4.
+
+    """
+    if sys.version_info >= (2, 7, 5) or sys.version_info >= (3, 3):
+        # Python 2.7.5 and later, 3.3 and later: the build time config
+        # data was stored into a new private module _sysconfigdata.py
+        patch_module(os.path.join(libdir, '_sysconfigdata.py'),
+                     'build_time_vars += +{.+}',
+                     'import pyrun_config; build_time_vars = pyrun_config.config_vars',
+                     flags=re.DOTALL)
 
 def patch_site_py(libdir=LIBDIR):
 
@@ -519,6 +533,9 @@ def main(pyrunfile='pyrun.py',
 
     # Patch sysconfig module
     patch_sysconfig_py(libdir)
+
+    # Patch _sysconfigdata module (if needed)
+    patch__sysconfigdata_py(libdir)
 
     # Patch site module
     patch_site_py(libdir)
