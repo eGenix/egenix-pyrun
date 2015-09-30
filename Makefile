@@ -24,7 +24,7 @@
 
 # Python versions to use for pyrun
 PYTHON_34_VERSION = 3.4.3
-PYTHON_27_VERSION = 2.7.9
+PYTHON_27_VERSION = 2.7.10
 PYTHON_26_VERSION = 2.6.9
 
 # Python version to use as basis for pyrun
@@ -487,6 +487,11 @@ $(BINARY_DISTRIBUTION_ARCHIVE):	announce-distribution $(BINDIR)/$(PYRUN)
 	@$(ECHO) ""
 
 distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
+
+all-distributions:
+	@for i in $(PYTHONVERSIONS); do \
+	  $(MAKE) distribution PYTHONFULLVERSION=$$i; $(ECHO) ""; \
+	done
 
 ### Testing
 
