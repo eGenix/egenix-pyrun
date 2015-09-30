@@ -530,6 +530,8 @@ test-ssl:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) ""
 ifdef PYTHON_2_BUILD
 	cd $(TESTDIR); export EGENIX_CRYPTO_CONFIRM=1; bin/pip install egenix-pyopenssl
+else
+	cd $(TESTDIR); bin/pip install -U pip setuptools pyopenssl
 endif
 	export -n PYRUN_HTTPSVERIFY; cd $(TESTDIR); bin/pyrun ../test_ssl.py
 	export PYRUN_HTTPSVERIFY=0; cd $(TESTDIR); bin/pyrun ../test_ssl.py
