@@ -1,6 +1,6 @@
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
 --- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib2to3/pgen2/driver.py	2013-10-29 16:04:37.000000000 +0100
-+++ ./Lib/lib2to3/pgen2/driver.py	2015-04-21 15:42:24.697766718 +0200
++++ ./Lib/lib2to3/pgen2/driver.py	2016-02-16 17:55:47.018671116 +0100
 @@ -118,6 +118,14 @@
      """Load the grammar (maybe from a pickle)."""
      if logger is None:
@@ -18,7 +18,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib
          if tail == ".txt":
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib2to3/pygram.py ./Lib/lib2to3/pygram.py
 --- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib2to3/pygram.py	2013-10-29 16:04:37.000000000 +0100
-+++ ./Lib/lib2to3/pygram.py	2015-04-21 15:42:24.697766718 +0200
++++ ./Lib/lib2to3/pygram.py	2016-02-16 17:55:47.018671116 +0100
 @@ -13,6 +13,8 @@
  
  # The grammar file
@@ -37,7 +37,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib
 +pattern_symbols = Symbols(pattern_grammar)
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
 --- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib2to3/refactor.py	2013-10-29 16:04:37.000000000 +0100
-+++ ./Lib/lib2to3/refactor.py	2015-04-21 15:42:24.697766718 +0200
++++ ./Lib/lib2to3/refactor.py	2016-02-16 17:55:47.018671116 +0100
 @@ -29,6 +29,16 @@
  
  def get_all_fix_names(fixer_pkg, remove_prefix=True):
@@ -57,7 +57,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/lib
      fix_names = []
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/pkgutil.py ./Lib/pkgutil.py
 --- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/pkgutil.py	2013-10-29 16:04:37.000000000 +0100
-+++ ./Lib/pkgutil.py	2015-04-21 15:42:24.697766718 +0200
++++ ./Lib/pkgutil.py	2016-02-16 17:55:47.018671116 +0100
 @@ -267,20 +267,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
@@ -101,7 +101,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Lib/pkg
      def get_source(self, fullname=None):
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Modules/getpath.c ./Modules/getpath.c
 --- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Modules/getpath.c	2013-10-29 16:04:38.000000000 +0100
-+++ ./Modules/getpath.c	2015-04-21 15:42:24.697766718 +0200
++++ ./Modules/getpath.c	2016-02-16 17:55:47.018671116 +0100
 @@ -446,6 +446,17 @@
          strncpy(argv0_path, progpath, MAXPATHLEN);
          argv0_path[MAXPATHLEN] = '\0';
@@ -122,7 +122,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Modules
          ** This is because the python home should be set relative to the library,
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Python/import.c ./Python/import.c
 --- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Python/import.c	2013-10-29 16:04:39.000000000 +0100
-+++ ./Python/import.c	2015-04-21 15:42:24.697766718 +0200
++++ ./Python/import.c	2016-02-16 17:55:47.019671125 +0100
 @@ -2017,7 +2017,7 @@
          if (err != 0)
              goto err_return;
@@ -134,7 +134,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Python/
      Py_DECREF(co);
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Python/sysmodule.c ./Python/sysmodule.c
 --- /home/lemburg/egenix/projects/PyRun/Python-2.6.9/Python/sysmodule.c	2013-10-29 16:04:39.000000000 +0100
-+++ ./Python/sysmodule.c	2015-05-08 20:04:49.150623883 +0200
++++ ./Python/sysmodule.c	2016-02-16 17:55:47.019671125 +0100
 @@ -860,6 +860,49 @@
  Clear the internal type lookup cache.");
  

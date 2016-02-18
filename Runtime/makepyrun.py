@@ -10,7 +10,7 @@
     ---------------------------------------------------------------------
 
     Copyright (c) 1997-2000, Marc-Andre Lemburg; mailto:mal@lemburg.com
-    Copyright (c) 2000-2015, eGenix.com Software GmbH; mailto:info@egenix.com
+    Copyright (c) 2000-2016, eGenix.com Software GmbH; mailto:info@egenix.com
 
                             All Rights Reserved.
 
@@ -41,7 +41,7 @@ except ImportError:
 ### Globals
 
 # PyRun release version
-__version__ = '2.1.1'
+__version__ = '2.1.2'
 
 # Debug level
 _debug = 1

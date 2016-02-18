@@ -23,8 +23,8 @@
 ### High-level configuration
 
 # Python versions to use for pyrun
-PYTHON_34_VERSION = 3.4.3
-PYTHON_27_VERSION = 2.7.10
+PYTHON_34_VERSION = 3.4.4
+PYTHON_27_VERSION = 2.7.11
 PYTHON_26_VERSION = 2.6.9
 
 # Python version to use as basis for pyrun
@@ -319,6 +319,7 @@ $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 	./configure \
 		--prefix=$(TMPINSTALLDIR) \
 		--exec-prefix=$(TMPINSTALLDIR) \
+		--libdir=$(TMPINSTALLDIR)/lib \
 		--enable-unicode=$(PYTHONUNICODE) \
 		$(PYTHON_CONFIGURE_OPTIONS)
 	touch $@
@@ -331,6 +332,7 @@ $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 	./configure \
 		--prefix=$(TMPINSTALLDIR) \
 		--exec-prefix=$(TMPINSTALLDIR) \
+		--libdir=$(TMPINSTALLDIR)/lib \
 		--without-ensurepip \
 		$(PYTHON_CONFIGURE_OPTIONS)
 	touch $@
@@ -613,6 +615,14 @@ distclean:	clean
 		$(PYTHONORIGDIR) \
 		$(PYTHONDIR) \
 	true
+
+distclean-all:
+	@for i in $(PYTHONVERSIONS); do \
+	  $(MAKE) distclean PYTHONFULLVERSION=$$i; $(ECHO) ""; \
+	done
+
+spring-clean:
+	$(RM) -rf Python-2.* Python-3.* tmp-* test-pyrun-* build-*
 
 ### Misc other targets
 

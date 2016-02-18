@@ -49,7 +49,7 @@ for url in ('https://www.cacert.org/',
             ):
     try:
         webpage = urlopen(url)
-    except IOError:
+    except (IOError, ValueError):
         print ('URL %r could not be opened: %s' % (url, sys.exc_info()))
         failures += 1
         continue
