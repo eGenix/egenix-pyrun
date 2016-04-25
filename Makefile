@@ -23,11 +23,13 @@
 ### High-level configuration
 
 # Python versions to use for pyrun
+PYTHON_35_VERSION = 3.5.1
 PYTHON_34_VERSION = 3.4.4
 PYTHON_27_VERSION = 2.7.11
 PYTHON_26_VERSION = 2.6.9
 
 # Python version to use as basis for pyrun
+#PYTHONFULLVERSION = $(PYTHON_35_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_34_VERSION)
 PYTHONFULLVERSION = $(PYTHON_27_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_26_VERSION)
@@ -36,7 +38,8 @@ PYTHONFULLVERSION = $(PYTHON_27_VERSION)
 PYTHONVERSIONS = \
 	$(PYTHON_26_VERSION) \
 	$(PYTHON_27_VERSION) \
-	$(PYTHON_34_VERSION)
+	$(PYTHON_34_VERSION) \
+	$(PYTHON_35_VERSION)
 
 # Python Unicode version
 PYTHONUNICODE = ucs2
@@ -83,6 +86,7 @@ PLATFORM := $(shell python -c "from distutils.util import get_platform; print ge
 PYTHON_26_BUILD := $(shell test "$(PYTHONVERSION)" = "2.6" && echo "1")
 PYTHON_27_BUILD := $(shell test "$(PYTHONVERSION)" = "2.7" && echo "1")
 PYTHON_2_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "2" && echo "1")
+PYTHON_35_BUILD := $(shell test "$(PYTHONVERSION)" = "3.5" && echo "1")
 PYTHON_34_BUILD := $(shell test "$(PYTHONVERSION)" = "3.4" && echo "1")
 PYTHON_3_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "3" && echo "1")
 
