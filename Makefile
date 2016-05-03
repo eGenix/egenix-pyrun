@@ -268,11 +268,28 @@ STRIPOPTIONS = -S
 BOLD := `$(TPUT) bold`
 OFF := `$(TPUT) sgr0`
 
+# Build logs
+DATE := $(shell date +'%Y-%m-%d-%H%M%S')
+TODAY := $(shell date +'%Y-%m-%d')
+BUILDLOGDIR = build-logs
+BUILDLOG = $(BUILDLOGDIR)/$(BINARY_DISTRIBUTION)-$@-$(DATE).log
+BUILDLOGGZ = $(BUILDLOG).gz
+LOGREDIR =  2>&1 | tee $(BUILDLOG); gzip $(BUILDLOG); $(ECHO) "Wrote build log to $(BUILDLOGGZ)"; $(ECHO) ""
+TODAYSBUILDLOGS = $(BUILDLOGDIR)/*-$(TODAY)-*.log*
+
 ### Generic targets
 
 all:	pyrun
 
 pyrun:	config interpreter runtime
+
+### Logging
+
+logs:
+	mkdir -p $(BUILDLOGDIR)
+
+check-build-logs:
+	zgrep -n -i -E -C 2 --color=always '(make.*[*][*][*]|error +[0-9]+| +failed[^"])' $(TODAYSBUILDLOGS) | less
 
 ### Announcements
 
@@ -491,8 +508,11 @@ $(BINARY_DISTRIBUTION_ARCHIVE):	announce-distribution $(BINDIR)/$(PYRUN)
 	@$(ECHO) "$(OFF)"
 	@$(ECHO) "The eGenix PyRun Distribution is called: $(BINARY_DISTRIBUTION_ARCHIVE)"
 	@$(ECHO) ""
+	touch $@
 
-distribution:	$(BINARY_DISTRIBUTION_ARCHIVE)
+distribution:	logs
+	$(MAKE) $(BINARY_DISTRIBUTION_ARCHIVE) \
+		$(LOGREDIR)
 
 all-distributions:
 	@for i in $(PYTHONVERSIONS); do \
