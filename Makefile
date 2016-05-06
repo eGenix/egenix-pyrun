@@ -68,7 +68,8 @@ EXCLUDES = 	-x test \
 # Package details (used for distributions and normally passed in via
 # the product Makefile)
 PACKAGENAME = egenix-pyrun
-PACKAGEVERSION = $(shell cd Runtime; python -c "from makepyrun import __version__; print __version__")
+PACKAGEVERSION = 2.2.0
+#PACKAGEVERSION = $(shell cd Runtime; python -c "from makepyrun import __version__; print __version__")
 
 ### Runtime build parameters
 
@@ -299,6 +300,20 @@ announce-distribution:
 	@$(ECHO) "$(BOLD)Building $(PACKAGENAME) $(PACKAGEVERSION) for Python $(PYTHONFULLVERSION)-$(PYTHONUNICODE) $(OFF)"
 	@$(ECHO) "-------------------------------------------------------------------------------"
 	@$(ECHO) ""
+
+### Version updates
+
+update-product-version:
+	$(ECHO) "Updating version to $(PACKAGEVERSION) in install-pyrun"
+	sed -i -r --follow-symlinks \
+		-e "s/pyrun=[0-9.]+/pyrun=$(PACKAGEVERSION)/" \
+		-e "s/PyRun version [0-9.]+/PyRun version $(PACKAGEVERSION)/" \
+		-e "s/PYRUN_VERSION=[0-9.]+/PYRUN_VERSION=$(PACKAGEVERSION)/" \
+		install-pyrun
+	$(ECHO) "Updating version to $(PACKAGEVERSION) in makepyrun.py"
+	sed -i -r --follow-symlinks \
+		-e "s/__version__ = '[^']*'/__version__ = '$(PACKAGEVERSION)'/" \
+		Runtime/makepyrun.py
 
 ### Build process
 
