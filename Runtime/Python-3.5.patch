@@ -1,6 +1,6 @@
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/importlib/_bootstrap.py	2015-12-07 02:39:08.000000000 +0100
-+++ ./Lib/importlib/_bootstrap.py	2016-04-25 12:05:03.294505710 +0200
++++ ./Lib/importlib/_bootstrap.py	2016-05-03 19:22:35.789193826 +0200
 @@ -788,6 +788,10 @@
  
      @classmethod
@@ -33,7 +33,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/imp
      @classmethod
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib2to3/pgen2/driver.py	2015-12-07 02:39:08.000000000 +0100
-+++ ./Lib/lib2to3/pgen2/driver.py	2016-04-25 12:05:03.294505710 +0200
++++ ./Lib/lib2to3/pgen2/driver.py	2016-05-03 19:22:35.789193826 +0200
 @@ -111,6 +111,14 @@
      """Load the grammar (maybe from a pickle)."""
      if logger is None:
@@ -51,7 +51,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib
          if tail == ".txt":
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib2to3/refactor.py	2015-12-07 02:39:08.000000000 +0100
-+++ ./Lib/lib2to3/refactor.py	2016-04-25 12:05:03.294505710 +0200
++++ ./Lib/lib2to3/refactor.py	2016-05-03 19:22:35.789193826 +0200
 @@ -32,6 +32,16 @@
  
  def get_all_fix_names(fixer_pkg, remove_prefix=True):
@@ -71,7 +71,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib
      fix_names = []
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/pkgutil.py ./Lib/pkgutil.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/pkgutil.py	2015-12-07 02:39:08.000000000 +0100
-+++ ./Lib/pkgutil.py	2016-04-25 12:05:03.298505749 +0200
++++ ./Lib/pkgutil.py	2016-05-03 19:22:35.793193862 +0200
 @@ -307,20 +307,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
@@ -115,7 +115,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/pkg
      def get_source(self, fullname=None):
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Modules/getpath.c ./Modules/getpath.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Modules/getpath.c	2015-12-07 02:39:10.000000000 +0100
-+++ ./Modules/getpath.c	2016-04-25 12:05:03.298505749 +0200
++++ ./Modules/getpath.c	2016-05-03 19:22:35.793193862 +0200
 @@ -583,6 +583,24 @@
      wcsncpy(argv0_path, progpath, MAXPATHLEN);
      argv0_path[MAXPATHLEN] = '\0';
@@ -151,7 +151,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Modules
      PyMem_RawFree(_exec_prefix);
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/import.c ./Python/import.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/import.c	2015-12-07 02:39:11.000000000 +0100
-+++ ./Python/import.c	2016-04-25 12:05:03.298505749 +0200
++++ ./Python/import.c	2016-05-03 19:22:35.793193862 +0200
 @@ -1219,6 +1219,23 @@
      if (d == NULL) {
          goto err_return;
@@ -178,7 +178,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/
          goto err_return;
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/pylifecycle.c ./Python/pylifecycle.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/pylifecycle.c	2015-12-07 02:39:11.000000000 +0100
-+++ ./Python/pylifecycle.c	2016-04-25 12:17:53.445690348 +0200
++++ ./Python/pylifecycle.c	2016-05-03 19:22:35.793193862 +0200
 @@ -1164,6 +1164,14 @@
                  encoding = pythonioencoding;
              }
@@ -196,7 +196,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/
      /* Set sys.stdin */
 diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/sysmodule.c ./Python/sysmodule.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/sysmodule.c	2015-12-07 02:39:11.000000000 +0100
-+++ ./Python/sysmodule.c	2016-04-25 12:05:03.298505749 +0200
++++ ./Python/sysmodule.c	2016-05-03 19:22:35.793193862 +0200
 @@ -1205,6 +1205,50 @@
  Return True if Python is exiting.");
  
