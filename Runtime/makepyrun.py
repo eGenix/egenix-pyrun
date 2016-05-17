@@ -96,7 +96,8 @@ else:
     
 ### Configuration
 
-# List of modules to always include
+# List of modules to always include (even if they are not found
+# by the module finder)
 include_list = [
     '_bisect',
     '_bsddb',
@@ -179,6 +180,7 @@ exclude_package_list = [
     'turtledemo',
     'setuptools',
     'pip',
+    'ensurepip', # ensurepip needs access to bundled whl files; see #1774
     ]
 
 # Parse a line in Modules/Setup
