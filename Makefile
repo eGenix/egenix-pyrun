@@ -68,7 +68,7 @@ EXCLUDES = 	-x test \
 # Package details (used for distributions and normally passed in via
 # the product Makefile)
 PACKAGENAME = egenix-pyrun
-PACKAGEVERSION = 2.2.0
+PACKAGEVERSION = 2.2.1
 #PACKAGEVERSION = $(shell cd Runtime; python -c "from makepyrun import __version__; print __version__")
 
 ### Runtime build parameters
@@ -509,7 +509,7 @@ install:	install-bin install-lib install-include
 
 ### Packaging
 
-$(BINARY_DISTRIBUTION_ARCHIVE):	announce-distribution $(BINDIR)/$(PYRUN)
+$(BINARY_DISTRIBUTION_ARCHIVE):	$(BINDIR)/$(PYRUN)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating PyRun Distribution =============================================="
 	@$(ECHO) "$(OFF)"
@@ -525,7 +525,7 @@ $(BINARY_DISTRIBUTION_ARCHIVE):	announce-distribution $(BINDIR)/$(PYRUN)
 	@$(ECHO) ""
 	touch $@
 
-distribution:	logs
+distribution:	announce-distribution logs
 	$(MAKE) $(BINARY_DISTRIBUTION_ARCHIVE) \
 		$(LOGREDIR)
 
@@ -616,7 +616,17 @@ test-pip:	$(TESTDIR)/bin/$(PYRUN)
 	cd $(TESTDIR); bin/pip install Django
 endif
 
-test-distribution:	test-basic test-pip
+test-pip-latest:
+	$(RM) -rf $(TESTDIR)
+	$(MAKE) test-install-pyrun
+	@$(ECHO) "--- Upgrading to latest pip --------------------------------------"
+	@$(ECHO) ""
+	cd $(TESTDIR); bin/pip install -U setuptools
+	cd $(TESTDIR); bin/pip install -U pip
+	@$(ECHO) ""
+	$(MAKE) test-pip
+
+test-distribution:	test-basic test-pip test-pip-latest
 
 test-all-pyruns:
 	@for i in $(PYTHONVERSIONS); do \
