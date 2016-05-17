@@ -452,8 +452,26 @@ def pyrun_enable_unbuffered_mode():
     """
     if pyrun_debug > 1:
         pyrun_log('Enabling unbuffered mode')
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'wb', 0)
-    sys.stderr = os.fdopen(sys.stderr.fileno(), 'wb', 0)
+
+    # Reopen in write binary unbuffered mode
+    stdout = os.fdopen(sys.stdout.fileno(), 'wb', 0)
+    stderr = os.fdopen(sys.stderr.fileno(), 'wb', 0)
+
+    # Assign new file objects
+    if PY2:
+        sys.stdout = stdout
+        sys.stderr = stderr
+    else:
+        # For Python 3, wrap the streams into TextIOWrapper
+        import io
+        sys.stdout = io.TextIOWrapper(stdout,
+                                      encoding=sys.stdout.encoding,
+                                      errors=sys.stdout.errors,
+                                      write_through=True)
+        sys.stderr = io.TextIOWrapper(stderr,
+                                      encoding=sys.stderr.encoding,
+                                      errors=sys.stderr.errors,
+                                      write_through=True)
 
 def pyrun_run_site_main():
 
