@@ -61,6 +61,10 @@ from pyrun_config import (
 
 ### Globals
 
+# PyRun properties (set in __main__ branch below)
+pyrun_mode = 'script'
+pyrun_app = 'pyrun'
+
 # Options
 pyrun_verbose = int(os.environ.get('PYRUN_VERBOSE', 0))
 pyrun_debug = int(os.environ.get('PYRUN_DEBUG', 0))
@@ -84,25 +88,25 @@ PY3 = (sys.version_info[0] == 3)
 
 if PY2:
     # Emulate Python 3 exec() function
-    def run_code(code, globals_dict, locals_dict=None):
+    def pyrun_exec_code(code, globals_dict, locals_dict=None):
         if locals_dict is None:
             locals_dict = globals_dict
         exec('exec code in globals_dict, locals_dict')
 
     # We can use execfile() in Python 2
-    run_code_file = execfile
+    pyrun_exec_code_file = execfile
 
 else:
     # Python 3 and above can use the exec() function
     import builtins
-    run_code = getattr(builtins, 'exec')
+    pyrun_exec_code = getattr(builtins, 'exec')
 
     # Python 3 does not include the execfile() builtin
-    def run_code_file(filename, globals_dict, locals_dict=None):
+    def pyrun_exec_code_file(filename, globals_dict, locals_dict=None):
         with open(filename, 'r', encoding='utf-8') as file:
             source = file.read()
         code = compile(source, filename, 'exec', optimize=pyrun_optimized)
-        run_code(code, globals_dict, locals_dict)
+        pyrun_exec_code(code, globals_dict, locals_dict)
 
     # Python 3 no longer has raw_input(). Use input() instead
     raw_input = input
@@ -651,6 +655,19 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         except ImportError as reason:
             pyrun_log_error('Could not run %r: %s' % (pyrun_script, reason))
             sys.exit(1)
+        except ValueError as reason:
+            # Unfortunately, trying to import a non-ZIP file as
+            # package will result in a ValueError rather than an
+            # ImportError. We do some extra checks here to prevent
+            # masking application level ValueErrors.
+            if 'source code string' not in str(reason):
+                raise
+            if pyrun_mode == 'app':
+                # For app mode, change the reason to something more
+                # useful
+                reason = 'app missing appended ZIP package'
+            pyrun_log_error('Could not run %r: %s' % (pyrun_script, reason))
+            sys.exit(1)
 
     elif (mode == 'codefile' or mode == 'codestring'):
 
@@ -694,7 +711,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         runtime_globals = globals()
         runtime_globals.update(__name__='__main__',
                                __file__=pyrun_script)
-        run_code(module_code, runtime_globals)
+        pyrun_exec_code(module_code, runtime_globals)
 
     elif mode == 'file':
 
@@ -714,7 +731,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         runtime_globals = globals()
         runtime_globals.update(__name__='__main__',
                                __file__=pyrun_script)
-        run_code_file(pyrun_script, runtime_globals, runtime_globals)
+        pyrun_exec_code_file(pyrun_script, runtime_globals, runtime_globals)
 
     elif mode == 'string':
 
@@ -738,7 +755,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         runtime_globals = globals()
         runtime_globals.update(__name__='__main__',
                                __file__=script_path)
-        run_code(code, runtime_globals)
+        pyrun_exec_code(code, runtime_globals)
 
     else:
         raise TypeError('unknown execution mode %r' % mode)
@@ -747,8 +764,22 @@ def pyrun_execute_script(pyrun_script, mode='file'):
 
 if __name__ == '__main__':
 
-    # Parse the command line and get the script name
-    pyrun_parse_cmdline()
+    # Determine run mode
+    pyrun_mode = 'script'
+    pyrun_app = os.path.split(sys.executable)[1]
+    if not pyrun_app.startswith(('pyrun', 'python')):
+        # Renaming the pyrun executable triggers app mode
+        pyrun_mode = 'app'
+
+    # Parse the command line and get the script name (if not in app
+    # mode)
+    if pyrun_mode != 'app':
+        pyrun_parse_cmdline()
+
+        # Check for interactive mode, now that we have the command
+        # line parsed
+        if not sys.argv and sys.stdin.isatty():
+            pyrun_mode = 'interactive'
 
     # Enable unbuffered mode
     if pyrun_unbuffered:
@@ -761,27 +792,9 @@ if __name__ == '__main__':
     if pyrun_debug > 1:
         pyrun_info()
 
-    # Start the runtime
-    if not sys.argv and sys.stdin.isatty():
+    # Start the runtime in various modes
 
-        ### Enter interactive mode
-
-        # Setup sys.path
-        pyrun_setup_sys_path()
-        
-        # Import site module and run site.main() (which is not run by
-        # pyrun per default like in standard Python; see makepyrun.py)
-        if not pyrun_skip_site_main:
-            pyrun_run_site_main()
-
-        # Setup sys.argv for interactive mode
-        if not sys.argv:
-            sys.argv = ['']
-
-        # Enter interactive mode
-        pyrun_prompt()
-
-    else:
+    if pyrun_mode == 'script':
 
         ### Run a script
 
@@ -811,22 +824,22 @@ if __name__ == '__main__':
         # Setup paths & mode
         script_path = pyrun_script
         if pyrun_as_module:
-            mode = 'module'
+            script_mode = 'module'
             script_path = None
         elif pyrun_as_string:
-            mode = 'string'
+            script_mode = 'string'
             script_path = None
         else:
             if pyrun_version < '2.7.0':
-                mode = 'file'
+                script_mode = 'file'
             # Python 2.7 and later
             elif (pyrun_script.endswith('.py') or
                   pyrun_script.endswith('.pyw')):
-                mode = 'file'
+                script_mode = 'file'
             else:
                 # Use path mode for all other files, since this
                 # provides support for directories, ZIP files, etc.
-                mode = 'path'
+                script_mode = 'path'
 
         # Setup sys.path
         pyrun_setup_sys_path(script_path)
@@ -838,7 +851,7 @@ if __name__ == '__main__':
 
         # Run the script
         try:
-            pyrun_execute_script(pyrun_script, mode)
+            pyrun_execute_script(pyrun_script, script_mode)
         except Exception as reason:
             if pyrun_interactive:
                 import traceback
@@ -851,8 +864,67 @@ if __name__ == '__main__':
             if pyrun_interactive:
                 pyrun_prompt()
 
-    # Exit
-    sys.exit(0)
+        # Exit
+        sys.exit(0)
+
+    elif pyrun_mode == 'app':
+
+        ### App mode: run the executable itself via package import
+
+        # Run the executable as ZIP Python package (imports top-level
+        # __main__ module from the appended ZIP file and runs it)
+        pyrun_script = sys.executable
+        
+        # Setup sys.path
+        pyrun_setup_sys_path(pyrun_script)
+
+        # Import site module and run site.main() (which is not run by
+        # pyrun per default like in standard Python; see makepyrun.py)
+        if not pyrun_skip_site_main:
+            pyrun_run_site_main()
+
+        # Run the script
+        try:
+            pyrun_execute_script(pyrun_script, 'path')
+        except Exception as reason:
+            if pyrun_interactive:
+                import traceback
+                traceback.print_exc()
+                pyrun_prompt(banner='')
+            else:
+                raise
+        else:
+            # Enter interactive mode, in case wanted
+            if pyrun_interactive:
+                pyrun_prompt()
+
+        # Exit
+        sys.exit(0)
+
+    elif pyrun_mode == 'interactive':
+        
+        ### Enter interactive mode
+
+        # Setup sys.path
+        pyrun_setup_sys_path()
+        
+        # Import site module and run site.main() (which is not run by
+        # pyrun per default like in standard Python; see makepyrun.py)
+        if not pyrun_skip_site_main:
+            pyrun_run_site_main()
+
+        # Setup sys.argv for interactive mode
+        if not sys.argv:
+            sys.argv = ['']
+
+        # Enter interactive mode
+        pyrun_prompt()
+
+        # Exit
+        sys.exit(0)
+
+    else:
+        raise TypeError('Unsupported pyrun execution mode: %r' % pyrun_mode)
 
 # Should not get here...
 sys.exit(0)
