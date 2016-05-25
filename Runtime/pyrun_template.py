@@ -74,9 +74,9 @@ pyrun_bytecode = False
 pyrun_ignore_environment = False
 pyrun_ignore_pth_files = False
 pyrun_skip_site_main = False
-pyrun_interactive = False
-pyrun_unbuffered = False
-pyrun_optimized = 0
+pyrun_inspect = int(os.environ.get('PYTHONINSPECT', 0))
+pyrun_unbuffered = int(os.environ.get('PYTHONUNBUFFERED', 0))
+pyrun_optimized = int(os.environ.get('PYTHONOPTIMIZE', 0))
 pyrun_dontwritebytecode = False
 pyrun_hashrandomization = False
 
@@ -156,7 +156,7 @@ Available pyrun options:
 -c:   compile and run <script> directly as Python code
 -d:   enable debug mode (-dd for level 2)
 -h:   show this help text
--i:   enable interactive mode
+-i:   enable interactive inspection mode
 -m:   import and run a module <script> available on PYTHONPATH
 -s:   ignore user site; PyRun always ignores user site configs
 -u:   open stdout/stderr in unbuffered mode
@@ -214,7 +214,7 @@ pyrun_as_string = %(pyrun_as_string)r
 pyrun_bytecode = %(pyrun_bytecode)r
 pyrun_ignore_environment = %(pyrun_ignore_environment)r
 pyrun_ignore_pth_files = %(pyrun_ignore_pth_files)r
-pyrun_interactive = %(pyrun_interactive)r
+pyrun_inspect = %(pyrun_inspect)r
 pyrun_unbuffered = %(pyrun_unbuffered)r
 pyrun_optimized = %(pyrun_optimized)r
 pyrun_dontwritebytecode = %(pyrun_dontwritebytecode)r
@@ -297,8 +297,8 @@ def pyrun_parse_cmdline():
 
         elif arg == '-i':
             # Enable interactive mode
-            global pyrun_interactive
-            pyrun_interactive = True
+            global pyrun_inspect
+            pyrun_inspect = True
 
         elif arg == '-E':
             # Ignore environment variable settings
@@ -389,8 +389,8 @@ def pyrun_parse_cmdline():
         sys._setflag('debug', pyrun_debug)
     if pyrun_hashrandomization:
         sys._setflag('hash_randomization', pyrun_hashrandomization)
-    if pyrun_interactive:
-        sys._setflag('inspect', pyrun_interactive)
+    if pyrun_inspect:
+        sys._setflag('inspect', pyrun_inspect)
     if pyrun_dontwritebytecode:
         sys._setflag('dont_write_bytecode', pyrun_dontwritebytecode)
         sys.dont_write_bytecode = pyrun_dontwritebytecode
@@ -655,12 +655,15 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         except ImportError as reason:
             pyrun_log_error('Could not run %r: %s' % (pyrun_script, reason))
             sys.exit(1)
-        except ValueError as reason:
+        except (ValueError, TypeError) as reason:
             # Unfortunately, trying to import a non-ZIP file as
-            # package will result in a ValueError rather than an
-            # ImportError. We do some extra checks here to prevent
-            # masking application level ValueErrors.
-            if 'source code string' not in str(reason):
+            # package will result in a ValueError (in Python 3) or
+            # TypeError (in Python 2) rather than an ImportError. We
+            # do some extra checks here to prevent masking application
+            # level ValueErrors.
+            reason = str(reason)
+            if ('string without null bytes' not in reason and
+                'source code string' not in reason):
                 raise
             if pyrun_mode == 'app':
                 # For app mode, change the reason to something more
@@ -789,7 +792,7 @@ if __name__ == '__main__':
     pyrun_update_runtime()
     
     # Show debug info
-    if pyrun_debug > 1:
+    if pyrun_debug:
         pyrun_info()
 
     # Start the runtime in various modes
@@ -853,7 +856,7 @@ if __name__ == '__main__':
         try:
             pyrun_execute_script(pyrun_script, script_mode)
         except Exception as reason:
-            if pyrun_interactive:
+            if pyrun_inspect:
                 import traceback
                 traceback.print_exc()
                 pyrun_prompt(banner='')
@@ -861,7 +864,7 @@ if __name__ == '__main__':
                 raise
         else:
             # Enter interactive mode, in case wanted
-            if pyrun_interactive:
+            if pyrun_inspect:
                 pyrun_prompt()
 
         # Exit
@@ -887,7 +890,7 @@ if __name__ == '__main__':
         try:
             pyrun_execute_script(pyrun_script, 'path')
         except Exception as reason:
-            if pyrun_interactive:
+            if pyrun_inspect:
                 import traceback
                 traceback.print_exc()
                 pyrun_prompt(banner='')
@@ -895,7 +898,7 @@ if __name__ == '__main__':
                 raise
         else:
             # Enter interactive mode, in case wanted
-            if pyrun_interactive:
+            if pyrun_inspect:
                 pyrun_prompt()
 
         # Exit
@@ -919,6 +922,11 @@ if __name__ == '__main__':
 
         # Enter interactive mode
         pyrun_prompt()
+
+        # Disable inspect mode to not enter a prompt after the
+        # following sys.exit()
+        if pyrun_inspect:
+            sys._setflag('inspect', 0)
 
         # Exit
         sys.exit(0)
