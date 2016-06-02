@@ -71,6 +71,23 @@ PACKAGENAME = egenix-pyrun
 PACKAGEVERSION = 2.2.1
 #PACKAGEVERSION = $(shell cd Runtime; python -c "from makepyrun import __version__; print __version__")
 
+# OpenSSL installation to compile and link against. If an environment
+# variable SSL is given we use that.  Otherwise, We check a few custom
+# locations which possibly more recent versions before going to the standard
+# system paths.  /usr/local is common on Linux, /usr/contrib on HP-UX,
+# /usr/sfw on Solaris/OpenIndiana, fallback is /usr.
+PYRUN_SSL = $(shell if ( test -n "$(SSL)" ); then echo $(SSL); \
+		    elif ( test -e /usr/local/ssl/include/openssl/ssl.h ); then echo /usr/local/ssl; \
+		    elif ( test -e /usr/contrib/ssl/include/openssl/ssl.h ); then echo /usr/contrib/ssl; \
+		    elif ( test -e /usr/sfw/include/openssl/ssl.h ); then echo /usr/sfw; \
+		    else echo /usr; \
+		    fi)
+
+# General purpose CFLAGS and LDFLAGS to use when building the Python
+# interpreter
+PYRUN_CFLAGS = $(CFLAGS)
+PYRUN_LDFLAGS = $(LDFLAGS)
+
 ### Runtime build parameters
 
 # Project dir
@@ -404,7 +421,7 @@ $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	@$(ECHO) "$(OFF)"
 	$(MAKE) config
 	cd $(PYTHONDIR); \
-	$(MAKE); \
+	$(MAKE) SSL=$(PYRUN_SSL) CFLAGS=$(PYRUN_CFLAGS) LDFLAGS=$(PYRUN_LDFLAGS); \
 	$(MAKE) install; \
 	if ! test -d $(PYRUNSHAREDLIBDIR); then mkdir -p $(PYRUNSHAREDLIBDIR); fi; \
 	$(CP_DIR) -vf $(TMPSHAREDLIBDIR)/* $(PYRUNSHAREDLIBDIR); \

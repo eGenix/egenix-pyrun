@@ -234,10 +234,11 @@ _csv _csv.c
 _socket socketmodule.c
 
 # Socket module helper for SSL support; you must comment out the other
-# socket line above, and possibly edit the SSL variable:
-SSL=/usr
+# socket line above, and possibly edit the SSL variable (this is usually
+# set by the PyRun Makefile):
+#SSL=/usr
 _ssl _ssl.c \
-	-DUSE_SSL -I$(SSL)/include -I$(SSL)/include/openssl \
+	-DUSE_SSL -I$(SSL)/include \
 	-L$(SSL)/lib64 -L$(SSL)/lib -lssl -lcrypto
 
 # The crypt module is now disabled by default because it breaks builds
