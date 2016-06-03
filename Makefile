@@ -252,7 +252,7 @@ endif
 
 # Tools
 TAR = tar
-# Note: MAKE is a pre-defined variable in GNU make
+# MAKE is a predefined variable
 RM = /bin/rm
 STRIP = strip
 CP = cp
@@ -268,6 +268,7 @@ endif
 
 ifdef FREEBSD_PLATFORM
 ECHO = /bin/echo 
+# MAKE = gmake # We need gmake on FreeBSD
 endif
 
 ifdef RASPI_PLATFORM
@@ -421,7 +422,10 @@ $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	@$(ECHO) "$(OFF)"
 	$(MAKE) config
 	cd $(PYTHONDIR); \
-	$(MAKE) SSL=$(PYRUN_SSL) CFLAGS=$(PYRUN_CFLAGS) LDFLAGS=$(PYRUN_LDFLAGS); \
+	export SSL="$(PYRUN_SSL)"; \
+	export CFLAGS="$(PYRUN_CFLAGS)"; \
+	export LDFLAGS="$(PYRUN_LDFLAGS)"; \
+	$(MAKE) SSL="$(PYRUN_SSL)" CFLAGS="$(PYRUN_CFLAGS)" LDFLAGS="$(PYRUN_LDFLAGS)"; \
 	$(MAKE) install; \
 	if ! test -d $(PYRUNSHAREDLIBDIR); then mkdir -p $(PYRUNSHAREDLIBDIR); fi; \
 	$(CP_DIR) -vf $(TMPSHAREDLIBDIR)/* $(PYRUNSHAREDLIBDIR); \
@@ -481,8 +485,11 @@ $(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY) $(BUILDDIR)
 		$(EXCLUDES) \
 	        $(PYRUNDIR)/$(PYRUNPY)
 	cd $(PYRUNDIR); \
-	export LD_RUN_PATH=$(PYRUNRPATH); \
-	$(MAKE); \
+	export LD_RUN_PATH="$(PYRUNRPATH)"; \
+	export SSL="$(PYRUN_SSL)"; \
+	export CFLAGS="$(PYRUN_CFLAGS)"; \
+	export LDFLAGS="$(PYRUN_LDFLAGS)"; \
+	$(MAKE) SSL="$(PYRUN_SSL)" CFLAGS="$(PYRUN_CFLAGS)" LDFLAGS="$(PYRUN_LDFLAGS)"; \
 	$(CP) $(PYRUN) $(PYRUN_DEBUG); \
 	$(STRIP) $(STRIPOPTIONS) $(PYRUN)
 	$(CP) $(PYRUNDIR)/$(PYRUN) $(BINDIR)
