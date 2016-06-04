@@ -83,11 +83,6 @@ PYRUN_SSL = $(shell if ( test -n "$(SSL)" ); then echo $(SSL); \
 		    else echo /usr; \
 		    fi)
 
-# General purpose CFLAGS and LDFLAGS to use when building the Python
-# interpreter
-PYRUN_CFLAGS = $(CFLAGS)
-PYRUN_LDFLAGS = $(LDFLAGS)
-
 ### Runtime build parameters
 
 # Project dir
@@ -423,9 +418,7 @@ $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 	$(MAKE) config
 	cd $(PYTHONDIR); \
 	export SSL="$(PYRUN_SSL)"; \
-	export CFLAGS="$(PYRUN_CFLAGS)"; \
-	export LDFLAGS="$(PYRUN_LDFLAGS)"; \
-	$(MAKE) SSL="$(PYRUN_SSL)" CFLAGS="$(PYRUN_CFLAGS)" LDFLAGS="$(PYRUN_LDFLAGS)"; \
+	$(MAKE); \
 	$(MAKE) install; \
 	if ! test -d $(PYRUNSHAREDLIBDIR); then mkdir -p $(PYRUNSHAREDLIBDIR); fi; \
 	$(CP_DIR) -vf $(TMPSHAREDLIBDIR)/* $(PYRUNSHAREDLIBDIR); \
@@ -487,9 +480,7 @@ $(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY) $(BUILDDIR)
 	cd $(PYRUNDIR); \
 	export LD_RUN_PATH="$(PYRUNRPATH)"; \
 	export SSL="$(PYRUN_SSL)"; \
-	export CFLAGS="$(PYRUN_CFLAGS)"; \
-	export LDFLAGS="$(PYRUN_LDFLAGS)"; \
-	$(MAKE) SSL="$(PYRUN_SSL)" CFLAGS="$(PYRUN_CFLAGS)" LDFLAGS="$(PYRUN_LDFLAGS)"; \
+	$(MAKE); \
 	$(CP) $(PYRUN) $(PYRUN_DEBUG); \
 	$(STRIP) $(STRIPOPTIONS) $(PYRUN)
 	$(CP) $(PYRUNDIR)/$(PYRUN) $(BINDIR)
