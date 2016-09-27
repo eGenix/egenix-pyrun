@@ -204,8 +204,12 @@ endif
 #     We use this to enable using egenix-pyopenssl with pyrun and without
 #     having to set LD_LIBRARY_PATH
 #
-PYRUNORIGIN := $$ORIGIN
-PYRUNRPATH = '$(PYRUNORIGIN):$(PYRUNORIGIN)/../lib:$(PYRUNORIGIN)/../lib/python$(PYRUNVERSION)/site-packages/OpenSSL'
+PYRUNORIGIN = \$$ORIGIN
+PYRUNRPATH := $(PYRUNORIGIN):$(PYRUNORIGIN)/../lib:$(PYRUNORIGIN)/../lib/python$(PYRUNVERSION)/site-packages/OpenSSL
+
+# rpath test target:
+show-rpath:
+	echo "$(PYRUNRPATH)"
 
 # Installation directories
 PREFIX = /usr/local
