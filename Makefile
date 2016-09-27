@@ -209,7 +209,13 @@ PYRUNRPATH := $(PYRUNORIGIN):$(PYRUNORIGIN)/../lib:$(PYRUNORIGIN)/../lib/python$
 
 # rpath test target:
 show-rpath:
-	echo "$(PYRUNRPATH)"
+	echo "Makefile setting:"
+	echo "PYRUNRPATH = $(PYRUNRPATH)"
+	if [ -e $(BINDIR)/$(PYRUN) ]; then \
+	    echo ""; \
+	    echo "Binary $(BINDIR)/$(PYRUN):"; \
+	    readelf -d $(BINDIR)/$(PYRUN) | grep PATH; \
+	fi
 
 # Installation directories
 PREFIX = /usr/local
