@@ -1,6 +1,6 @@
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/importlib/_bootstrap.py	2015-12-07 02:39:08.000000000 +0100
-+++ ./Lib/importlib/_bootstrap.py	2016-05-03 19:22:35.789193826 +0200
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Lib/importlib/_bootstrap.py	2016-06-25 23:38:36.000000000 +0200
++++ ./Lib/importlib/_bootstrap.py	2016-11-17 16:02:43.118002106 +0100
 @@ -788,6 +788,10 @@
  
      @classmethod
@@ -31,9 +31,9 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/imp
          exec(code, module.__dict__)
  
      @classmethod
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib2to3/pgen2/driver.py	2015-12-07 02:39:08.000000000 +0100
-+++ ./Lib/lib2to3/pgen2/driver.py	2016-05-03 19:22:35.789193826 +0200
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Lib/lib2to3/pgen2/driver.py	2016-06-25 23:38:36.000000000 +0200
++++ ./Lib/lib2to3/pgen2/driver.py	2016-11-17 16:02:43.118002106 +0100
 @@ -111,6 +111,14 @@
      """Load the grammar (maybe from a pickle)."""
      if logger is None:
@@ -49,9 +49,9 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib
      if gp is None:
          head, tail = os.path.splitext(gt)
          if tail == ".txt":
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib2to3/refactor.py	2015-12-07 02:39:08.000000000 +0100
-+++ ./Lib/lib2to3/refactor.py	2016-05-03 19:22:35.789193826 +0200
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Lib/lib2to3/refactor.py	2016-06-25 23:38:36.000000000 +0200
++++ ./Lib/lib2to3/refactor.py	2016-11-17 16:02:43.118002106 +0100
 @@ -32,6 +32,16 @@
  
  def get_all_fix_names(fixer_pkg, remove_prefix=True):
@@ -69,9 +69,9 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/lib
      pkg = __import__(fixer_pkg, [], [], ["*"])
      fixer_dir = os.path.dirname(pkg.__file__)
      fix_names = []
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/pkgutil.py ./Lib/pkgutil.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/pkgutil.py	2015-12-07 02:39:08.000000000 +0100
-+++ ./Lib/pkgutil.py	2016-05-03 19:22:35.793193862 +0200
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Lib/pkgutil.py ./Lib/pkgutil.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Lib/pkgutil.py	2016-06-25 23:38:36.000000000 +0200
++++ ./Lib/pkgutil.py	2016-11-17 16:02:43.118002106 +0100
 @@ -307,20 +307,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
@@ -113,10 +113,10 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Lib/pkg
          return self.code
  
      def get_source(self, fullname=None):
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Modules/getpath.c ./Modules/getpath.c
---- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Modules/getpath.c	2015-12-07 02:39:10.000000000 +0100
-+++ ./Modules/getpath.c	2016-05-03 19:22:35.793193862 +0200
-@@ -583,6 +583,24 @@
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Modules/getpath.c ./Modules/getpath.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Modules/getpath.c	2016-06-25 23:38:38.000000000 +0200
++++ ./Modules/getpath.c	2016-11-17 16:02:43.118002106 +0100
+@@ -566,6 +566,24 @@
      wcsncpy(argv0_path, progpath, MAXPATHLEN);
      argv0_path[MAXPATHLEN] = '\0';
  
@@ -141,7 +141,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Modules
  #ifdef WITH_NEXT_FRAMEWORK
      /* On Mac OS X we have a special case if we're running from a framework.
      ** This is because the python home should be set relative to the library,
-@@ -828,6 +846,7 @@
+@@ -811,6 +829,7 @@
      else
          wcsncpy(exec_prefix, _exec_prefix, MAXPATHLEN);
  
@@ -149,10 +149,10 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Modules
      PyMem_RawFree(_pythonpath);
      PyMem_RawFree(_prefix);
      PyMem_RawFree(_exec_prefix);
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/import.c ./Python/import.c
---- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/import.c	2015-12-07 02:39:11.000000000 +0100
-+++ ./Python/import.c	2016-05-03 19:22:35.793193862 +0200
-@@ -1219,6 +1219,23 @@
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Python/import.c ./Python/import.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Python/import.c	2016-06-25 23:38:38.000000000 +0200
++++ ./Python/import.c	2016-11-17 16:02:43.122002142 +0100
+@@ -1223,6 +1223,23 @@
      if (d == NULL) {
          goto err_return;
      }
@@ -176,12 +176,12 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/
      m = exec_code_in_module(name, d, co);
      if (m == NULL)
          goto err_return;
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/pylifecycle.c ./Python/pylifecycle.c
---- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/pylifecycle.c	2015-12-07 02:39:11.000000000 +0100
-+++ ./Python/pylifecycle.c	2016-05-03 19:22:35.793193862 +0200
-@@ -1164,6 +1164,14 @@
-                 encoding = pythonioencoding;
-             }
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Python/pylifecycle.c ./Python/pylifecycle.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Python/pylifecycle.c	2016-06-25 23:38:38.000000000 +0200
++++ ./Python/pylifecycle.c	2016-11-17 16:02:43.122002142 +0100
+@@ -1163,6 +1163,14 @@
+             if (loc != NULL && strcmp(loc, "C") == 0)
+                 errors = "surrogateescape";
          }
 +	else {
 +	    /* For eGenix PyRun we use a fixed PYTHONIOENCODING default of
@@ -194,9 +194,9 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/
      }
  
      /* Set sys.stdin */
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/sysmodule.c ./Python/sysmodule.c
---- /home/lemburg/egenix/projects/PyRun/Python-3.5.1/Python/sysmodule.c	2015-12-07 02:39:11.000000000 +0100
-+++ ./Python/sysmodule.c	2016-05-03 19:22:35.793193862 +0200
+diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Python/sysmodule.c ./Python/sysmodule.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.5.2/Python/sysmodule.c	2016-06-25 23:38:38.000000000 +0200
++++ ./Python/sysmodule.c	2016-11-17 16:02:43.122002142 +0100
 @@ -1205,6 +1205,50 @@
  Return True if Python is exiting.");
  
