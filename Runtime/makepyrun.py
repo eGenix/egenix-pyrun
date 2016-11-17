@@ -99,6 +99,7 @@ else:
 # List of modules to always include (even if they are not found
 # by the module finder)
 include_list = [
+    # Python 2
     '_bisect',
     '_bsddb',
     '_bytesio',
@@ -136,6 +137,8 @@ include_list = [
     'hashlib',
     #'parser',
     'pyexpat',
+    # Python 3
+    '_lzma',
     ]
 
 # List of modules to always exclude from the list of modules
