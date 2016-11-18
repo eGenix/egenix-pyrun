@@ -23,6 +23,10 @@
 ### High-level configuration
 
 # Python versions to use for pyrun
+#
+# Note: When changing the versions here, also update them in the product
+# Makefile.
+#
 PYTHON_35_VERSION = 3.5.2
 PYTHON_34_VERSION = 3.4.5
 PYTHON_27_VERSION = 2.7.12

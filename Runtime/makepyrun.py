@@ -41,7 +41,7 @@ except ImportError:
 ### Globals
 
 # PyRun release version
-__version__ = '2.2.2'
+__version__ = '2.2.3'
 
 # Debug level
 _debug = 1
@@ -138,7 +138,10 @@ include_list = [
     #'parser',
     'pyexpat',
     # Python 3
-    '_lzma',
+    #
+    # Note: Adding _lzma can cause serious issues, since the needed lib
+    # isn't universally installed everywhere.  See #1793 and #1794.
+    #'_lzma',
     ]
 
 # List of modules to always exclude from the list of modules

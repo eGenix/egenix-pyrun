@@ -456,7 +456,11 @@ _sqlite3 \
 _bz2 _bz2module.c -lbz2
 
 # lzma
-_lzma _lzmamodule.c -llzma
+#
+# Note: Adding this can cause serious issues, since the needed lib isn't
+# universally installed everywhere. See #1793 and #1794.
+#
+#_lzma _lzmamodule.c -llzma
 
 # _json
 _json _json.c
