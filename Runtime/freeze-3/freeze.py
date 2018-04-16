@@ -93,7 +93,7 @@ import modulefinder
 import getopt
 import os
 import sys
-
+import sysconfig
 
 # Import the freeze-private modules
 
@@ -267,9 +267,12 @@ def main():
         if win:
             frozendllmain_c = os.path.join(exec_prefix, 'Pc\\frozen_dllmain.c')
     else:
-        binlib = os.path.join(exec_prefix,
-                              'lib', 'python%s' % version,
-                              'config-%s' % flagged_version)
+        # Since the location of the config dir changed between Python
+        # versions, it's better to get the name via the sysconfig module
+        # function get_makefile_filename() (the Makefile is placed into this
+        # dir during install)
+        config_dir = os.path.dirname(sysconfig.get_makefile_filename())
+        binlib = os.path.join(exec_prefix, config_dir)
         incldir = os.path.join(prefix, 'include', 'python%s' % flagged_version)
         config_h_dir = os.path.join(exec_prefix, 'include',
                                     'python%s' % flagged_version)

@@ -216,7 +216,7 @@ def test_v_flag(runtime=PYRUN):
                  runtime)
     assert match_result(
         result,
-        "verbose=1\n(import .*|# zipimport: found .*)"
+        "verbose=1\n(import .*|# zipimport: found .*|# destroy sitecustomize.*)"
         )
     
     result = run('%s -vv -c '
@@ -225,7 +225,7 @@ def test_v_flag(runtime=PYRUN):
                  runtime)
     assert match_result(
         result,
-        "verbose=2\n(import .*|# zipimport: found .*)"
+        "verbose=2\n(import .*|# zipimport: found .*|# destroy sitecustomize.*)"
         )
     
 def test_s_flag(runtime=PYRUN):

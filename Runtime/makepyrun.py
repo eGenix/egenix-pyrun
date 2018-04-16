@@ -10,7 +10,7 @@
     ---------------------------------------------------------------------
 
     Copyright (c) 1997-2000, Marc-Andre Lemburg; mailto:mal@lemburg.com
-    Copyright (c) 2000-2016, eGenix.com Software GmbH; mailto:info@egenix.com
+    Copyright (c) 2000-2018, eGenix.com Software GmbH; mailto:info@egenix.com
 
                             All Rights Reserved.
 
@@ -29,7 +29,7 @@
 # created for building pyrun. As such it has access to the
 # configuration of the final pyrun executable.
 #
-import sys, os, re, pprint
+import sys, os, re, pprint, zlib
 
 try:
     # sysconfig was added to Python 2.7 as top-level module
@@ -41,7 +41,7 @@ except ImportError:
 ### Globals
 
 # PyRun release version
-__version__ = '2.2.3'
+__version__ = '2.3.0'
 
 # Debug level
 _debug = 1
@@ -159,6 +159,7 @@ exclude_list = [
     '_testcapi',
     'parser',
     # Python 3
+    'idlelib',
     ]
 
 # List of packages to always exclude from the list of modules
@@ -351,10 +352,18 @@ def patch__sysconfigdata_py(libdir=LIBDIR):
     """ Patch the new _sysconfigdata module in Python 2.7 and 3.4.
 
     """
+    module_name = '_sysconfigdata.py'
+    if sys.version_info >= (3, 6):
+        # In Python 3.6, the module name was changed to include ABI,
+        # platform and architecture details, so we have to fetch the name
+        # from an internal function in sysconfig.  If this internal function
+        # is changed, adapt this code as necessary:
+        import sysconfig
+        module_name = sysconfig._get_sysconfigdata_name() + '.py'
     if sys.version_info >= (2, 7, 5) or sys.version_info >= (3, 3):
         # Python 2.7.5 and later, 3.3 and later: the build time config
         # data was stored into a new private module _sysconfigdata.py
-        patch_module(os.path.join(libdir, '_sysconfigdata.py'),
+        patch_module(os.path.join(libdir, module_name),
                      'build_time_vars += +{.+}',
                      'import pyrun_config; build_time_vars = pyrun_config.config_vars',
                      flags=re.DOTALL)
@@ -382,11 +391,12 @@ def patch_site_py(libdir=LIBDIR):
         '"See https?://www\.python\.org[^"%]*/license/?"'
         ')',
         '"See http://egenix.com/products/python/PyRun/license.html"')
-    # Disable use of lib/site-python
-    patch_module(
-        os.path.join(libdir, 'site.py'),
-        'sitepackages.append\(os.path.join\(prefix, "lib", "site-python"\)\)',
-        '#sitepackages.append(os.path.join(prefix, "lib", "site-python"))')
+    # Disable use of lib/site-python (removed in Python 3.5)
+    if sys.version_info < (3, 5):
+        patch_module(
+            os.path.join(libdir, 'site.py'),
+            'sitepackages.append\(os.path.join\(prefix, "lib", "site-python"\)\)',
+            '#sitepackages.append(os.path.join(prefix, "lib", "site-python"))')
     # Disable ENABLE_USER_SITE, since we don't want PyRun to install
     # things in the user's site-packages dir
     patch_module(
@@ -411,6 +421,27 @@ def patch_ssl_py(libdir=LIBDIR):
         "    _create_default_https_context = create_default_context\n"
         "else:\n"
         "    _create_default_https_context = _create_unverified_context\n"
+        )
+
+def patch_lib2to3_pygram(libdir=LIBDIR):
+
+    """ Patch lib2to3.pygram module.
+
+        We load the grammars from the pyrun_grammar module.
+
+    """
+    patch_module(
+        os.path.join(libdir, 'lib2to3', 'pygram.py'),
+        '^python_grammar = driver.load_packaged_grammar\("lib2to3", _GRAMMAR_FILE\)',
+        '#python_grammar = driver.load_packaged_grammar("lib2to3", _GRAMMAR_FILE)\n'
+        "import pyrun_grammar\n"
+        "python_grammar = pyrun_grammar.load_python_grammar()\n"
+        )
+    patch_module(
+        os.path.join(libdir, 'lib2to3', 'pygram.py'),
+        '^pattern_grammar = driver.load_packaged_grammar\("lib2to3", _PATTERN_GRAMMAR_FILE\)',
+        '#pattern_grammar = driver.load_packaged_grammar("lib2to3", _PATTERN_GRAMMAR_FILE)\n'
+        "pattern_grammar = pyrun_grammar.load_pattern_grammar()\n"
         )
 
 def create_pyrun_config_py(inputfile='pyrun_config_template.py',
@@ -550,6 +581,9 @@ def main(pyrunfile='pyrun.py',
 
     # Patch ssl module
     patch_ssl_py(libdir)
+
+    # Patch lib2to3.pygram
+    patch_lib2to3_pygram(libdir)
 
 if __name__ == '__main__':
     main(*sys.argv[1:])

@@ -27,12 +27,14 @@
 # Note: When changing the versions here, also update them in the product
 # Makefile.
 #
-PYTHON_35_VERSION = 3.5.2
-PYTHON_34_VERSION = 3.4.5
-PYTHON_27_VERSION = 2.7.12
+PYTHON_36_VERSION = 3.6.5
+PYTHON_35_VERSION = 3.5.5
+PYTHON_34_VERSION = 3.4.8
+PYTHON_27_VERSION = 2.7.14
 PYTHON_26_VERSION = 2.6.9
 
 # Python version to use as basis for pyrun
+#PYTHONFULLVERSION = $(PYTHON_36_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_35_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_34_VERSION)
 PYTHONFULLVERSION = $(PYTHON_27_VERSION)
@@ -43,7 +45,8 @@ PYTHONVERSIONS = \
 	$(PYTHON_26_VERSION) \
 	$(PYTHON_27_VERSION) \
 	$(PYTHON_34_VERSION) \
-	$(PYTHON_35_VERSION)
+	$(PYTHON_35_VERSION) \
+	$(PYTHON_36_VERSION)
 
 # Python Unicode version
 PYTHONUNICODE = ucs2
@@ -72,7 +75,7 @@ EXCLUDES = 	-x test \
 # Package details (used for distributions and normally passed in via
 # the product Makefile)
 PACKAGENAME = egenix-pyrun
-PACKAGEVERSION = 2.2.1
+PACKAGEVERSION = 2.3.0
 #PACKAGEVERSION = $(shell cd Runtime; python -c "from makepyrun import __version__; print __version__")
 
 # OpenSSL installation to compile and link against. If an environment
@@ -100,12 +103,13 @@ PYRUNVERSION = $(PYTHONVERSION)
 PLATFORM := $(shell python -c "from distutils.util import get_platform; print get_platform()")
 
 # Python build flags
+PYTHON_2_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "2" && echo "1")
 PYTHON_26_BUILD := $(shell test "$(PYTHONVERSION)" = "2.6" && echo "1")
 PYTHON_27_BUILD := $(shell test "$(PYTHONVERSION)" = "2.7" && echo "1")
-PYTHON_2_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "2" && echo "1")
-PYTHON_35_BUILD := $(shell test "$(PYTHONVERSION)" = "3.5" && echo "1")
-PYTHON_34_BUILD := $(shell test "$(PYTHONVERSION)" = "3.4" && echo "1")
 PYTHON_3_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "3" && echo "1")
+PYTHON_34_BUILD := $(shell test "$(PYTHONVERSION)" = "3.4" && echo "1")
+PYTHON_35_BUILD := $(shell test "$(PYTHONVERSION)" = "3.5" && echo "1")
+PYTHON_36_BUILD := $(shell test "$(PYTHONVERSION)" = "3.6" && echo "1")
 
 # Special Python environment setups
 ifdef PYTHON_3_BUILD
@@ -572,6 +576,9 @@ $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 	$(RM) -rf $(TESTDIR)
 	./install-pyrun \
 		--log \
+		--debug \
+		--setuptools-version=latest \
+		--pip-version=latest \
 		--pyrun-distribution=$(BINARY_DISTRIBUTION_ARCHIVE) \
 		$(TESTDIR)
 	touch $@

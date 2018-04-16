@@ -28,7 +28,7 @@
 COPYRIGHT = """\
 
     Copyright (c) 1997-2000, Marc-Andre Lemburg; mailto:mal@lemburg.com
-    Copyright (c) 2000-2016, eGenix.com Software GmbH; mailto:info@egenix.com
+    Copyright (c) 2000-2018, eGenix.com Software GmbH; mailto:info@egenix.com
 
                             All Rights Reserved.
 
@@ -447,7 +447,13 @@ def pyrun_prompt(pyrun_script='<stdin>', banner=None):
     runtime_globals = globals()
     runtime_globals.update(__name__='__main__',
                            __file__=pyrun_script)
-    code.interact(banner, raw_input, runtime_globals)
+    if sys.version_info < (3, 6):
+        code.interact(banner, raw_input, runtime_globals)
+    else:
+        # Python 3.6 introduce an exit message and comes with
+        # an annoying default value which we'll supress here
+        code.interact(banner, raw_input, runtime_globals,
+                      exitmsg='')
 
 def pyrun_enable_unbuffered_mode():
 
