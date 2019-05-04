@@ -27,10 +27,10 @@
 # Note: When changing the versions here, also update them in the product
 # Makefile.
 #
-PYTHON_36_VERSION = 3.6.5
-PYTHON_35_VERSION = 3.5.5
-PYTHON_34_VERSION = 3.4.8
-PYTHON_27_VERSION = 2.7.14
+PYTHON_36_VERSION = 3.6.8
+PYTHON_35_VERSION = 3.5.7
+PYTHON_34_VERSION = 3.4.9
+PYTHON_27_VERSION = 2.7.16
 PYTHON_26_VERSION = 2.6.9
 
 # Python version to use as basis for pyrun
