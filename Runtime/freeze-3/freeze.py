@@ -193,7 +193,7 @@ def main():
     except getopt.error as msg:
         usage('getopt error: ' + str(msg))
 
-    # proces option arguments
+    # process option arguments
     for o, a in opts:
         if o == '-h':
             print(__doc__)
@@ -252,7 +252,7 @@ def main():
     ishome = os.path.exists(os.path.join(prefix, 'Python', 'ceval.c'))
 
     # locations derived from options
-    version = sys.version[:3]
+    version = '%d.%d' % sys.version_info[:2]
     flagged_version = version + sys.abiflags
     if win:
         extensions_c = 'frozen_extensions.c'
