@@ -14,7 +14,9 @@ trailer = """\
 };
 """
 
-default_entry_point = """
+# This version does not work in Python 3.7, since the libpython already
+# includes a Py_GetArgcArgv() function.
+old_default_entry_point = """
 
 /* For Py_GetArgcArgv(); set by main() */
 static char **orig_argv;
@@ -40,6 +42,23 @@ main(int argc, char **argv)
         Py_NoSiteFlag++;        /* Don't import site.py */
         orig_argc = argc;	/* For Py_GetArgcArgv() */
         orig_argv = argv;
+
+        PyImport_FrozenModules = _PyImport_FrozenModules;
+        return Py_FrozenMain(argc, argv);
+}
+
+"""
+
+default_entry_point = """
+
+int
+main(int argc, char **argv)
+{
+        extern int Py_FrozenMain(int, char **);
+
+        /* Disabled, since we want to default to non-optimized mode: */
+        /* Py_OptimizeFlag++; */
+        Py_NoSiteFlag++;        /* Don't import site.py */
 
         PyImport_FrozenModules = _PyImport_FrozenModules;
         return Py_FrozenMain(argc, argv);
