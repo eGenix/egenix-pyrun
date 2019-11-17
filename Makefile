@@ -137,7 +137,7 @@ ARCHIVE = $(PYRUN)-$(PYRUNFULLVERSION)-$(PLATFORM)
 
 # Location of the Python tarball
 PYTHONTARBALL = /downloads/egenix-build-environment/Python-$(PYTHONFULLVERSION).tgz
-PYTHONSOURCEURL = http://www.python.org/ftp/python/$(PYTHONFULLVERSION)/Python-$(PYTHONFULLVERSION).tgz
+PYTHONSOURCEURL = https://www.python.org/ftp/python/$(PYTHONFULLVERSION)/Python-$(PYTHONFULLVERSION).tgz
 
 # Directories
 PYTHONORIGDIR = $(PWD)/Python-$(PYTHONFULLVERSION)
