@@ -503,6 +503,7 @@ zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz
 # More information on Expat can be found at www.libexpat.org.
 #
 pyexpat -DHAVE_EXPAT_CONFIG_H -I./Modules/expat/ \
+	-DXML_DEV_URANDOM \
 	expat/xmlparse.c \
 	expat/xmlrole.c \
 	expat/xmltok.c \

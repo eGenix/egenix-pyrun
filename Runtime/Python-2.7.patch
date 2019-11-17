@@ -1,10 +1,10 @@
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Lib/lib2to3/pgen2/driver.py	2016-06-25 23:49:31.000000000 +0200
-+++ ./Lib/lib2to3/pgen2/driver.py	2016-11-17 15:57:05.959024520 +0100
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Lib/lib2to3/pgen2/driver.py	2019-10-19 20:38:44.000000000 +0200
++++ ./Lib/lib2to3/pgen2/driver.py	2019-11-17 15:19:33.471467314 +0100
 @@ -111,6 +111,14 @@
-     """Load the grammar (maybe from a pickle)."""
-     if logger is None:
-         logger = logging.getLogger()
+     head, tail = os.path.splitext(gt)
+     if tail == ".txt":
+         tail = ""
 +    # eGenix PyRun support using pyrun_grammar.py to avoid having to
 +    # carry around the grammar files
 +    if gt == '<pyrun>/lib2to3/Grammar.txt':
@@ -13,13 +13,13 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Lib/li
 +    elif gt == '<pyrun>/lib2to3/PatternGrammar.txt':
 +        import pyrun_grammar
 +        return pyrun_grammar.load_pattern_grammar()
-     if gp is None:
-         head, tail = os.path.splitext(gt)
-         if tail == ".txt":
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Lib/lib2to3/refactor.py	2016-06-25 23:49:31.000000000 +0200
-+++ ./Lib/lib2to3/refactor.py	2016-11-17 15:57:05.959024520 +0100
-@@ -32,6 +32,16 @@
+     return head + tail + ".".join(map(str, sys.version_info)) + ".pickle"
+ 
+ 
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Lib/lib2to3/refactor.py	2019-10-19 20:38:44.000000000 +0200
++++ ./Lib/lib2to3/refactor.py	2019-11-17 15:19:33.507467709 +0100
+@@ -33,6 +33,16 @@
  
  def get_all_fix_names(fixer_pkg, remove_prefix=True):
      """Return a sorted list of all available fix names in the given package."""
@@ -34,12 +34,12 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Lib/li
 +                    for name in pyrun_config.lib2to3_fixes]
 +
      pkg = __import__(fixer_pkg, [], [], ["*"])
-     fixer_dir = os.path.dirname(pkg.__file__)
      fix_names = []
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Lib/pkgutil.py ./Lib/pkgutil.py
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Lib/pkgutil.py	2016-06-25 23:49:31.000000000 +0200
-+++ ./Lib/pkgutil.py	2016-11-17 15:57:05.963024555 +0100
-@@ -275,20 +275,27 @@
+     for finder, name, ispkg in pkgutil.iter_modules(pkg.__path__):
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Lib/pkgutil.py ./Lib/pkgutil.py
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Lib/pkgutil.py	2019-10-19 20:38:44.000000000 +0200
++++ ./Lib/pkgutil.py	2019-11-17 15:19:33.531467972 +0100
+@@ -273,20 +273,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
      def get_code(self, fullname=None):
@@ -80,10 +80,10 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Lib/pk
          return self.code
  
      def get_source(self, fullname=None):
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Modules/getpath.c ./Modules/getpath.c
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Modules/getpath.c	2016-06-25 23:49:31.000000000 +0200
-+++ ./Modules/getpath.c	2016-11-17 15:57:05.963024555 +0100
-@@ -444,6 +444,17 @@
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Modules/getpath.c ./Modules/getpath.c
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Modules/getpath.c	2019-10-19 20:38:44.000000000 +0200
++++ ./Modules/getpath.c	2019-11-17 15:19:33.795470867 +0100
+@@ -442,6 +442,17 @@
          strncpy(argv0_path, progpath, MAXPATHLEN);
          argv0_path[MAXPATHLEN] = '\0';
  
@@ -101,10 +101,10 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Module
  #ifdef WITH_NEXT_FRAMEWORK
          /* On Mac OS X we have a special case if we're running from a framework.
          ** This is because the python home should be set relative to the library,
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Python/import.c ./Python/import.c
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Python/import.c	2016-06-25 23:49:32.000000000 +0200
-+++ ./Python/import.c	2016-11-17 15:57:05.963024555 +0100
-@@ -2124,7 +2124,7 @@
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Python/import.c ./Python/import.c
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Python/import.c	2019-10-19 20:38:44.000000000 +0200
++++ ./Python/import.c	2019-11-17 15:19:33.863471612 +0100
+@@ -2146,7 +2146,7 @@
          if (err != 0)
              goto err_return;
      }
@@ -113,9 +113,9 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Python
      if (m == NULL)
          goto err_return;
      Py_DECREF(co);
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Python/sysmodule.c ./Python/sysmodule.c
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.12/Python/sysmodule.c	2016-06-25 23:49:32.000000000 +0200
-+++ ./Python/sysmodule.c	2016-11-17 15:57:05.963024555 +0100
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Python/sysmodule.c ./Python/sysmodule.c
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.17/Python/sysmodule.c	2019-10-19 20:38:44.000000000 +0200
++++ ./Python/sysmodule.c	2019-11-17 15:19:33.863471612 +0100
 @@ -916,6 +916,50 @@
  Clear the internal type lookup cache.");
  

@@ -1,7 +1,7 @@
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/distutils/sysconfig.py ./Lib/distutils/sysconfig.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/distutils/sysconfig.py	2019-03-25 21:21:05.000000000 +0100
-+++ ./Lib/distutils/sysconfig.py	2019-05-04 14:54:21.699771441 +0200
-@@ -434,6 +434,10 @@
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/distutils/sysconfig.py ./Lib/distutils/sysconfig.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/distutils/sysconfig.py	2019-10-15 00:32:36.000000000 +0200
++++ ./Lib/distutils/sysconfig.py	2019-11-17 15:17:22.490030068 +0100
+@@ -439,6 +439,10 @@
          platform=sys.platform,
          multiarch=getattr(sys.implementation, '_multiarch', ''),
      ))
@@ -12,9 +12,9 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/dis
      _temp = __import__(name, globals(), locals(), ['build_time_vars'], 0)
      build_time_vars = _temp.build_time_vars
      global _config_vars
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/importlib/_bootstrap.py	2019-03-25 21:21:05.000000000 +0100
-+++ ./Lib/importlib/_bootstrap.py	2019-05-04 14:54:21.699771441 +0200
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/importlib/_bootstrap.py	2019-10-15 00:32:36.000000000 +0200
++++ ./Lib/importlib/_bootstrap.py	2019-11-17 15:17:22.530030507 +0100
 @@ -791,6 +791,10 @@
  
      @classmethod
@@ -45,9 +45,9 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/imp
          exec(code, module.__dict__)
  
      @classmethod
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/lib2to3/pgen2/driver.py	2019-03-25 21:21:05.000000000 +0100
-+++ ./Lib/lib2to3/pgen2/driver.py	2019-05-04 14:54:21.699771441 +0200
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/lib2to3/pgen2/driver.py	2019-10-15 00:32:36.000000000 +0200
++++ ./Lib/lib2to3/pgen2/driver.py	2019-11-17 15:17:22.582031079 +0100
 @@ -108,6 +108,14 @@
      head, tail = os.path.splitext(gt)
      if tail == ".txt":
@@ -63,10 +63,10 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/lib
      return head + tail + ".".join(map(str, sys.version_info)) + ".pickle"
  
  
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/lib2to3/refactor.py	2019-03-25 21:21:05.000000000 +0100
-+++ ./Lib/lib2to3/refactor.py	2019-05-04 14:54:21.699771441 +0200
-@@ -29,6 +29,16 @@
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/lib2to3/refactor.py	2019-10-15 00:32:36.000000000 +0200
++++ ./Lib/lib2to3/refactor.py	2019-11-17 15:17:22.582031079 +0100
+@@ -30,6 +30,16 @@
  
  def get_all_fix_names(fixer_pkg, remove_prefix=True):
      """Return a sorted list of all available fix names in the given package."""
@@ -81,11 +81,11 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/lib
 +                    for name in pyrun_config.lib2to3_fixes]
 +
      pkg = __import__(fixer_pkg, [], [], ["*"])
-     fixer_dir = os.path.dirname(pkg.__file__)
      fix_names = []
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/pkgutil.py ./Lib/pkgutil.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/pkgutil.py	2019-03-25 21:21:05.000000000 +0100
-+++ ./Lib/pkgutil.py	2019-05-04 14:54:21.699771441 +0200
+     for finder, name, ispkg in pkgutil.iter_modules(pkg.__path__):
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/pkgutil.py ./Lib/pkgutil.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/pkgutil.py	2019-10-15 00:32:36.000000000 +0200
++++ ./Lib/pkgutil.py	2019-11-17 15:17:22.602031298 +0100
 @@ -315,20 +315,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
@@ -127,9 +127,9 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/pkg
          return self.code
  
      def get_source(self, fullname=None):
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/sysconfig.py ./Lib/sysconfig.py
---- /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/sysconfig.py	2019-03-25 21:21:05.000000000 +0100
-+++ ./Lib/sysconfig.py	2019-05-04 14:54:21.699771441 +0200
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/sysconfig.py ./Lib/sysconfig.py
+--- /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Lib/sysconfig.py	2019-10-15 00:32:36.000000000 +0200
++++ ./Lib/sysconfig.py	2019-11-17 15:17:22.602031298 +0100
 @@ -344,12 +344,16 @@
  
  
@@ -148,10 +148,10 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Lib/sys
  
  
  def _generate_posix_vars():
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Makefile.pre.in ./Makefile.pre.in
---- /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Makefile.pre.in	2019-03-25 21:21:05.000000000 +0100
-+++ ./Makefile.pre.in	2019-05-04 14:54:21.699771441 +0200
-@@ -127,6 +127,10 @@
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Makefile.pre.in ./Makefile.pre.in
+--- /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Makefile.pre.in	2019-10-15 00:32:36.000000000 +0200
++++ ./Makefile.pre.in	2019-11-17 15:17:22.602031298 +0100
+@@ -129,6 +129,10 @@
  MULTIARCH=	@MULTIARCH@
  MULTIARCH_CPPFLAGS = @MULTIARCH_CPPFLAGS@
  
@@ -162,7 +162,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Makefil
  # Install prefix for architecture-independent files
  prefix=		@prefix@
  
-@@ -1386,7 +1390,7 @@
+@@ -1397,7 +1401,7 @@
  			esac; \
  		done; \
  	done
@@ -171,7 +171,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Makefil
  		$(DESTDIR)$(LIBDEST); \
  	$(INSTALL_DATA) $(srcdir)/LICENSE $(DESTDIR)$(LIBDEST)/LICENSE.txt
  	if test -d $(DESTDIR)$(LIBDEST)/distutils/tests; then \
-@@ -1529,7 +1533,7 @@
+@@ -1540,7 +1544,7 @@
  		--install-scripts=$(BINDIR) \
  		--install-platlib=$(DESTSHARED) \
  		--root=$(DESTDIR)/
@@ -180,10 +180,10 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Makefil
  	-rm -r $(DESTDIR)$(DESTSHARED)/__pycache__
  
  # Here are a couple of targets for MacOSX again, to install a full
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Python/import.c ./Python/import.c
---- /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Python/import.c	2019-03-25 21:21:05.000000000 +0100
-+++ ./Python/import.c	2019-05-04 14:54:21.699771441 +0200
-@@ -1350,6 +1350,23 @@
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Python/import.c ./Python/import.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Python/import.c	2019-10-15 00:32:36.000000000 +0200
++++ ./Python/import.c	2019-11-17 15:17:22.622031518 +0100
+@@ -1349,6 +1349,23 @@
      if (d == NULL) {
          goto err_return;
      }
@@ -207,10 +207,10 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Python/
      m = exec_code_in_module(name, d, co);
      if (m == NULL)
          goto err_return;
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Python/pylifecycle.c ./Python/pylifecycle.c
---- /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Python/pylifecycle.c	2019-03-25 21:21:05.000000000 +0100
-+++ ./Python/pylifecycle.c	2019-05-04 14:54:21.703771480 +0200
-@@ -1900,6 +1900,14 @@
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Python/pylifecycle.c ./Python/pylifecycle.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Python/pylifecycle.c	2019-10-15 00:32:36.000000000 +0200
++++ ./Python/pylifecycle.c	2019-11-17 15:17:22.622031518 +0100
+@@ -1908,6 +1908,14 @@
                  errors = err;
              }
          }
@@ -225,10 +225,10 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Python/
  
          if (interp->core_config.utf8_mode) {
              if (!encoding) {
-diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Python/sysmodule.c ./Python/sysmodule.c
---- /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Python/sysmodule.c	2019-03-25 21:21:05.000000000 +0100
-+++ ./Python/sysmodule.c	2019-05-04 14:54:21.703771480 +0200
-@@ -1513,6 +1513,50 @@
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Python/sysmodule.c ./Python/sysmodule.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.7.5/Python/sysmodule.c	2019-10-15 00:32:36.000000000 +0200
++++ ./Python/sysmodule.c	2019-11-17 15:17:22.622031518 +0100
+@@ -1515,6 +1515,50 @@
  #endif   /* ANDROID_API_LEVEL */
  
  
@@ -279,7 +279,7 @@ diff -ur -x importlib.h /home/lemburg/egenix/projects/PyRun/Python-3.7.3/Python/
  static PyMethodDef sys_methods[] = {
      /* Might as well keep this in alphabetic order */
      {"breakpointhook",  (PyCFunction)sys_breakpointhook,
-@@ -1580,6 +1624,7 @@
+@@ -1582,6 +1626,7 @@
      {"setdlopenflags", sys_setdlopenflags, METH_VARARGS,
       setdlopenflags_doc},
  #endif
