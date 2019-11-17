@@ -5,7 +5,7 @@ def worker():
     """
         Worker function
     """
-    print 'Worker %i using %s' % (os.getpid(), sys.executable)
+    print('Worker %i using %s' % (os.getpid(), sys.executable))
 
 if __name__ == '__main__':
     jobs = []
@@ -16,5 +16,5 @@ if __name__ == '__main__':
     while jobs:
         p = jobs.pop()
         p.join()
-        print 'Worker %r joined' % p
-    print 'Works.'
+        print('Worker %r joined' % p)
+    print('Works.')

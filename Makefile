@@ -27,12 +27,14 @@
 # Note: When changing the versions here, also update them in the product
 # Makefile.
 #
+PYTHON_38_VERSION = 3.8.0
 PYTHON_37_VERSION = 3.7.3
 PYTHON_36_VERSION = 3.6.8
 PYTHON_27_VERSION = 2.7.16
 
 # Python version to use as basis for pyrun
-PYTHONFULLVERSION = $(PYTHON_37_VERSION)
+PYTHONFULLVERSION = $(PYTHON_38_VERSION)
+#PYTHONFULLVERSION = $(PYTHON_37_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_36_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_27_VERSION)
 
@@ -40,7 +42,8 @@ PYTHONFULLVERSION = $(PYTHON_37_VERSION)
 PYTHONVERSIONS = \
 	$(PYTHON_27_VERSION) \
 	$(PYTHON_36_VERSION) \
-	$(PYTHON_37_VERSION)
+	$(PYTHON_37_VERSION) \
+	$(PYTHON_38_VERSION)
 
 # Python Unicode version
 PYTHONUNICODE = ucs2
@@ -92,6 +95,7 @@ PWD := $(shell pwd)
 # Version & Platform
 PYTHONVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\.[0-9]\).*/\1/')
 PYTHONMAJORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\)\..*/\1/')
+PYTHONMINORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/[0-9]\.\([0-9]\)\..*/\1/')
 PYRUNFULLVERSION = $(PYTHONFULLVERSION)
 PYRUNVERSION = $(PYTHONVERSION)
 PLATFORM := $(shell python -c "from distutils.util import get_platform; print get_platform()")
@@ -102,6 +106,8 @@ PYTHON_27_BUILD := $(shell test "$(PYTHONVERSION)" = "2.7" && echo "1")
 PYTHON_3_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "3" && echo "1")
 PYTHON_36_BUILD := $(shell test "$(PYTHONVERSION)" = "3.6" && echo "1")
 PYTHON_37_BUILD := $(shell test "$(PYTHONVERSION)" = "3.7" && echo "1")
+PYTHON_37_OR_EARLIER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -lt 8 && echo "1")
+PYTHON_38_BUILD := $(shell test "$(PYTHONVERSION)" = "3.8" && echo "1")
 
 # Special Python environment setups
 ifdef PYTHON_3_BUILD
@@ -158,9 +164,14 @@ TMPLIBDIR = $(TMPINSTALLDIR)/lib/python$(PYRUNVERSION)
 TMPSHAREDLIBDIR = $(TMPLIBDIR)/lib-dynload
 TMPSITEPACKAGESLIBDIR = $(TMPLIBDIR)/site-packages
 ifdef PYTHON_2_BUILD
+ # Python 2.x did not have ABI dirs
  TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)
-else
+else ifdef PYTHON_37_OR_EARLIER_BUILD
+ # Python 3.x - 3.7 put the include files into an ABI specific dir
  TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)$(PYTHONABI)
+else
+ # Python 3.8 returned to the non-ABI dir
+ TMPINCLUDEDIR = $(TMPINSTALLDIR)/include/python$(PYRUNVERSION)
 endif
 
 # Build dir
@@ -348,6 +359,8 @@ $(PYTHONORIGDIR):
 	    $(ECHO) "Extracting local copy $(PYTHONTARBALL)."; \
 	    $(TAR) xfz $(PYTHONTARBALL) ; \
 	fi
+
+python-orig:	$(PYTHONORIGDIR)
 
 $(PYTHONDIR):
 	@$(ECHO) "$(BOLD)"
@@ -708,6 +721,7 @@ create-python-patch:	$(PYTHONORIGDIR)
 	cd $(PYTHONDIR); \
 	diff -ur \
 		-x 'importlib.h' \
+		-x 'Setup' \
 		$(PYTHONORIGDIR) . | sed '/Only in .*/d' \
 		>  ../Runtime/$(PYTHONPATCHFILE)
 
