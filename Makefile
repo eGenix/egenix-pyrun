@@ -81,6 +81,7 @@ PACKAGEVERSION = 2.4.0
 # system paths.  /usr/local is common on Linux, /usr/contrib on HP-UX,
 # /usr/sfw on Solaris/OpenIndiana, fallback is /usr.
 PYRUN_SSL = $(shell if ( test -n "$(SSL)" ); then echo $(SSL); \
+		    elif ( test -e /usr/include/openssl/ssl.h ); then echo /usr; \
 		    elif ( test -e /usr/local/ssl/include/openssl/ssl.h ); then echo /usr/local/ssl; \
 		    elif ( test -e /usr/contrib/ssl/include/openssl/ssl.h ); then echo /usr/contrib/ssl; \
 		    elif ( test -e /usr/sfw/include/openssl/ssl.h ); then echo /usr/sfw; \
