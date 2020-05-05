@@ -389,6 +389,7 @@ $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 	@$(ECHO) "=== Configuring Python ========================================================"
 	@$(ECHO) "$(OFF)"
 	cd $(PYTHONDIR); \
+	CONFIG_SITE="" \
 	./configure \
 		--prefix=$(TMPINSTALLDIR) \
 		--exec-prefix=$(TMPINSTALLDIR) \
@@ -402,6 +403,7 @@ $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 	@$(ECHO) "=== Configuring Python ========================================================"
 	@$(ECHO) "$(OFF)"
 	cd $(PYTHONDIR); \
+	CONFIG_SITE="" \
 	./configure \
 		--prefix=$(TMPINSTALLDIR) \
 		--exec-prefix=$(TMPINSTALLDIR) \
