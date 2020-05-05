@@ -27,7 +27,7 @@
 # Note: When changing the versions here, also update them in the product
 # Makefile.
 #
-PYTHON_38_VERSION = 3.8.0
+PYTHON_38_VERSION = 3.8.2
 PYTHON_37_VERSION = 3.7.5
 PYTHON_36_VERSION = 3.6.9
 PYTHON_27_VERSION = 2.7.17
