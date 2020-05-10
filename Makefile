@@ -30,7 +30,7 @@
 PYTHON_38_VERSION = 3.8.2
 PYTHON_37_VERSION = 3.7.5
 PYTHON_36_VERSION = 3.6.9
-PYTHON_27_VERSION = 2.7.17
+PYTHON_27_VERSION = 2.7.18
 
 # Python version to use as basis for pyrun
 PYTHONFULLVERSION = $(PYTHON_38_VERSION)
@@ -72,6 +72,9 @@ EXCLUDES = 	-x test \
 # Package details (used for distributions and normally passed in via
 # the product Makefile)
 PACKAGENAME = egenix-pyrun
+
+# Package version; note that you have to keep this in sync with
+# Runtime/makepyrun.py
 PACKAGEVERSION = 2.4.0
 #PACKAGEVERSION = $(shell cd Runtime; python -c "from makepyrun import __version__; print __version__")
 
@@ -245,7 +248,8 @@ BINARY_DISTRIBUTION_ARCHIVE = $(DISTDIR)/$(BINARY_DISTRIBUTION).tgz
 TESTDIR = $(PWD)/test-$(PYTHONVERSION)-$(PYTHONUNICODE)
 
 # Python configure options
-PYTHON_CONFIGURE_OPTIONS = ""
+#PYTHON_CONFIGURE_OPTIONS = ""
+PYTHON_CONFIGURE_OPTIONS = "--enable-optimizations"
 
 # Build platform
 LINUX_PLATFORM := $(shell test "`uname -s`" = "Linux" && echo "1")

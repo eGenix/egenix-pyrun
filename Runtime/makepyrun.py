@@ -41,7 +41,7 @@ except ImportError:
 ### Globals
 
 # PyRun release version
-__version__ = '2.3.0'
+__version__ = '2.4.0'
 
 # Debug level
 _debug = 1
