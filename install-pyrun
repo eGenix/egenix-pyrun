@@ -19,13 +19,13 @@ OPTIONS:
            have pip install the given requirements (only works
            if pip is installed as part of the pyrun installation)
 
-       --python=2.7
-           install PyRun for Python version 2.6, 2.7 (default), 3.4, 3.5
+       --python=3.7
+           install PyRun for Python version 2.7, 3.6, 3.7 (default), 3.8
        --python-unicode=ucs2
            install PyRun for Python Unicode version 
            ucs2 (default for Python 2) or ucs4 (default for Python 3)
-       --pyrun=2.2.2
-           install PyRun version 2.2.2 (default)
+       --pyrun=2.4.0
+           install PyRun version 2.4.0 (default)
 
        --platform=linux-i686
            install PyRun for the given platform; this is usually
@@ -74,7 +74,7 @@ in targetdir. If no local versions of setuptools or pip are found, the
 tools are downloaded from pypi.org.
 "
 COPYRIGHT="
-Copyright (c) 2012-2018, eGenix.com Software GmbH; mailto:info@egenix.com
+Copyright (c) 2012-2020, eGenix.com Software GmbH; mailto:info@egenix.com
 
                      All Rights Reserved.
 
@@ -87,7 +87,7 @@ received a copy.
 "
 
 # Script version
-VERSION=1.5.0
+VERSION=1.6.0
 
 # Generate debug output ?
 DEBUG=0
@@ -106,15 +106,14 @@ macosx-10.5-x86_64
 ### Configuration
 
 # Select Python version (major.minor)
-PYTHON_VERSION=2.7
+PYTHON_VERSION=3.7
 
 # Select Python Unicode version (ucs2 or ucs4 depending on
 # Python version)
 PYTHON_UNICODE_VERSION=
 
 # Select PyRun version (major.minor.patch)
-#PYRUN_VERSION=2.3.0
-PYRUN_VERSION=2.2.3
+PYRUN_VERSION=2.4.0
 
 # Platform string on the PyRun binary distribution (usually
 # auto-detected, see below)
