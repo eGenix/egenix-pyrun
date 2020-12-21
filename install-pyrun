@@ -442,12 +442,12 @@ if [ "$PYTHON_VERSION" == "2.7" ]; then
 	echo "WARNING: setuptools $SETUPTOOLS_VERSION is not compatible with Python 2.7; using setuptools 44.1.1" 2>&1 | tee -a $LOG_FILE
 	SETUPTOOLS_VERSION="44.1.1"
     fi
-    # pip dropped Python 2.7 support in pip x.x (not dropped yet), so force
-    # to use the last compatible pip version
-    #if [[ "$PIP_VERSION" > "25.0" ]]; then
-    #	echo "WARNING: pip $PIP_VERSION is not compatible with Python 2.7; using pip 24.9" 2>&1 | tee -a $LOG_FILE
-    #	PIP_VERSION="24.9"
-    #fi
+    # pip dropped Python 2.7 support in pip 21.0, so force to use the last
+    # compatible pip version
+    if [[ "$PIP_VERSION" > "21.0" ]]; then
+    	echo "WARNING: pip $PIP_VERSION is not compatible with Python 2.7; using pip 20.3.3" 2>&1 | tee -a $LOG_FILE
+    	PIP_VERSION="20.3.3"
+    fi
 fi
 
 # eGenix PyRun distribution to use
