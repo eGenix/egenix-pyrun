@@ -432,23 +432,22 @@ fi
 
 # Double check Python compatibility
 #
-# Python 2.5 are no longer needed for eGenix PyRun 2.0, since
-# we don't support it anymore for 2.0. Leaving this code in
-# to be able to install older pyrun versions as well.
+# Python 2.7 support was dropped from setuptools in version 45.0.0
+# and from pip in version 
 #
-if [ "$PYTHON_VERSION" == "2.5" ]; then
-    # setuptools dropped Python 2.5 support in setuptools 2.0, so
+if [ "$PYTHON_VERSION" == "2.7" ]; then
+    # setuptools dropped Python 2.7 support in setuptools 45.0, so
     # force to use the last compatible setuptools version
-    if [[ "$SETUPTOOLS_VERSION" > "1.4.2" ]]; then
-	echo "WARNING: setuptools $SETUPTOOLS_VERSION is not compatible with Python 2.5; using setuptools 1.4.2" 2>&1 | tee -a $LOG_FILE
-	SETUPTOOLS_VERSION="1.4.2"
+    if [[ "$SETUPTOOLS_VERSION" > "44.1.1" ]]; then
+	echo "WARNING: setuptools $SETUPTOOLS_VERSION is not compatible with Python 2.7; using setuptools 44.1.1" 2>&1 | tee -a $LOG_FILE
+	SETUPTOOLS_VERSION="44.1.1"
     fi
-    # pip dropped Python 2.5 support in pip 1.4, so force to 
-    # use the last compatible pip version
-    if [[ "$PIP_VERSION" > "1.3.1" ]]; then
-	echo "WARNING: pip $PIP_VERSION is not compatible with Python 2.5; using pip 1.3.1" 2>&1 | tee -a $LOG_FILE
-	PIP_VERSION="1.3.1"
-    fi
+    # pip dropped Python 2.7 support in pip x.x (not dropped yet), so force
+    # to use the last compatible pip version
+    #if [[ "$PIP_VERSION" > "25.0" ]]; then
+    #	echo "WARNING: pip $PIP_VERSION is not compatible with Python 2.7; using pip 24.9" 2>&1 | tee -a $LOG_FILE
+    #	PIP_VERSION="24.9"
+    #fi
 fi
 
 # eGenix PyRun distribution to use
