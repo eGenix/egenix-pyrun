@@ -27,8 +27,8 @@
 # Note: When changing the versions here, also update them in the product
 # Makefile.
 #
-PYTHON_38_VERSION = 3.8.2
-PYTHON_37_VERSION = 3.7.5
+PYTHON_38_VERSION = 3.8.3
+PYTHON_37_VERSION = 3.7.7
 PYTHON_36_VERSION = 3.6.9
 PYTHON_27_VERSION = 2.7.18
 
@@ -198,9 +198,14 @@ PYRUNSITEPACKAGESLIBDIR = $(PYRUNLIBDIR)/site-packages
 # Target dir for include files
 INCLUDEDIR = $(BUILDDIR)/include
 ifdef PYTHON_2_BUILD
+ # Python 2.x did not have ABI dirs
  PYRUNINCLUDEDIR = $(INCLUDEDIR)/python$(PYRUNVERSION)
-else
+else ifdef PYTHON_37_OR_EARLIER_BUILD
+ # Python 3.x - 3.7 put the include files into an ABI specific dir
  PYRUNINCLUDEDIR = $(INCLUDEDIR)/python$(PYRUNVERSION)$(PYTHONABI)
+else
+ # Python 3.8 returned to the non-ABI dir
+ PYRUNINCLUDEDIR = $(INCLUDEDIR)/python$(PYRUNVERSION)
 endif
 
 # PyRun rpath setting (used to hardwire linker paths into the binary)
