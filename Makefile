@@ -742,6 +742,19 @@ create-all-patches:
 	  $(MAKE) create-python-patch PYTHONFULLVERSION=$$i; $(ECHO) ""; \
 	done
 
+print-exported-python-api:	$(BINDIR)/$(PYRUN)
+	nm $(BINDIR)/$(PYRUN) | fgrep ' T Py' | sort -k 2
+
+versions:
+	echo "PyRun version: $(PACKAGEVERSION)"
+	echo "-----------------------------------"
+	echo "PyRun Python version: $(PYRUNFULLVERSION)"
+	echo "PyRun platform: $(PLATFORM)"
+	echo "PyRun Unicode: $(PYTHONUNICODE)"
+	echo "PyRun archive base name: $(ARCHIVE)"
+	echo "PyRun binary: $(BINDIR)/$(PYRUN)"
+	echo "PyRun SSL dir: $(PYRUN_SSL)"
+
 ### Debugging
 
 print-vars:
