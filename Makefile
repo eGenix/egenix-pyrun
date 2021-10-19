@@ -27,9 +27,9 @@
 # Note: When changing the versions here, also update them in the product
 # Makefile.
 #
-PYTHON_38_VERSION = 3.8.3
-PYTHON_37_VERSION = 3.7.7
-PYTHON_36_VERSION = 3.6.9
+PYTHON_38_VERSION = 3.8.12
+PYTHON_37_VERSION = 3.7.12
+PYTHON_36_VERSION = 3.6.15
 PYTHON_27_VERSION = 2.7.18
 
 # Python version to use as basis for pyrun
@@ -743,7 +743,7 @@ create-all-patches:
 	done
 
 print-exported-python-api:	$(BINDIR)/$(PYRUN)
-	nm $(BINDIR)/$(PYRUN) | fgrep ' T Py' | sort -k 2
+	nm $(BINDIR)/$(PYRUN) | egrep -v ' T _?Py' | sort -k 2
 
 versions:
 	echo "PyRun version: $(PACKAGEVERSION)"
