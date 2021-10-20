@@ -42,10 +42,11 @@ for url in ('https://www.python.org/',
     webpage.close()
 
 # Try URLs which are not using a trusted certificate
-chunk = 1024
+chunk = 100
 failures = 0
-for url in ('https://www.cacert.org/',
-            'https://www.pcwebshop.co.uk/',
+for url in ('https://self-signed.badssl.com/',
+            'https://untrusted-root.badssl.com/',
+            'https://wrong.host.badssl.com/',
             ):
     try:
         webpage = urlopen(url)
@@ -65,7 +66,7 @@ elif not int(os.environ.get('PYRUN_HTTPSVERIFY', 1)):
     print ('Note: PYRUN_HTTPSVERIFY is set to 0')
     assert failures == 0
 else:
-    assert failures == 2
+    assert failures == 3
 
 print ('')
 print ('Works.')

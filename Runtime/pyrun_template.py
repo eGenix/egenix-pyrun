@@ -28,7 +28,7 @@
 COPYRIGHT = """\
 
     Copyright (c) 1997-2000, Marc-Andre Lemburg; mailto:mal@lemburg.com
-    Copyright (c) 2000-2018, eGenix.com Software GmbH; mailto:info@egenix.com
+    Copyright (c) 2000-2021, eGenix.com Software GmbH; mailto:info@egenix.com
 
                             All Rights Reserved.
 
