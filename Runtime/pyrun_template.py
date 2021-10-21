@@ -48,9 +48,9 @@ import pyrun_config
 from pyrun_config import (
     pyrun_name,
     pyrun_version,
+    pyrun_libversion,
     pyrun_release,
     pyrun_build,
-    pyrun_libversion,
     pyrun_copyright,
     pyrun_executable,
     pyrun_dir,
@@ -153,22 +153,24 @@ Version: %s %s
 
 Available pyrun options:
 
--b:   run the given <script> file as bytecode
--c:   compile and run <script> directly as Python code
--d:   enable debug mode (-dd for level 2)
--h:   show this help text
--i:   enable interactive inspection mode
--m:   import and run a module <script> available on PYTHONPATH
--s:   ignore user site; PyRun always ignores user site configs
--u:   open stdout/stderr in unbuffered mode
--v:   run in verbose mode (-vv for level 2)
--B:   don't write byte code files
--E:   ignore environment variables (only PYTHONPATH)
--O:   run in optimized mode (-OO also removes doc-strings)
--R:   not implemented; use PYTHONHASHSEED instead
--S:   skip running site.main() and disable support for .pth files
--V:   print the pyrun version and exit
--3:   not implemented; only for compatibility with Python
+-b:       run the given <script> file as bytecode
+-c:       compile and run <script> directly as Python code
+-d:       enable debug mode (-dd for level 2)
+-h:       show this help text
+-i:       enable interactive inspection mode
+-m:       import and run a module <script> available on PYTHONPATH
+-s:       ignore user site; PyRun always ignores user site configs
+-u:       open stdout/stderr in unbuffered mode
+-v:       run in verbose mode (-vv for level 2)
+-B:       don't write byte code files
+-E:       ignore environment variables (only PYTHONPATH)
+-O:       run in optimized mode (-OO also removes doc-strings)
+-R:       not implemented; use PYTHONHASHSEED instead
+-S:       skip running site.main() and disable support for .pth files
+-V:       print the pyrun version and exit
+-3:       not implemented; only for compatibility with Python
+-W arg:   not implemented; only for compatibility with Python
+-X arg:   not implemented; only for compatibility with Python
 
 Most Python environment variables are supported.
 
@@ -241,6 +243,13 @@ def pyrun_log_error(line):
     """
     sys.stderr.write('%s error: %s\n' % (pyrun_name, line))
 
+def pyrun_log_warning(line):
+
+    """ Log a warning line to stderr.
+
+    """
+    sys.stderr.write('%s warning: %s\n' % (pyrun_name, line))
+
 def pyrun_parse_cmdline():
 
     """ Parse the pyrun command line arguments.
@@ -252,7 +261,7 @@ def pyrun_parse_cmdline():
     import getopt
 
     # Parse sys.argv
-    valid_options = 'vVmcbiESdOu3h?sBR'
+    valid_options = 'vVm:c:biESdOu3h?sBRW:X:'
     try:
         parsed_options, remaining_argv = getopt.getopt(sys.argv[1:],
                                                        valid_options)
@@ -273,10 +282,12 @@ def pyrun_parse_cmdline():
             # Run script as module
             global pyrun_as_module
             pyrun_as_module = True
-            if not remaining_argv:
+            if not value:
                 pyrun_log_error(
                     'Missing argument for -m. Try pyrun -h for help.')
                 sys.exit(1)
+            # Add the value back to argv for later processing
+            remaining_argv.insert(0, value)
             # -m terminates the option list, just like for Python
             break
 
@@ -284,10 +295,12 @@ def pyrun_parse_cmdline():
             # Run argument as command string
             global pyrun_as_string
             pyrun_as_string = True
-            if not remaining_argv:
+            if not value:
                 pyrun_log_error(
                     'Missing argument for -c. Try pyrun -h for help.')
                 sys.exit(1)
+            # Add the value back to argv for later processing
+            remaining_argv.insert(0, value)
             # -c terminates the option list, just like for Python
             break
 
@@ -348,8 +361,20 @@ def pyrun_parse_cmdline():
             rc = 1
             pyrun_log_error(
                 'Command line option -R is not supported.\n'
-                'Please use PYTHONHASHSEED to enable hash randomization')
+                'Please use PYTHONHASHSEED to enable hash randomization.')
             sys.exit(rc)
+
+        elif arg == '-W':
+            # Warning control: not yet implemented
+            pyrun_log_warning(
+                'Command line option -W is not yet supported.\n'
+                'Ignoring the option.')
+
+        elif arg == '-X':
+            # Implementation specific options: not implemented
+            pyrun_log_warning(
+                'Command line option -X is not supported.\n'
+                'Ignoring the option.')
 
         # XXX Add more standard Python command line options here
 

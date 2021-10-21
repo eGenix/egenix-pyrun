@@ -185,6 +185,11 @@ def test_d_flag(runtime=PYRUN):
         result,
         "ok\n"
         )
+
+    if sys.version.startswith('3.10.0'):
+        # Tokenizer in this version has a bug, so the following does not
+        # work correctly. See https://bugs.python.org/issue45562
+        return
     
     result = run('%s -d -c "import sys; print (sys._setflag(\'debug\'))"' %
                  runtime)

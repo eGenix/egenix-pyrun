@@ -35,7 +35,9 @@ pyrun_name = '#$pyrun'
 pyrun_version = '#$version'
 if pyrun_version.startswith('#$'):
     pyrun_version = sys.version.split()[0]
-pyrun_libversion = pyrun_version[:3]
+pyrun_libversion = '#$libversion'
+if pyrun_libversion.startswith('#$'):
+    pyrun_libversion = '.'.join(pyrun_version.split('.')[:2])
 pyrun_release = '#$release'
 pyrun_build = '(release %s, %s' % (
     pyrun_release,

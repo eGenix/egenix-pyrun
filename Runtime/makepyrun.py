@@ -71,7 +71,7 @@ PREFIX = os.path.abspath(os.path.join(LIBDIR, '..', '..'))
 # PyRun name
 PYRUN_NAME = 'pyrun'
 
-# PyRun version
+# PyRun Python version
 PYRUN_VERSION = sys.version.split()[0]
 
 # PyRun release
@@ -493,6 +493,7 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
                             config='\n    '.join(repr_list),
                             pyrun=pyrun_name,
                             version=pyrun_version,
+                            libversion='.'.join(pyrun_version.split('.')[:2]),
                             release=pyrun_release,
                             lib2to3_fixes=repr(fixes)))
     f.close()
@@ -551,7 +552,7 @@ def create_pyrun_py(inputfile='pyrun_template.py',
 ###
 
 def main(pyrunfile='pyrun.py',
-         version=sys.version[:6],
+         version=PYRUN_VERSION,
          libdir=LIBDIR,
          setupfile=SETUPFILE):
 
