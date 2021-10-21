@@ -86,18 +86,9 @@ pyrun_hashrandomization = False
 PY2 = (sys.version_info[0] == 2)
 PY3 = (sys.version_info[0] == 3)
 
-if PY2:
-    # Emulate Python 3 exec() function
-    def pyrun_exec_code(code, globals_dict, locals_dict=None):
-        if locals_dict is None:
-            locals_dict = globals_dict
-        exec('exec code in globals_dict, locals_dict')
-
-    # We can use execfile() in Python 2
-    pyrun_exec_code_file = execfile
-
-else:
-    # Python 3 and above can use the exec() function
+if PY3:
+    # Python 3 and above can use the exec() function; in Python 2 "exec" is
+    # a keyword, we have to use the odd getattr() below.
     import builtins
     pyrun_exec_code = getattr(builtins, 'exec')
 
@@ -110,6 +101,16 @@ else:
 
     # Python 3 no longer has raw_input(). Use input() instead
     raw_input = input
+
+else:
+    # Emulate Python 3 exec() function in Python 2
+    def pyrun_exec_code(code, globals_dict, locals_dict=None):
+        if locals_dict is None:
+            locals_dict = globals_dict
+        exec('exec code in globals_dict, locals_dict')
+
+    # We can use execfile() in Python 2
+    pyrun_exec_code_file = execfile
 
 ### Helpers
 
@@ -468,10 +469,7 @@ def pyrun_enable_unbuffered_mode():
     stderr = os.fdopen(sys.stderr.fileno(), 'wb', 0)
 
     # Assign new file objects
-    if PY2:
-        sys.stdout = stdout
-        sys.stderr = stderr
-    else:
+    if PY3:
         # For Python 3, wrap the streams into TextIOWrapper
         import io
         sys.stdout = io.TextIOWrapper(stdout,
@@ -482,6 +480,10 @@ def pyrun_enable_unbuffered_mode():
                                       encoding=sys.stderr.encoding,
                                       errors=sys.stderr.errors,
                                       write_through=True)
+    else:
+        # Python 2
+        sys.stdout = stdout
+        sys.stderr = stderr
 
 def pyrun_run_site_main():
 
@@ -681,8 +683,17 @@ def pyrun_execute_script(pyrun_script, mode='file'):
     elif (mode == 'codefile' or mode == 'codestring'):
 
         ### Run pyrun_script as bytecode file or string
+        
+        import marshal
+        if PY3:
+            # Python 3
+            import importlib.util
+            MAGIC = importlib.util.MAGIC_NUMBER
+        else:
+            # Python 2
+            import imp
+            MAGIC = imp.get_magic()
 
-        import imp, marshal
         if mode == 'codefile':
             if pyrun_verbose:
                 pyrun_log('Running %r as bytecode file' % pyrun_script)
@@ -703,7 +714,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
             module_file = cStringIO.StringIO(pyrun_script)
 
         # Check magic
-        if module_file.read(4) != imp.get_magic():
+        if module_file.read(4) != MAGIC:
             pyrun_log_error('Incompatible bytecode file %r' % pyrun_script)
             sys.exit(1)
 
