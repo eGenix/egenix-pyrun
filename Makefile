@@ -27,6 +27,7 @@
 # Note: When changing the versions here, also update them in the product
 # Makefile.
 #
+PYTHON_310_VERSION = 3.10.0
 PYTHON_39_VERSION = 3.9.7
 PYTHON_38_VERSION = 3.8.12
 PYTHON_37_VERSION = 3.7.12
@@ -34,7 +35,8 @@ PYTHON_36_VERSION = 3.6.15
 PYTHON_27_VERSION = 2.7.18
 
 # Python version to use as basis for pyrun
-PYTHONFULLVERSION = $(PYTHON_39_VERSION)
+PYTHONFULLVERSION = $(PYTHON_310_VERSION)
+#PYTHONFULLVERSION = $(PYTHON_39_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_38_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_37_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_36_VERSION)
@@ -46,7 +48,8 @@ PYTHONVERSIONS = \
 	$(PYTHON_36_VERSION) \
 	$(PYTHON_37_VERSION) \
 	$(PYTHON_38_VERSION) \
-	$(PYTHON_39_VERSION)
+	$(PYTHON_39_VERSION) \
+	$(PYTHON_310_VERSION)
 
 # Python Unicode version
 PYTHONUNICODE = ucs2
@@ -100,9 +103,9 @@ PYRUN_SSL = $(shell if ( test -n "$(SSL)" ); then echo $(SSL); \
 PWD := $(shell pwd)
 
 # Version & Platform
-PYTHONVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\.[0-9]\).*/\1/')
-PYTHONMAJORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\)\..*/\1/')
-PYTHONMINORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/[0-9]\.\([0-9]\)\..*/\1/')
+PYTHONVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\.[0-9]\+\).*/\1/')
+PYTHONMAJORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\+\)\..*/\1/')
+PYTHONMINORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/[0-9]\.\([0-9]\+\)\..*/\1/')
 PYRUNFULLVERSION = $(PYTHONFULLVERSION)
 PYRUNVERSION = $(PYTHONVERSION)
 PLATFORM := $(shell python -c "from distutils.util import get_platform; print get_platform()")
@@ -116,6 +119,7 @@ PYTHON_37_BUILD := $(shell test "$(PYTHONVERSION)" = "3.7" && echo "1")
 PYTHON_37_OR_EARLIER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -lt 8 && echo "1")
 PYTHON_38_BUILD := $(shell test "$(PYTHONVERSION)" = "3.8" && echo "1")
 PYTHON_39_BUILD := $(shell test "$(PYTHONVERSION)" = "3.9" && echo "1")
+PYTHON_310_BUILD := $(shell test "$(PYTHONVERSION)" = "3.10" && echo "1")
 
 # Special Python environment setups
 ifdef PYTHON_3_BUILD
@@ -752,6 +756,7 @@ print-exported-python-api:	$(BINDIR)/$(PYRUN)
 versions:
 	echo "PyRun version: $(PACKAGEVERSION)"
 	echo "-----------------------------------"
+	echo "Python version: $(PYTHONFULLVERSION) ($(PYTHONVERSION) = $(PYTHONMAJORVERSION).$(PYTHONMINORVERSION))"
 	echo "PyRun Python version: $(PYRUNFULLVERSION)"
 	echo "PyRun platform: $(PLATFORM)"
 	echo "PyRun Unicode: $(PYTHONUNICODE)"

@@ -239,11 +239,14 @@ _socket socketmodule.c
 
 # Socket module helper for SSL support; you must comment out the other
 # socket line above, and possibly edit the SSL variable (this is usually
-# set by the PyRun Makefile):
+# set by the eGenix PyRun Makefile):
 #SSL=/usr
 _ssl _ssl.c \
 	-DUSE_SSL -I$(SSL)/include \
 	-L$(SSL)/lib64 -L$(SSL)/lib -lssl -lcrypto
+_hashlib _hashopenssl.c \
+	-I$(SSL)/include -L$(SSL)/lib64 -L$(SSL)/lib \
+	-lcrypto
 
 # The crypt module is now disabled by default because it breaks builds
 # on many systems (where -lcrypt is needed), e.g. Linux (I believe).
@@ -532,9 +535,6 @@ _codecs_tw cjkcodecs/_codecs_tw.c
 ### Built-in extensions for which there are no entries in Setup.dist:
 
 # _ctypes needs to build libffi first - punting on this
-
-# _hashlib
-_hashlib _hashopenssl.c -I$(SSL)/include -L$(SSL)/lib64 -L$(SSL)/lib -lssl -lcrypto
 
 # _heapq
 _heapq _heapqmodule.c

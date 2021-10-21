@@ -105,39 +105,37 @@ PYTHONPATH=$(COREPYTHONPATH)
 # This only contains the minimal set of modules required to run the
 # setup.py script in the root of the Python source tree.
 
-posix posixmodule.c		# posix (UNIX) system calls
+posix -DPy_BUILD_CORE_BUILTIN -I$(srcdir)/Include/internal posixmodule.c # posix (UNIX) system calls
 errno errnomodule.c		# posix (UNIX) errno values
 pwd pwdmodule.c			# this is needed to find out the user's home dir
 				# if $HOME is not set
-_sre _sre.c			# Fredrik Lundh's new regular expressions
+_sre -DPy_BUILD_CORE_BUILTIN _sre.c			# Fredrik Lundh's new regular expressions
 _codecs _codecsmodule.c		# access to the builtin codecs and codec registry
-_weakref _weakref.c		# weak references
-_functools _functoolsmodule.c   # Tools for working with functions and callable objects
-_operator _operator.c	        # operator.add() and similar goodies
+_weakref _weakref.c     # basic weak reference support
+_functools -DPy_BUILD_CORE_BUILTIN -I$(srcdir)/Include/internal _functoolsmodule.c # Tools for working with functions and callable objects
+_operator -DPy_BUILD_CORE_BUILTIN _operator.c	        # operator.add() and similar goodies
 _collections _collectionsmodule.c # Container types
-itertools itertoolsmodule.c    # Functions creating iterators for efficient looping
-atexit atexitmodule.c      # Register functions to be run at interpreter-shutdown
-_signal signalmodule.c
+_abc -DPy_BUILD_CORE_BUILTIN _abc.c                      # Abstract base classes
+itertools itertoolsmodule.c     # Functions creating iterators for efficient looping
+atexit atexitmodule.c           # Register functions to be run at interpreter-shutdown
+_signal -DPy_BUILD_CORE_BUILTIN -I$(srcdir)/Include/internal signalmodule.c
 _stat _stat.c			# stat.h interface
 # @if macosx: TIME_DEFS=
 # @if not macosx: TIME_DEFS=-lrt
-time timemodule.c $(TIME_DEFS) # -lm # time operations and variables
+time -DPy_BUILD_CORE_BUILTIN -I$(srcdir)/Include/internal timemodule.c $(TIME_DEFS) # -lm # time operations and variables
+_thread -DPy_BUILD_CORE_BUILTIN -I$(srcdir)/Include/internal _threadmodule.c        # low-level threading interface
 
 # access to ISO C locale support
-_locale _localemodule.c  # -lintl
+_locale -DPy_BUILD_CORE_BUILTIN _localemodule.c  # -lintl
 
 # Standard I/O baseline
-_io -I$(srcdir)/Modules/_io _io/_iomodule.c _io/iobase.c _io/fileio.c _io/bytesio.c _io/bufferedio.c _io/textio.c _io/stringio.c
-
-# The zipimport module is always imported at startup. Having it as a
-# builtin module avoids some bootstrapping problems and reduces overhead.
-zipimport zipimport.c
+_io -DPy_BUILD_CORE_BUILTIN -I$(srcdir)/Include/internal -I$(srcdir)/Modules/_io _io/_iomodule.c _io/iobase.c _io/fileio.c _io/bytesio.c _io/bufferedio.c _io/textio.c _io/stringio.c
 
 # faulthandler module
 faulthandler faulthandler.c
 
 # debug tool to trace memory blocks allocated by Python
-_tracemalloc _tracemalloc.c hashtable.c
+_tracemalloc _tracemalloc.c
 
 # The rest of the modules listed in this file are all commented out by
 # default.  Usually they can be detected and built as dynamically
@@ -171,20 +169,25 @@ _symtable symtablemodule.c
 
 # Modules that should always be present (non UNIX dependent):
 
-array arraymodule.c	# array objects
-cmath cmathmodule.c # _math.c # -lm # complex math library functions
-math mathmodule.c _math.c # -lm # math library functions, e.g. sin()
-_struct _struct.c	# binary structure packing/unpacking
+array -DPy_BUILD_CORE_MODULE arraymodule.c	# array objects
+cmath cmathmodule.c -DPy_BUILD_CORE_MODULE # _math.c # -lm # complex math library functions
+math mathmodule.c -DPy_BUILD_CORE_MODULE _math.c # -lm # math library functions, e.g. sin()
+_contextvars _contextvarsmodule.c  # Context Variables
+_struct -DPy_BUILD_CORE_MODULE _struct.c	# binary structure packing/unpacking
 #_testcapi _testcapimodule.c    # Python C API test module
-_random _randommodule.c	# Random number generator
+#_testinternalcapi _testinternalcapi.c -I$(srcdir)/Include/internal -DPy_BUILD_CORE_MODULE  # Python internal C API test module
+_random _randommodule.c -DPy_BUILD_CORE_MODULE # Random number generator
 _elementtree -I$(srcdir)/Modules/expat -DHAVE_EXPAT_CONFIG_H -DUSE_PYEXPAT_CAPI _elementtree.c	# elementtree accelerator
-_pickle _pickle.c	# pickle accelerator
+_pickle -DPy_BUILD_CORE_MODULE _pickle.c	# pickle accelerator
 _datetime _datetimemodule.c	# datetime accelerator
+_zoneinfo _zoneinfo.c -DPy_BUILD_CORE_MODULE # zoneinfo accelerator
 _bisect _bisectmodule.c	# Bisection algorithms
-_heapq _heapqmodule.c	# Heap queue algorithm
+_heapq _heapqmodule.c -DPy_BUILD_CORE_MODULE	# Heap queue algorithm
 _asyncio _asynciomodule.c  # Fast asyncio Future
+_json -I$(srcdir)/Include/internal -DPy_BUILD_CORE_BUILTIN _json.c    # _json speedups
+_statistics _statisticsmodule.c # statistics accelerator
 
-unicodedata unicodedata.c    # static Unicode character database
+unicodedata unicodedata.c -DPy_BUILD_CORE_MODULE    # static Unicode character database
 
 
 # Modules with some UNIX dependencies -- on by default:
@@ -231,7 +234,7 @@ _hashlib _hashopenssl.c \
 termios termios.c	# Steen Lumholt's termios module
 resource resource.c	# Jeremy Hylton's rlimit interface
 
-_posixsubprocess _posixsubprocess.c  # POSIX subprocess module helper
+_posixsubprocess -DPy_BUILD_CORE_BUILTIN _posixsubprocess.c  # POSIX subprocess module helper
 
 # Multimedia modules -- off by default.
 # These don't work for 64-bit platforms!!!
@@ -253,13 +256,12 @@ _md5 md5module.c
 # The _sha module implements the SHA checksum algorithms.
 # (NIST's Secure Hash Algorithms.)
 _sha1 sha1module.c
-_sha256 sha256module.c
-_sha512 sha512module.c
+_sha256 sha256module.c -DPy_BUILD_CORE_BUILTIN
+_sha512 sha512module.c -DPy_BUILD_CORE_BUILTIN
 _sha3 _sha3/sha3module.c
 
 # _blake module
 _blake2 _blake2/blake2module.c _blake2/blake2b_impl.c _blake2/blake2s_impl.c
-
 
 # The _tkinter module.
 #
@@ -345,27 +347,6 @@ syslog syslogmodule.c		# syslog daemon interface
 # Helper module for various ascii-encoders
 binascii binascii.c
 
-# Fred Drake's interface to the Python parser
-#parser parsermodule.c
-
-
-# Lee Busby's SIGFPE modules.
-# The library to link fpectl with is platform specific.
-# Choose *one* of the options below for fpectl:
-
-# For SGI IRIX (tested on 5.3):
-#fpectl fpectlmodule.c -lfpe
-
-# For Solaris with SunPro compiler (tested on Solaris 2.5 with SunPro C 4.2):
-# (Without the compiler you don't have -lsunmath.)
-#fpectl fpectlmodule.c -R/opt/SUNWspro/lib -lsunmath -lm
-
-# For other systems: see instructions in fpectlmodule.c.
-#fpectl fpectlmodule.c ...
-
-# Test module for fpectl.  No extra libraries needed.
-#fpetest fpetestmodule.c
-
 # Andrew Kuchling's zlib module.
 # This require zlib 1.1.3 (or later).
 # See http://www.gzip.org/zlib/
@@ -407,7 +388,7 @@ _codecs_tw cjkcodecs/_codecs_tw.c
 # Another example -- the 'xxsubtype' module shows C-level subtyping in action
 xxsubtype xxsubtype.c
 
-### Built-in extensions for which there are no entries in Setup.dist:
+### Built-in extensions for which there are no entries in Setup.dist/Setup:
 
 # _decimal needs more complex setup, punting on this for now
 #DECIMAL_DEFS=-DCONFIG_64=1 -DASM=1
@@ -469,5 +450,19 @@ _bz2 _bz2module.c -lbz2
 #
 #_lzma _lzmamodule.c -llzma
 
-# _json
-_json _json.c
+# multiprocessing
+_multiprocessing \
+	_multiprocessing/semaphore.c \
+	_multiprocessing/multiprocessing.c \
+	-I$(srcdir)/Modules/_multiprocessing
+
+# Optional add-on for multiprocessing to use shared memory
+#POSIXSHMEM_LIBS=rt
+POSIXSHMEM_LIBS=
+_posixshmem \
+	_multiprocessing/posixshmem.c \
+	-I$(srcdir)/Modules/_multiprocessing \
+	$(POSIXSHMEM_LIBS)
+
+# queue
+_queue _queuemodule.c
