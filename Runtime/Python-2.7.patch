@@ -80,6 +80,24 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.
          return self.code
  
      def get_source(self, fullname=None):
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Makefile.pre.in ./Makefile.pre.in
+--- /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Makefile.pre.in	2020-04-19 23:13:39.000000000 +0200
++++ ./Makefile.pre.in	2021-10-21 14:40:08.692666318 +0200
+@@ -511,8 +511,12 @@
+ 	fi
+ 
+ # This is shared by the math and cmath modules
+-Modules/_math.o: Modules/_math.c Modules/_math.h
+-	$(CC) -c $(CCSHARED) $(PY_CFLAGS) -o $@ $<
++#
++# eGenix PyRun builds the _math.o file via Setup, so we don't need this
++# separate target.
++#
++#Modules/_math.o: Modules/_math.c Modules/_math.h
++#       $(CC) -c $(CCSHARED) $(PY_CORE_CFLAGS) -o $@ $<
+ 
+ # Build the shared modules
+ # Under GNU make, MAKEFLAGS are sorted and normalized; the 's' for
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Modules/getpath.c ./Modules/getpath.c
 --- /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Modules/getpath.c	2020-04-19 23:13:39.000000000 +0200
 +++ ./Modules/getpath.c	2021-10-20 20:23:31.877338284 +0200
