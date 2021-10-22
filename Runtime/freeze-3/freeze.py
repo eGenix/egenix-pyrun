@@ -104,54 +104,6 @@ import makemakefile
 import parsesetup
 import bkfile
 
-# Fix for bug in modulefinder (see issue #21707 on the Python bug tracker)
-
-import types
-
-class ModuleFinder(modulefinder.ModuleFinder):
-
-    def replace_paths_in_code(self, co):
-        new_filename = original_filename = os.path.normpath(co.co_filename)
-        for f, r in self.replace_paths:
-            if original_filename.startswith(f):
-                new_filename = r + original_filename[len(f):]
-                break
-
-        if self.debug and original_filename not in self.processed_paths:
-            if new_filename != original_filename:
-                self.msgout(2, "co_filename %r changed to %r" \
-                                    % (original_filename,new_filename,))
-            else:
-                self.msgout(2, "co_filename %r remains unchanged" \
-                                    % (original_filename,))
-            self.processed_paths.append(original_filename)
-
-        consts = list(co.co_consts)
-        for i in range(len(consts)):
-            if isinstance(consts[i], type(co)):
-                consts[i] = self.replace_paths_in_code(consts[i])
-
-        if sys.version_info < (3, 8):
-            # Python 3.x - 3.7 did not have positional only args
-            return types.CodeType(co.co_argcount, co.co_kwonlyargcount,
-                                  co.co_nlocals, co.co_stacksize,
-                                  co.co_flags, co.co_code, tuple(consts),
-                                  co.co_names, co.co_varnames,
-                                  new_filename, co.co_name,
-                                  co.co_firstlineno, co.co_lnotab,
-                                  co.co_freevars, co.co_cellvars)
-        else:        
-            # Python 3.8 added positional only args
-            return types.CodeType(co.co_argcount,
-                                  co.co_posonlyargcount,
-                                  co.co_kwonlyargcount,
-                                  co.co_nlocals, co.co_stacksize,
-                                  co.co_flags, co.co_code, tuple(consts),
-                                  co.co_names, co.co_varnames,
-                                  new_filename, co.co_name,
-                                  co.co_firstlineno, co.co_lnotab,
-                                  co.co_freevars, co.co_cellvars)
-
 # Main program
 
 def main():
@@ -394,8 +346,7 @@ def main():
     # collect all modules of the program
     dir = os.path.dirname(scriptfile)
     path[0] = dir
-    #mf = modulefinder.ModuleFinder(path, debug, exclude, replace_paths)
-    mf = ModuleFinder(path, debug, exclude, replace_paths)
+    mf = modulefinder.ModuleFinder(path, debug, exclude, replace_paths)
 
     if win and subsystem=='service':
         # If a Windows service, then add the "built-in" module.
