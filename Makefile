@@ -719,6 +719,13 @@ clean:	clean-runtime
 		$(PYRUNLIBDIR); \
 	true
 
+clean-all:
+	@for i in $(PYTHONVERSIONS); do \
+	  $(ECHO) "Clean up $(PYTHONVERSION) build"; \
+	  $(MAKE) clean PYTHONFULLVERSION=$$i; \
+	  $(ECHO) ""; \
+	done
+
 distclean:	clean
 	$(RM) -rf \
 		$(DISTDIR) \
@@ -728,7 +735,9 @@ distclean:	clean
 
 distclean-all:
 	@for i in $(PYTHONVERSIONS); do \
-	  $(MAKE) distclean PYTHONFULLVERSION=$$i; $(ECHO) ""; \
+	  $(ECHO) "Dist clean $(PYTHONVERSION) build"; \
+	  $(MAKE) distclean PYTHONFULLVERSION=$$i; \
+	  $(ECHO) ""; \
 	done
 
 spring-clean:
