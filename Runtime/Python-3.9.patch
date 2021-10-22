@@ -1,6 +1,6 @@
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/distutils/sysconfig.py ./Lib/distutils/sysconfig.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/distutils/sysconfig.py	2021-08-30 21:02:15.000000000 +0200
-+++ ./Lib/distutils/sysconfig.py	2021-10-20 21:38:23.805488166 +0200
++++ ./Lib/distutils/sysconfig.py	2021-10-21 17:07:56.916718133 +0200
 @@ -444,6 +444,10 @@
          platform=sys.platform,
          multiarch=getattr(sys.implementation, '_multiarch', ''),
@@ -14,7 +14,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.
      global _config_vars
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/importlib/_bootstrap.py	2021-08-30 21:02:15.000000000 +0200
-+++ ./Lib/importlib/_bootstrap.py	2021-10-20 21:38:23.805488166 +0200
++++ ./Lib/importlib/_bootstrap.py	2021-10-21 17:07:56.916718133 +0200
 @@ -810,6 +810,10 @@
  
      @classmethod
@@ -47,7 +47,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.
      @classmethod
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/lib2to3/pgen2/driver.py	2021-08-30 21:02:15.000000000 +0200
-+++ ./Lib/lib2to3/pgen2/driver.py	2021-10-20 21:38:23.805488166 +0200
++++ ./Lib/lib2to3/pgen2/driver.py	2021-10-21 17:07:56.916718133 +0200
 @@ -107,6 +107,14 @@
      head, tail = os.path.splitext(gt)
      if tail == ".txt":
@@ -65,7 +65,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.
  
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/lib2to3/refactor.py	2021-08-30 21:02:15.000000000 +0200
-+++ ./Lib/lib2to3/refactor.py	2021-10-20 21:38:23.805488166 +0200
++++ ./Lib/lib2to3/refactor.py	2021-10-21 17:07:56.916718133 +0200
 @@ -30,6 +30,16 @@
  
  def get_all_fix_names(fixer_pkg, remove_prefix=True):
@@ -85,7 +85,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.
      for finder, name, ispkg in pkgutil.iter_modules(pkg.__path__):
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/pkgutil.py ./Lib/pkgutil.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/pkgutil.py	2021-08-30 21:02:15.000000000 +0200
-+++ ./Lib/pkgutil.py	2021-10-20 21:38:23.805488166 +0200
++++ ./Lib/pkgutil.py	2021-10-21 17:07:56.916718133 +0200
 @@ -316,20 +316,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
@@ -129,7 +129,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.
      def get_source(self, fullname=None):
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/sysconfig.py ./Lib/sysconfig.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Lib/sysconfig.py	2021-08-30 21:02:15.000000000 +0200
-+++ ./Lib/sysconfig.py	2021-10-20 21:38:23.805488166 +0200
++++ ./Lib/sysconfig.py	2021-10-21 17:07:56.916718133 +0200
 @@ -352,12 +352,16 @@
  
  
@@ -150,7 +150,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.
  def _generate_posix_vars():
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Makefile.pre.in ./Makefile.pre.in
 --- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Makefile.pre.in	2021-08-30 21:02:15.000000000 +0200
-+++ ./Makefile.pre.in	2021-10-20 21:38:23.805488166 +0200
++++ ./Makefile.pre.in	2021-10-21 17:07:56.916718133 +0200
 @@ -128,6 +128,10 @@
  MULTIARCH=	@MULTIARCH@
  MULTIARCH_CPPFLAGS = @MULTIARCH_CPPFLAGS@
@@ -197,7 +197,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.
  # Here are a couple of targets for MacOSX again, to install a full
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Python/import.c ./Python/import.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Python/import.c	2021-08-30 21:02:15.000000000 +0200
-+++ ./Python/import.c	2021-10-20 21:38:23.805488166 +0200
++++ ./Python/import.c	2021-10-22 11:58:22.013786482 +0200
 @@ -1449,6 +1449,23 @@
      if (d == NULL) {
          goto err_return;
@@ -222,24 +222,70 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.
      m = exec_code_in_module(tstate, name, d, co);
      if (m == NULL) {
          goto err_return;
-diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Python/initconfig.c ./Python/initconfig.c
---- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Python/initconfig.c	2021-08-30 21:02:15.000000000 +0200
-+++ ./Python/initconfig.c	2021-10-20 21:38:23.805488166 +0200
-@@ -1609,7 +1609,10 @@
-     }
+@@ -1515,8 +1532,12 @@
+ static void
+ remove_importlib_frames(PyThreadState *tstate)
+ {
++/*  eGenix PyRun provides its own frozen version of these modules:
+     const char *importlib_filename = "<frozen importlib._bootstrap>";
+     const char *external_filename = "<frozen importlib._bootstrap_external>";
++ */
++    const char *importlib_filename = "<pyrun>/importlib/_bootstrap.py";
++    const char *external_filename = "<pyrun>/importlib/_bootstrap.py";
+     const char *remove_frames = "_call_with_frames_removed";
+     int always_trim = 0;
+     int in_importlib = 0;
+diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Python/preconfig.c ./Python/preconfig.c
+--- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Python/preconfig.c	2021-08-30 21:02:15.000000000 +0200
++++ ./Python/preconfig.c	2021-10-22 12:01:00.143399121 +0200
+@@ -286,7 +286,13 @@
  
-     /* UTF-8 Mode uses UTF-8/surrogateescape */
--    if (preconfig->utf8_mode) {
+        Py_UTF8Mode=1 enables the UTF-8 mode. PYTHONUTF8 environment variable
+        is ignored (even if use_environment=1). */
+-    config->utf8_mode = 0;
++
 +    /* For eGenix PyRun we use UTF-8 as default.  This should provide a
 +       better user experience than the Python default of using the locale
 +       settings for determining the stdin/stdout encodings.  */
-+    if (1 || preconfig->utf8_mode) {
-         if (config->stdio_encoding == NULL) {
-             status = PyConfig_SetString(config, &config->stdio_encoding,
-                                         L"utf-8");
++    /*config->utf8_mode = 0;*/
++    config->utf8_mode = 1;
++
+     config->coerce_c_locale = 0;
+     config->coerce_c_locale_warn = 0;
+ 
+@@ -312,7 +318,13 @@
+        environment variables. */
+     config->coerce_c_locale = -1;
+     config->coerce_c_locale_warn = -1;
+-    config->utf8_mode = -1;
++
++    /* For eGenix PyRun we use UTF-8 as default.  This should provide a
++       better user experience than the Python default of using the locale
++       settings for determining the stdin/stdout encodings.  */
++    /*config->utf8_mode = -1;*/
++    config->utf8_mode = 1;
++
+ #ifdef MS_WINDOWS
+     config->legacy_windows_fs_encoding = 0;
+ #endif
+@@ -328,7 +340,13 @@
+     config->configure_locale = 0;
+     config->isolated = 1;
+     config->use_environment = 0;
+-    config->utf8_mode = 0;
++
++    /* For eGenix PyRun we use UTF-8 as default.  This should provide a
++       better user experience than the Python default of using the locale
++       settings for determining the stdin/stdout encodings.  */
++    /*config->utf8_mode = 0;*/
++    config->utf8_mode = 1;
++
+     config->dev_mode = 0;
+ #ifdef MS_WINDOWS
+     config->legacy_windows_fs_encoding = 0;
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Python/sysmodule.c ./Python/sysmodule.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.9.7/Python/sysmodule.c	2021-08-30 21:02:15.000000000 +0200
-+++ ./Python/sysmodule.c	2021-10-20 21:38:23.805488166 +0200
++++ ./Python/sysmodule.c	2021-10-21 17:07:56.916718133 +0200
 @@ -1931,6 +1931,54 @@
  
  

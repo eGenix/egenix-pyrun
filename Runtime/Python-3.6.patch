@@ -1,6 +1,6 @@
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/distutils/sysconfig.py ./Lib/distutils/sysconfig.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/distutils/sysconfig.py	2021-09-04 05:49:41.000000000 +0200
-+++ ./Lib/distutils/sysconfig.py	2021-10-20 20:36:09.320098597 +0200
++++ ./Lib/distutils/sysconfig.py	2021-10-21 16:05:48.187077533 +0200
 @@ -421,6 +421,10 @@
          platform=sys.platform,
          multiarch=getattr(sys.implementation, '_multiarch', ''),
@@ -14,7 +14,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.
      global _config_vars
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/importlib/_bootstrap.py	2021-09-04 05:49:41.000000000 +0200
-+++ ./Lib/importlib/_bootstrap.py	2021-10-20 20:36:09.320098597 +0200
++++ ./Lib/importlib/_bootstrap.py	2021-10-21 16:05:48.187077533 +0200
 @@ -779,6 +779,10 @@
  
      @classmethod
@@ -47,7 +47,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.
      @classmethod
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/lib2to3/pgen2/driver.py	2021-09-04 05:49:41.000000000 +0200
-+++ ./Lib/lib2to3/pgen2/driver.py	2021-10-20 20:36:09.320098597 +0200
++++ ./Lib/lib2to3/pgen2/driver.py	2021-10-21 16:05:48.187077533 +0200
 @@ -111,6 +111,14 @@
      head, tail = os.path.splitext(gt)
      if tail == ".txt":
@@ -65,7 +65,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.
  
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/lib2to3/refactor.py	2021-09-04 05:49:41.000000000 +0200
-+++ ./Lib/lib2to3/refactor.py	2021-10-20 20:36:09.320098597 +0200
++++ ./Lib/lib2to3/refactor.py	2021-10-21 16:05:48.187077533 +0200
 @@ -29,6 +29,16 @@
  
  def get_all_fix_names(fixer_pkg, remove_prefix=True):
@@ -85,7 +85,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.
      fix_names = []
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/pkgutil.py ./Lib/pkgutil.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/pkgutil.py	2021-09-04 05:49:41.000000000 +0200
-+++ ./Lib/pkgutil.py	2021-10-20 20:36:09.320098597 +0200
++++ ./Lib/pkgutil.py	2021-10-21 16:05:48.187077533 +0200
 @@ -312,20 +312,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
@@ -129,7 +129,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.
      def get_source(self, fullname=None):
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/sysconfig.py ./Lib/sysconfig.py
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Lib/sysconfig.py	2021-09-04 05:49:41.000000000 +0200
-+++ ./Lib/sysconfig.py	2021-10-20 20:36:09.320098597 +0200
++++ ./Lib/sysconfig.py	2021-10-21 16:05:48.187077533 +0200
 @@ -343,12 +343,16 @@
  
  
@@ -150,7 +150,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.
  def _generate_posix_vars():
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Makefile.pre.in ./Makefile.pre.in
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Makefile.pre.in	2021-09-04 05:49:41.000000000 +0200
-+++ ./Makefile.pre.in	2021-10-21 14:34:44.169735904 +0200
++++ ./Makefile.pre.in	2021-10-21 16:05:48.187077533 +0200
 @@ -124,6 +124,10 @@
  MULTIARCH=	@MULTIARCH@
  MULTIARCH_CPPFLAGS = @MULTIARCH_CPPFLAGS@
@@ -197,7 +197,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.
  # Here are a couple of targets for MacOSX again, to install a full
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Modules/getpath.c ./Modules/getpath.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Modules/getpath.c	2021-09-04 05:49:41.000000000 +0200
-+++ ./Modules/getpath.c	2021-10-20 20:36:09.320098597 +0200
++++ ./Modules/getpath.c	2021-10-21 16:05:48.187077533 +0200
 @@ -566,6 +566,24 @@
      wcsncpy(argv0_path, progpath, MAXPATHLEN);
      argv0_path[MAXPATHLEN] = '\0';
@@ -233,7 +233,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.
      PyMem_RawFree(_exec_prefix);
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Python/import.c ./Python/import.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Python/import.c	2021-09-04 05:49:41.000000000 +0200
-+++ ./Python/import.c	2021-10-20 20:36:09.320098597 +0200
++++ ./Python/import.c	2021-10-22 12:08:11.095795741 +0200
 @@ -1229,6 +1229,23 @@
      if (d == NULL) {
          goto err_return;
@@ -258,9 +258,22 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.
      m = exec_code_in_module(name, d, co);
      if (m == NULL)
          goto err_return;
+@@ -1292,8 +1309,12 @@
+ static void
+ remove_importlib_frames(void)
+ {
++/*  eGenix PyRun provides its own frozen version of these modules:
+     const char *importlib_filename = "<frozen importlib._bootstrap>";
+     const char *external_filename = "<frozen importlib._bootstrap_external>";
++ */
++    const char *importlib_filename = "<pyrun>/importlib/_bootstrap.py";
++    const char *external_filename = "<pyrun>/importlib/_bootstrap.py";
+     const char *remove_frames = "_call_with_frames_removed";
+     int always_trim = 0;
+     int in_importlib = 0;
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Python/pylifecycle.c ./Python/pylifecycle.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Python/pylifecycle.c	2021-09-04 05:49:41.000000000 +0200
-+++ ./Python/pylifecycle.c	2021-10-20 20:36:09.320098597 +0200
++++ ./Python/pylifecycle.c	2021-10-21 16:05:48.187077533 +0200
 @@ -1249,6 +1249,14 @@
                  encoding = pythonioencoding;
              }
@@ -278,7 +291,7 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.
                 stdin and stdout use the surrogateescape error handler by
 diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Python/sysmodule.c ./Python/sysmodule.c
 --- /home/lemburg/egenix/projects/PyRun/Python-3.6.15/Python/sysmodule.c	2021-09-04 05:49:41.000000000 +0200
-+++ ./Python/sysmodule.c	2021-10-20 20:36:09.320098597 +0200
++++ ./Python/sysmodule.c	2021-10-21 16:05:48.187077533 +0200
 @@ -1350,6 +1350,50 @@
  Return True if Python is exiting.");
  
