@@ -160,6 +160,11 @@ else
  FREEZEDIR = Runtime/freeze-3
 endif
 
+# Freeze optimization settings; the freeze.py script is run with these
+# Python optimization settings, which affect the way the stdlib modules are
+# compiled.
+PYRUNFREEZEOPTIMIZATION = -O
+
 # Name of the freeze template and executable
 PYRUNPY = $(PYRUN).py
 
@@ -259,6 +264,10 @@ BINARY_DISTRIBUTION_ARCHIVE = $(DISTDIR)/$(BINARY_DISTRIBUTION).tgz
 
 # Test directory
 TESTDIR = $(PWD)/test-$(PYTHONVERSION)-$(PYTHONUNICODE)
+
+# Compiler optimization settings
+OPT = -g -O3 -Wall -Wstrict-prototypes
+export OPT
 
 # Python configure options
 #PYTHON_CONFIGURE_OPTIONS = ""
@@ -514,7 +523,8 @@ $(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY) $(BUILDDIR)
 	unset PYTHONPATH; export PYTHONPATH; \
 	export PYTHONHOME=$(TMPINSTALLDIR); \
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
-	$(TMPPYTHON) -O freeze.py -d \
+	$(TMPPYTHON) $(PYRUNFREEZEOPTIMIZATION) \
+		freeze.py -d \
 		-o $(PYRUNDIR) \
 		-r $(PYRUNLIBDIRCODEPREFIX) \
 		-r $(PYRUNDIRCODEPREFIX) \
@@ -706,6 +716,7 @@ clean-runtime:
 		$(PYRUNDIR)/*.c \
 		$(PYRUNDIR)/*.o \
 		$(PYRUNDIR)/Makefile \
+		$(PYRUNDIR)/__pycache__ \
 		$(PYRUNDIR)/$(PYRUN) \
 		$(PYRUNDIR)/$(PYRUN_DEBUG) \
 		$(PYRUNDIR)/$(PYRUNPY); \
@@ -721,7 +732,7 @@ clean:	clean-runtime
 
 clean-all:
 	@for i in $(PYTHONVERSIONS); do \
-	  $(ECHO) "Clean up $(PYTHONVERSION) build"; \
+	  $(ECHO) "Clean up $$i build"; \
 	  $(MAKE) clean PYTHONFULLVERSION=$$i; \
 	  $(ECHO) ""; \
 	done
@@ -735,7 +746,7 @@ distclean:	clean
 
 distclean-all:
 	@for i in $(PYTHONVERSIONS); do \
-	  $(ECHO) "Dist clean $(PYTHONVERSION) build"; \
+	  $(ECHO) "Dist clean $$i build"; \
 	  $(MAKE) distclean PYTHONFULLVERSION=$$i; \
 	  $(ECHO) ""; \
 	done
@@ -779,3 +790,6 @@ print-vars:
 	@$(foreach V,\
 		$(sort $(.VARIABLES)), \
                 $(warning $V=$($V)))
+
+print-env:
+	env | sort
