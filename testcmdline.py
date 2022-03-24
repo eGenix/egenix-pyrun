@@ -287,6 +287,16 @@ def test_R_flag(runtime=PYRUN):
             result,
             "(?s).*PYTHONHASHSEED.*"
             )
+
+def test_W_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    result = run(
+        '%s -W ignore '
+        '-c "import warnings; warnings.warn(\'test\'); print (\'done\')"' %
+        runtime)
+    assert 'test' not in result
     
 ###
 
@@ -304,4 +314,5 @@ if __name__ == '__main__':
     test_s_flag(runtime)
     test_B_flag(runtime)
     test_R_flag(runtime)
+    test_W_flag(runtime)
     print('%s passes all command line tests' % runtime)
