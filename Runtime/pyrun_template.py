@@ -22,13 +22,13 @@
 # All variables you add to this namespace will end up in the globals()
 # namespace of the script that's being run.
 #
-# Compatible to Python 2.6, 2.7 and 3.4+
+# Compatible to Python 2.7 and 3.4+
 
 # Copyright information
 COPYRIGHT = """\
 
     Copyright (c) 1997-2000, Marc-Andre Lemburg; mailto:mal@lemburg.com
-    Copyright (c) 2000-2021, eGenix.com Software GmbH; mailto:info@egenix.com
+    Copyright (c) 2000-2022, eGenix.com Software GmbH; mailto:info@egenix.com
 
                             All Rights Reserved.
 
@@ -168,8 +168,8 @@ Available pyrun options:
 -R:       not implemented; use PYTHONHASHSEED instead
 -S:       skip running site.main() and disable support for .pth files
 -V:       print the pyrun version and exit
+-W arg:   add arg as warning filter
 -3:       not implemented; only for compatibility with Python
--W arg:   not implemented; only for compatibility with Python
 -X arg:   not implemented; only for compatibility with Python
 
 Most Python environment variables are supported.
@@ -365,11 +365,14 @@ def pyrun_parse_cmdline():
             sys.exit(rc)
 
         elif arg == '-W':
-            # Warning control: not yet implemented
-            if pyrun_debug:
-                pyrun_log_warning(
-                    'Command line option -W is not yet supported. '
-                    'Ignoring the option.')
+            # Warning control
+            sys.warnoptions.append(value)
+            if 'warnings' in sys.modules:
+                # If the warnings module was already loaded, the filters
+                # will already have been parsed, so we explicitly add
+                # the filter here to make sure it gets registered.
+                import warnings
+                warnings._setoption(value)
 
         elif arg == '-X':
             # Implementation specific options: not implemented
