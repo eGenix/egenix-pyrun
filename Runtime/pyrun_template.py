@@ -360,21 +360,23 @@ def pyrun_parse_cmdline():
             # pythonrun.c
             rc = 1
             pyrun_log_error(
-                'Command line option -R is not supported.\n'
+                'Command line option -R is not supported. '
                 'Please use PYTHONHASHSEED to enable hash randomization.')
             sys.exit(rc)
 
         elif arg == '-W':
             # Warning control: not yet implemented
-            pyrun_log_warning(
-                'Command line option -W is not yet supported.\n'
-                'Ignoring the option.')
+            if pyrun_debug:
+                pyrun_log_warning(
+                    'Command line option -W is not yet supported. '
+                    'Ignoring the option.')
 
         elif arg == '-X':
             # Implementation specific options: not implemented
-            pyrun_log_warning(
-                'Command line option -X is not supported.\n'
-                'Ignoring the option.')
+            if pyrun_debug:
+                pyrun_log_warning(
+                    'Command line option -X is not supported. '
+                    'Ignoring the option.')
 
         # XXX Add more standard Python command line options here
 
