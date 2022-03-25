@@ -65,6 +65,9 @@ from pyrun_config import (
 pyrun_mode = 'script'
 pyrun_app = 'pyrun'
 
+# Settings
+pyrun_argv = sys.argv[:] # save original sys.argv
+
 # Options
 pyrun_verbose = int(os.environ.get('PYRUN_VERBOSE', 0))
 pyrun_debug = int(os.environ.get('PYRUN_DEBUG', 0))
@@ -204,6 +207,7 @@ pyrun_build = %(pyrun_build)r
 
 # Files and directories
 pyrun_executable = %(pyrun_executable)r
+pyrun_argv = %(pyrun_argv)r
 pyrun_dir = %(pyrun_dir)r
 pyrun_binary = %(pyrun_binary)r
 pyrun_prefix = %(pyrun_prefix)r
@@ -261,9 +265,9 @@ def pyrun_parse_cmdline():
     import getopt
 
     # Parse sys.argv
-    valid_options = 'vVm:c:biESdOu3h?sBRW:X:'
+    valid_options = 'vVmcbiESdOu3h?sBRW:X:'
     try:
-        parsed_options, remaining_argv = getopt.getopt(sys.argv[1:],
+        parsed_options, remaining_argv = getopt.getopt(pyrun_argv[1:],
                                                        valid_options)
     except getopt.GetoptError as reason:
         pyrun_help(['*** Problem parsing command line: %s' % reason])
@@ -282,12 +286,11 @@ def pyrun_parse_cmdline():
             # Run script as module
             global pyrun_as_module
             pyrun_as_module = True
-            if not value:
+            if not remaining_argv:
                 pyrun_log_error(
                     'Missing argument for -m. Try pyrun -h for help.')
                 sys.exit(1)
-            # Add the value back to argv for later processing
-            remaining_argv.insert(0, value)
+            # The remaining arguments may be parsed by the module.
             # -m terminates the option list, just like for Python
             break
 
@@ -295,12 +298,10 @@ def pyrun_parse_cmdline():
             # Run argument as command string
             global pyrun_as_string
             pyrun_as_string = True
-            if not value:
+            if not remaining_argv:
                 pyrun_log_error(
                     'Missing argument for -c. Try pyrun -h for help.')
                 sys.exit(1)
-            # Add the value back to argv for later processing
-            remaining_argv.insert(0, value)
             # -c terminates the option list, just like for Python
             break
 

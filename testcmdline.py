@@ -298,6 +298,36 @@ def test_W_flag(runtime=PYRUN):
         runtime)
     assert 'test' not in result
     
+def test_m_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    result = run(
+        '%s -m showargv' %
+        runtime)
+    assert 'showargv' in result
+    
+    result = run(
+        '%s -m showargv -n' %
+        runtime)
+    assert 'showargv' in result
+    assert '-n' in result
+    
+def test_c_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    result = run(
+        '%s -c "import sys; print(sys.argv)"' %
+        runtime)
+    assert '-c' in result
+    
+    result = run(
+        '%s -c "import sys; print(sys.argv)" -n' %
+        runtime)
+    assert '-c' in result
+    assert '-n' in result
+    
 ###
 
 if __name__ == '__main__':
@@ -315,4 +345,6 @@ if __name__ == '__main__':
     test_B_flag(runtime)
     test_R_flag(runtime)
     test_W_flag(runtime)
+    test_m_flag(runtime)
+    test_c_flag(runtime)
     print('%s passes all command line tests' % runtime)
