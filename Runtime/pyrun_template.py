@@ -77,6 +77,7 @@ pyrun_bytecode = False
 pyrun_ignore_environment = False
 pyrun_ignore_pth_files = False
 pyrun_skip_site_main = False
+pyrun_skip_user_site = False
 pyrun_inspect = int(os.environ.get('PYTHONINSPECT', 0))
 pyrun_unbuffered = int(os.environ.get('PYTHONUNBUFFERED', 0))
 pyrun_optimized = int(os.environ.get('PYTHONOPTIMIZE', 0))
@@ -162,11 +163,12 @@ Available pyrun options:
 -h:       show this help text
 -i:       enable interactive inspection mode
 -m:       import and run a module <script> available on PYTHONPATH
--s:       ignore user site; PyRun always ignores user site configs
+-s:       ignore user site
 -u:       open stdout/stderr in unbuffered mode
 -v:       run in verbose mode (-vv for level 2)
 -B:       don't write byte code files
 -E:       ignore environment variables (only PYTHONPATH)
+-I:       isolate from environment: same as -E -s
 -O:       run in optimized mode (-OO also removes doc-strings)
 -R:       not implemented; use PYTHONHASHSEED instead
 -S:       skip running site.main() and disable support for .pth files
@@ -265,7 +267,7 @@ def pyrun_parse_cmdline():
     import getopt
 
     # Parse sys.argv
-    valid_options = 'vVmcbiESdOu3h?sBRW:X:'
+    valid_options = 'vVmcbiESdOu3h?sBRIW:X:'
     try:
         parsed_options, remaining_argv = getopt.getopt(pyrun_argv[1:],
                                                        valid_options)
@@ -365,6 +367,20 @@ def pyrun_parse_cmdline():
                 'Please use PYTHONHASHSEED to enable hash randomization.')
             sys.exit(rc)
 
+        elif arg == '-s':
+            # Disable running user site.py
+            global pyrun_skip_site_user_site
+            pyrun_skip_site_user_site = True
+
+        elif arg == '-I':
+            # Isolate Python from user environment. We implement this as
+            # a combination of -E and -s, since PyRun already isolates
+            # itself from the user environment in several ways.
+            # -E flag: ignore environment
+            pyrun_ignore_environment = True
+            # -s flag: ignore user site dir
+            pyrun_skip_site_user_site = True
+
         elif arg == '-W':
             # Warning control
             sys.warnoptions.append(value)
@@ -393,7 +409,6 @@ def pyrun_parse_cmdline():
         # The following options are simply ignored for this reason:
         #
         elif arg in ('-3',
-                     '-s',
                      ):
             # Ignored option, only here for compatibility with
             # standard Python
@@ -409,6 +424,7 @@ def pyrun_parse_cmdline():
                 rc = 1
             pyrun_help(extra_lines)
             sys.exit(rc)
+
         i += 1
 
     # Update Python flags, if needed; note that the sys.flag setting
@@ -440,11 +456,11 @@ def pyrun_normpath(path,
 
     """
     path = path.strip()
-    
+
     # Apply limited tilde expansion
     if path == '~':
         path = os.environ.get(_home_env, '~')
-        
+
     elif path[:2] == _home_prefix:
         home = os.environ.get(_home_env, None)
         if home is not None:
@@ -528,6 +544,8 @@ def pyrun_run_site_main():
             pyrun_log('    %s' % path)
     import site
     site.PREFIXES = [sys.prefix]
+    if pyrun_skip_user_site:
+        site.ENABLE_USER_SITE = False
     site.main()
     if pyrun_debug > 1:
         pyrun_log('  sys.path after importing site:')
@@ -640,7 +658,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
         pyrun_log('  globals()=%r' % globals())
 
     # Adjust defaults
-    if (mode == 'file' and 
+    if (mode == 'file' and
         (pyrun_script.endswith('.pyc') or
          pyrun_script.endswith('.pyo'))):
         mode = 'codefile'
@@ -661,7 +679,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
             sys.exit(1)
 
     elif mode == 'path':
-        
+
         ### Run pyrun_script as path (much like python <path>)
         #
         # Only supported in Python 2.7+. Can handle .py files, ZIP
@@ -714,7 +732,7 @@ def pyrun_execute_script(pyrun_script, mode='file'):
     elif (mode == 'codefile' or mode == 'codestring'):
 
         ### Run pyrun_script as bytecode file or string
-        
+
         import marshal
         if PY3:
             # Python 3
@@ -838,7 +856,7 @@ if __name__ == '__main__':
 
     # Update run-time environment
     pyrun_update_runtime()
-    
+
     # Show debug info
     if pyrun_debug:
         pyrun_info()
@@ -925,7 +943,7 @@ if __name__ == '__main__':
         # Run the executable as ZIP Python package (imports top-level
         # __main__ module from the appended ZIP file and runs it)
         pyrun_script = sys.executable
-        
+
         # Setup sys.path
         pyrun_setup_sys_path(pyrun_script)
 
@@ -953,12 +971,12 @@ if __name__ == '__main__':
         sys.exit(0)
 
     elif pyrun_mode == 'interactive':
-        
+
         ### Enter interactive mode
 
         # Setup sys.path
         pyrun_setup_sys_path()
-        
+
         # Import site module and run site.main() (which is not run by
         # pyrun per default like in standard Python; see makepyrun.py)
         if not pyrun_skip_site_main:

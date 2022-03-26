@@ -58,7 +58,7 @@ def test_cmd_line(runtime=PYRUN):
         'Hello world !\n'
         )
     l.append(result)
-    
+
     result = run('%s -S main.py' % runtime)
     assert match_result(
         result,
@@ -68,7 +68,7 @@ def test_cmd_line(runtime=PYRUN):
         "sys.path[0]: '%s'\n" % os.path.abspath(os.getcwd())
         )
     l.append(result)
-    
+
     result = run('%s -S pkg/main.py' % runtime)
     assert match_result(
         result,
@@ -88,7 +88,7 @@ def test_cmd_line(runtime=PYRUN):
         "sys.path[0]: '.*/pkg/sub'\n"
         )
     l.append(result)
-    
+
     # These features are only supported in pyrun 2.7 and 3.4+.
     if python_version(runtime) >= '2.7':
         result = run('%s -S dir' % runtime)
@@ -104,7 +104,7 @@ def test_cmd_line(runtime=PYRUN):
             "sys.path[0]: 'dir'\n"
             )
         l.append(result)
-    
+
         result = run('%s -S zipfiles.zip' % runtime)
         assert match_result(
             result,
@@ -114,7 +114,7 @@ def test_cmd_line(runtime=PYRUN):
             "sys.path[0]: 'zipfiles.zip'\n"
             )
         l.append(result)
-    
+
         result = run('%s -S zipfiles.abc' % runtime)
         assert match_result(
             result,
@@ -143,39 +143,39 @@ def test_O_flag(runtime=PYRUN):
         result,
         "ok\n"
         )
-    
+
     result = run('%s -c "assert 1==0; print (\'ok\')"' % runtime)
     assert match_result(
         result,
         "(?s).*AssertionError.*"
         )
-    
+
     result = run('%s -O -c "assert 1==1; print (\'ok\')"' % runtime)
     assert match_result(
         result,
         "ok\n"
         )
-    
+
     result = run('%s -O -c "assert 1==0; print (\'ok\')"' % runtime)
     assert match_result(
         result,
         "ok\n"
         )
-    
+
     result = run('%s -O -c "import sys; print (sys._setflag(\'optimize\'))"' %
                  runtime)
     assert match_result(
         result,
         "1\n"
         )
-    
+
     result = run('%s -OO -c "import sys; print (sys._setflag(\'optimize\'))"' %
                  runtime)
     assert match_result(
         result,
         "2\n"
         )
-    
+
 def test_d_flag(runtime=PYRUN):
 
     os.chdir(TESTDIR)
@@ -190,21 +190,21 @@ def test_d_flag(runtime=PYRUN):
         # Tokenizer in this version has a bug, so the following does not
         # work correctly. See https://bugs.python.org/issue45562
         return
-    
+
     result = run('%s -d -c "import sys; print (sys._setflag(\'debug\'))"' %
                  runtime)
     assert match_result(
         result,
         "1\n"
         )
-    
+
     result = run('%s -dd -c "import sys; print (sys._setflag(\'debug\'))"' %
                  runtime)
     assert match_result(
         result,
         "2\n"
         )
-    
+
 def test_v_flag(runtime=PYRUN):
 
     os.chdir(TESTDIR)
@@ -214,7 +214,7 @@ def test_v_flag(runtime=PYRUN):
         result,
         "ok\n"
         )
-    
+
     result = run('%s -v -c '
                  '"import sys; '
                  'print (\'verbose=%%r\' %% sys._setflag(\'verbose\'))"' %
@@ -223,7 +223,7 @@ def test_v_flag(runtime=PYRUN):
         result,
         "verbose=1\n(import .*|# zipimport: found .*|# destroy sitecustomize.*)"
         )
-    
+
     result = run('%s -vv -c '
                  '"import sys; '
                  'print (\'verbose=%%r\' %% sys._setflag(\'verbose\'))"' %
@@ -232,7 +232,7 @@ def test_v_flag(runtime=PYRUN):
         result,
         "verbose=2\n(import .*|# zipimport: found .*|# destroy sitecustomize.*)"
         )
-    
+
 def test_s_flag(runtime=PYRUN):
 
     os.chdir(TESTDIR)
@@ -242,7 +242,7 @@ def test_s_flag(runtime=PYRUN):
         result,
         "ok\n"
         )
-    
+
 def test_B_flag(runtime=PYRUN):
 
     os.chdir(TESTDIR)
@@ -262,7 +262,7 @@ def test_B_flag(runtime=PYRUN):
         )
     assert not os.path.exists(PYC_FILE)
     assert not os.path.exists(PYC_CACHE)
-    
+
 def test_R_flag(runtime=PYRUN):
 
     os.chdir(TESTDIR)
@@ -297,7 +297,7 @@ def test_W_flag(runtime=PYRUN):
         '-c "import warnings; warnings.warn(\'test\'); print (\'done\')"' %
         runtime)
     assert 'test' not in result
-    
+
 def test_m_flag(runtime=PYRUN):
 
     os.chdir(TESTDIR)
@@ -306,13 +306,13 @@ def test_m_flag(runtime=PYRUN):
         '%s -m showargv' %
         runtime)
     assert 'showargv' in result
-    
+
     result = run(
         '%s -m showargv -n' %
         runtime)
     assert 'showargv' in result
     assert '-n' in result
-    
+
 def test_c_flag(runtime=PYRUN):
 
     os.chdir(TESTDIR)
@@ -321,13 +321,42 @@ def test_c_flag(runtime=PYRUN):
         '%s -c "import sys; print(sys.argv)"' %
         runtime)
     assert '-c' in result
-    
+
     result = run(
         '%s -c "import sys; print(sys.argv)" -n' %
         runtime)
     assert '-c' in result
     assert '-n' in result
-    
+
+def test_s_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    result = run(
+        '%s -s -c "print (pyrun_skip_site_user_site)"' %
+        runtime)
+    assert 'True' in result
+
+def test_E_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    result = run(
+        '%s -E -c '
+        '"print (pyrun_ignore_environment)"' %
+        runtime)
+    assert 'True' in result
+
+def test_I_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    result = run(
+        '%s -I -c '
+        '"print (pyrun_skip_site_user_site and pyrun_ignore_environment)"' %
+        runtime)
+    assert 'True' in result
+
 ###
 
 if __name__ == '__main__':
@@ -347,4 +376,7 @@ if __name__ == '__main__':
     test_W_flag(runtime)
     test_m_flag(runtime)
     test_c_flag(runtime)
+    test_E_flag(runtime)
+    test_I_flag(runtime)
+    test_s_flag(runtime)
     print('%s passes all command line tests' % runtime)
