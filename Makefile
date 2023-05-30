@@ -27,7 +27,7 @@
 # Note: When changing the versions here, also update them in the product
 # Makefile.
 #
-PYTHON_310_VERSION = 3.10.0
+PYTHON_310_VERSION = 3.10.11
 PYTHON_39_VERSION = 3.9.7
 PYTHON_38_VERSION = 3.8.12
 PYTHON_37_VERSION = 3.7.12
@@ -161,6 +161,7 @@ PYTHONSOURCEURL = https://www.python.org/ftp/python/$(PYTHONFULLVERSION)/Python-
 # Directories
 PYTHONORIGDIR = $(PWD)/Python-$(PYTHONFULLVERSION)
 PYTHONDIR = $(PWD)/Python-$(PYTHONFULLVERSION)-$(PYTHONUNICODE)
+PYTHONORIGDIFFDIR = ../Python-$(PYTHONFULLVERSION) # relative to PYTHONDIR
 PYRUNDIR = $(PWD)/runtime
 ifdef PYTHON_2_BUILD
  FREEZEDIR = runtime/freeze-2
@@ -775,7 +776,8 @@ create-python-patch:	$(PYTHONORIGDIR)
 	diff -ur \
 		-x 'importlib.h' \
 		-x 'Setup' \
-		$(PYTHONORIGDIR) . | sed '/Only in .*/d' \
+		$(PYTHONORIGDIFFDIR) . | \
+		sed '/Only in .*/d' \
 		>  ../runtime/$(PYTHONPATCHFILE)
 
 create-all-patches:
