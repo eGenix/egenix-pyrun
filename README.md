@@ -1,5 +1,4 @@
-eGenix PyRun
-============
+# eGenix PyRun
 
 PyRun currently supports these Python releases:
 
@@ -19,8 +18,7 @@ supported by this release of eGenix PyRun.
 Note: PyRun has a long history and includes references to more Python
 releases, but we only actively support a subset of those.
 
-Build Dependencies
-------------------
+# Build Dependencies
 
 The following development packages need to be installed on the
 build system in addition to the compiler suite:
@@ -35,8 +33,7 @@ The tests need a few extra libs:
  * libxml2-devel
  * libxslt-devel
 
-Building
---------
+# Building
 
 "make build-all" will build eGenix PyRun for all supported Python
 releases and place the results into the build-* directories.
@@ -53,8 +50,7 @@ or
 
 make distribution PYTHONFULLVERSION=3.10.11
 
-Testing
--------
+# Testing
 
 The Makefile has various test targets.
 
