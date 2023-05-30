@@ -9,7 +9,7 @@ import os, sys, subprocess, re, shutil
 
 PYRUN = 'pyrun'
 PYTHON = 'python2.7'
-TESTDIR = os.path.abspath('Tests')
+TESTDIR = os.path.abspath('tests')
 
 # Enable debug output ?
 _debug = 0

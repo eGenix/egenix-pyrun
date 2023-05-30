@@ -88,9 +88,9 @@ EXCLUDES = 	-x test \
 PACKAGENAME = egenix-pyrun
 
 # Package version; note that you have to keep this in sync with
-# Runtime/makepyrun.py
+# runtime/makepyrun.py
 PACKAGEVERSION = 2.4.0
-#PACKAGEVERSION = $(shell cd Runtime; python -c "from makepyrun import __version__; print __version__")
+#PACKAGEVERSION = $(shell cd runtime; python -c "from makepyrun import __version__; print __version__")
 
 # OpenSSL installation to compile and link against. If an environment
 # variable SSL is given we use that.  Otherwise, We check a few custom
@@ -105,7 +105,7 @@ PYRUN_SSL = $(shell if ( test -n "$(SSL)" ); then echo $(SSL); \
 		    else echo /usr; \
 		    fi)
 
-### Runtime build parameters
+### runtime build parameters
 
 # Project dir
 PWD := $(shell pwd)
@@ -161,11 +161,11 @@ PYTHONSOURCEURL = https://www.python.org/ftp/python/$(PYTHONFULLVERSION)/Python-
 # Directories
 PYTHONORIGDIR = $(PWD)/Python-$(PYTHONFULLVERSION)
 PYTHONDIR = $(PWD)/Python-$(PYTHONFULLVERSION)-$(PYTHONUNICODE)
-PYRUNDIR = $(PWD)/Runtime
+PYRUNDIR = $(PWD)/runtime
 ifdef PYTHON_2_BUILD
- FREEZEDIR = Runtime/freeze-2
+ FREEZEDIR = runtime/freeze-2
 else
- FREEZEDIR = Runtime/freeze-3
+ FREEZEDIR = runtime/freeze-3
 endif
 
 # Freeze optimization settings; the freeze.py script is run with these
@@ -382,7 +382,7 @@ update-product-version:
 	$(ECHO) "Updating version to $(PACKAGEVERSION) in makepyrun.py"
 	sed -i -r --follow-symlinks \
 		-e "s/__version__ = '[^']*'/__version__ = '$(PACKAGEVERSION)'/" \
-		Runtime/makepyrun.py
+		runtime/makepyrun.py
 
 ### Build process
 
@@ -407,7 +407,7 @@ $(PYTHONDIR):
 	mv $(PYTHONORIGDIR) $(PYTHONDIR)
         # Apply Python patches needed for pyrun
 	cd $(PYTHONDIR); \
-	patch -p0 -F10 < ../Runtime/$(PYTHONPATCHFILE)
+	patch -p0 -F10 < ../runtime/$(PYTHONPATCHFILE)
 
 sources: $(PYTHONDIR)
 
@@ -490,11 +490,11 @@ $(TMPPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNDIR)/$(MODULESSETUP)
 
 interpreter:	$(TMPPYTHON)
 
-Runtime/$(PYRUNPY):	$(TMPPYTHON) Runtime/makepyrun.py Runtime/pyrun_template.py Runtime/pyrun_config_template.py Runtime/pyrun_grammar_template.py
+runtime/$(PYRUNPY):	$(TMPPYTHON) runtime/makepyrun.py runtime/pyrun_template.py runtime/pyrun_config_template.py runtime/pyrun_grammar_template.py
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Preparing PyRun ==========================================================="
 	@$(ECHO) "$(OFF)"
-	cd Runtime; \
+	cd runtime; \
 	unset PYTHONPATH; export PYTHONPATH; \
 	export PYTHONHOME=$(TMPINSTALLDIR); \
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
@@ -502,10 +502,10 @@ Runtime/$(PYRUNPY):	$(TMPPYTHON) Runtime/makepyrun.py Runtime/pyrun_template.py 
 	@$(ECHO) "Created $(PYRUNPY)."
 	touch $@
 
-prepare:	Runtime/$(PYRUNPY)
+prepare:	runtime/$(PYRUNPY)
 
 test-makepyrun:
-	cd Runtime; \
+	cd runtime; \
 	unset PYTHONPATH; export PYTHONPATH; \
 	export PYTHONHOME=$(TMPINSTALLDIR); \
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
@@ -520,12 +520,12 @@ $(BUILDDIR):
 			$(PYRUNSITEPACKAGESLIBDIR) \
 			$(PYRUNINCLUDEDIR)
 
-$(BINDIR)/$(PYRUN):	Runtime/$(PYRUNPY) $(BUILDDIR)
+$(BINDIR)/$(PYRUN):	runtime/$(PYRUNPY) $(BUILDDIR)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating PyRun ============================================================"
 	@$(ECHO) "$(OFF)"
         # Cleanup the PyRun freeze build dir
-	cd Runtime; $(RM) -f *.c *.o
+	cd runtime; $(RM) -f *.c *.o
         # Run freeze to build pyrun
 	cd $(FREEZEDIR); \
 	unset PYTHONPATH; export PYTHONPATH; \
@@ -635,7 +635,7 @@ test-basic:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) "--- Testing basic operation --------------------------------------"
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pyrun ../test.py
-	cp -ar Tests $(TESTDIR); cd $(TESTDIR); bin/pyrun ../testcmdline.py
+	cp -ar tests $(TESTDIR); cd $(TESTDIR); bin/pyrun ../testcmdline.py
 	cd $(TESTDIR); bin/pyrun -c "import sys; print(sys.version)"
 	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun
 	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun -
@@ -771,7 +771,7 @@ create-python-patch:	$(PYTHONORIGDIR)
 		-x 'importlib.h' \
 		-x 'Setup' \
 		$(PYTHONORIGDIR) . | sed '/Only in .*/d' \
-		>  ../Runtime/$(PYTHONPATCHFILE)
+		>  ../runtime/$(PYTHONPATCHFILE)
 
 create-all-patches:
 	@for i in $(PYTHONVERSIONS); do \
