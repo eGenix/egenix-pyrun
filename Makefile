@@ -301,6 +301,10 @@ ifdef MACOSX_INTEL_PLATFORM
  PYTHON_CONFIGURE_OPTIONS = MACOSX_DEPLOYMENT_TARGET=10.5
 endif
 
+# Setuptools' embedded distutils has a bug in the loader which causes it not
+# to work with pyrun, so disable using the embedded copy:
+export SETUPTOOLS_USE_DISTUTILS=stdlib
+
 # Tools
 TAR = tar
 # MAKE is a predefined variable
