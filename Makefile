@@ -749,8 +749,9 @@ distclean:	clean
 	$(RM) -rf \
 		$(DISTDIR) \
 		$(PYTHONORIGDIR) \
-		$(PYTHONDIR) \
+		$(PYTHONDIR); \
 	true
+	find . \( -name '*~' -or -name '*.bak' \) -delete
 
 distclean-all:
 	@for i in $(PYTHONVERSIONS); do \
