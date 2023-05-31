@@ -1,6 +1,6 @@
-diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Lib/lib2to3/pgen2/driver.py	2020-04-19 23:13:39.000000000 +0200
-+++ ./Lib/lib2to3/pgen2/driver.py	2021-10-20 20:23:31.877338284 +0200
+diff -ur -x importlib.h -x Setup ../Python-2.7.18/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
+--- ../Python-2.7.18/Lib/lib2to3/pgen2/driver.py	2020-04-19 23:13:39.000000000 +0200
++++ ./Lib/lib2to3/pgen2/driver.py	2023-05-31 12:13:56.785413762 +0200
 @@ -111,6 +111,14 @@
      head, tail = os.path.splitext(gt)
      if tail == ".txt":
@@ -16,9 +16,9 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.
      return head + tail + ".".join(map(str, sys.version_info)) + ".pickle"
  
  
-diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Lib/lib2to3/refactor.py	2020-04-19 23:13:39.000000000 +0200
-+++ ./Lib/lib2to3/refactor.py	2021-10-20 20:23:31.877338284 +0200
+diff -ur -x importlib.h -x Setup ../Python-2.7.18/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
+--- ../Python-2.7.18/Lib/lib2to3/refactor.py	2020-04-19 23:13:39.000000000 +0200
++++ ./Lib/lib2to3/refactor.py	2023-05-31 12:13:56.785413762 +0200
 @@ -33,6 +33,16 @@
  
  def get_all_fix_names(fixer_pkg, remove_prefix=True):
@@ -36,9 +36,9 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.
      pkg = __import__(fixer_pkg, [], [], ["*"])
      fix_names = []
      for finder, name, ispkg in pkgutil.iter_modules(pkg.__path__):
-diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Lib/pkgutil.py ./Lib/pkgutil.py
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Lib/pkgutil.py	2020-04-19 23:13:39.000000000 +0200
-+++ ./Lib/pkgutil.py	2021-10-20 20:23:31.877338284 +0200
+diff -ur -x importlib.h -x Setup ../Python-2.7.18/Lib/pkgutil.py ./Lib/pkgutil.py
+--- ../Python-2.7.18/Lib/pkgutil.py	2020-04-19 23:13:39.000000000 +0200
++++ ./Lib/pkgutil.py	2023-05-31 12:13:56.789413803 +0200
 @@ -273,20 +273,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
@@ -80,9 +80,9 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.
          return self.code
  
      def get_source(self, fullname=None):
-diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Makefile.pre.in ./Makefile.pre.in
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Makefile.pre.in	2020-04-19 23:13:39.000000000 +0200
-+++ ./Makefile.pre.in	2021-10-21 14:40:08.692666318 +0200
+diff -ur -x importlib.h -x Setup ../Python-2.7.18/Makefile.pre.in ./Makefile.pre.in
+--- ../Python-2.7.18/Makefile.pre.in	2020-04-19 23:13:39.000000000 +0200
++++ ./Makefile.pre.in	2023-05-31 12:13:56.789413803 +0200
 @@ -511,8 +511,12 @@
  	fi
  
@@ -98,9 +98,9 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.
  
  # Build the shared modules
  # Under GNU make, MAKEFLAGS are sorted and normalized; the 's' for
-diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Modules/getpath.c ./Modules/getpath.c
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Modules/getpath.c	2020-04-19 23:13:39.000000000 +0200
-+++ ./Modules/getpath.c	2021-10-20 20:23:31.877338284 +0200
+diff -ur -x importlib.h -x Setup ../Python-2.7.18/Modules/getpath.c ./Modules/getpath.c
+--- ../Python-2.7.18/Modules/getpath.c	2020-04-19 23:13:39.000000000 +0200
++++ ./Modules/getpath.c	2023-05-31 12:13:56.789413803 +0200
 @@ -442,6 +442,17 @@
          strncpy(argv0_path, progpath, MAXPATHLEN);
          argv0_path[MAXPATHLEN] = '\0';
@@ -119,9 +119,9 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.
  #ifdef WITH_NEXT_FRAMEWORK
          /* On Mac OS X we have a special case if we're running from a framework.
          ** This is because the python home should be set relative to the library,
-diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Python/import.c ./Python/import.c
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Python/import.c	2020-04-19 23:13:39.000000000 +0200
-+++ ./Python/import.c	2021-10-20 20:23:31.877338284 +0200
+diff -ur -x importlib.h -x Setup ../Python-2.7.18/Python/import.c ./Python/import.c
+--- ../Python-2.7.18/Python/import.c	2020-04-19 23:13:39.000000000 +0200
++++ ./Python/import.c	2023-05-31 12:13:56.789413803 +0200
 @@ -2146,7 +2146,7 @@
          if (err != 0)
              goto err_return;
@@ -131,9 +131,9 @@ diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.
      if (m == NULL)
          goto err_return;
      Py_DECREF(co);
-diff -ur -x importlib.h -x Setup /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Python/sysmodule.c ./Python/sysmodule.c
---- /home/lemburg/egenix/projects/PyRun/Python-2.7.18/Python/sysmodule.c	2020-04-19 23:13:39.000000000 +0200
-+++ ./Python/sysmodule.c	2021-10-20 20:23:31.877338284 +0200
+diff -ur -x importlib.h -x Setup ../Python-2.7.18/Python/sysmodule.c ./Python/sysmodule.c
+--- ../Python-2.7.18/Python/sysmodule.c	2020-04-19 23:13:39.000000000 +0200
++++ ./Python/sysmodule.c	2023-05-31 12:13:56.789413803 +0200
 @@ -916,6 +916,50 @@
  Clear the internal type lookup cache.");
  
