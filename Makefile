@@ -267,6 +267,9 @@ BINARY_DISTRIBUTION_ARCHIVE = $(DISTDIR)/$(BINARY_DISTRIBUTION).tgz
 # Test directory
 TESTDIR = $(PWD)/test-$(PYTHONVERSION)-$(PYTHONUNICODE)
 
+# Directory with tests
+PYRUNTESTS = $(PWD)/tests
+
 # Compiler optimization settings
 OPT = -g -O3 -Wall -Wstrict-prototypes
 export OPT
@@ -632,8 +635,8 @@ test-basic:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) "$(OFF)"
 	@$(ECHO) "--- Testing basic operation --------------------------------------"
 	@$(ECHO) ""
-	cd $(TESTDIR); bin/pyrun ../test.py
-	cp -ar tests $(TESTDIR); cd $(TESTDIR); bin/pyrun ../testcmdline.py
+	cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test.py
+	cp -ar tests $(TESTDIR); cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/testcmdline.py
 	cd $(TESTDIR); bin/pyrun -c "import sys; print(sys.version)"
 	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun
 	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun -
@@ -651,9 +654,9 @@ ifdef PYTHON_2_BUILD
 else
 	cd $(TESTDIR); bin/pip install -U pip setuptools pyopenssl
 endif
-	export -n PYRUN_HTTPSVERIFY; cd $(TESTDIR); bin/pyrun ../test_ssl.py
-	export PYRUN_HTTPSVERIFY=0; cd $(TESTDIR); bin/pyrun ../test_ssl.py
-	export PYRUN_HTTPSVERIFY=1; cd $(TESTDIR); bin/pyrun ../test_ssl.py
+	export -n PYRUN_HTTPSVERIFY; cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_ssl.py
+	export PYRUN_HTTPSVERIFY=0; cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_ssl.py
+	export PYRUN_HTTPSVERIFY=1; cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_ssl.py
 	@$(ECHO) ""
 
 ifdef PYTHON_2_BUILD
