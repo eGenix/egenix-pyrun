@@ -27,17 +27,22 @@
 # Copyright information
 COPYRIGHT = """\
 
-    Copyright (c) 1997-2000, Marc-Andre Lemburg; mailto:mal@lemburg.com
-    Copyright (c) 2000-2022, eGenix.com Software GmbH; mailto:info@egenix.com
+    Copyright (c) 1997-2000, IKDS Marc-Andre Lemburg; mailto:mal@lemburg.com
+    Copyright (c) 2000-2023, eGenix.com Software GmbH; mailto:info@egenix.com
 
                             All Rights Reserved.
 
-    This software may be used under the conditions and terms of the
-    eGenix.com Public License Agreement. You should have received a
-    copy with this software (usually in the file LICENSE.PyRun
-    located in the package's main directory). Please write to
-    licenses@egenix.com to obtain a copy in case you should not have
-    received a copy.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 """
 
