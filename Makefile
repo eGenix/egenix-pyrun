@@ -27,20 +27,13 @@
 # Note: When changing the versions here, also update them in the product
 # Makefile.
 #
+# Latest as of 2023-05-24:
 PYTHON_310_VERSION = 3.10.11
 PYTHON_39_VERSION = 3.9.16
 PYTHON_38_VERSION = 3.8.16
 PYTHON_37_VERSION = 3.7.16
 PYTHON_36_VERSION = 3.6.15
 PYTHON_27_VERSION = 2.7.18
-
-# Latest as of 2023-05-24:
-#PYTHON_310_VERSION = 3.10.11
-#PYTHON_39_VERSION = 3.9.16
-#PYTHON_38_VERSION = 3.8.16
-#PYTHON_37_VERSION = 3.7.16
-#PYTHON_36_VERSION = 3.6.15
-#PYTHON_27_VERSION = 2.7.18
 
 # Python version to use as basis for pyrun
 PYTHONFULLVERSION = $(PYTHON_310_VERSION)
@@ -770,7 +763,7 @@ spring-clean:
 
 ### Misc other targets
 
-create-python-patch:	$(PYTHONORIGDIR)
+create-python-patch:	$(PYTHONORIGDIR) $(PYTHONDIR)
 	@$(ECHO) "Creating patch for $(PYTHONVERSION)"
 	cd $(PYTHONDIR); \
 	diff -ur \
