@@ -36,11 +36,11 @@ The tests need a few extra libs:
 
 # Building
 
-"make build-all" will build eGenix PyRun for all supported Python
+`make build-all` will build eGenix PyRun for all supported Python
 releases and place the results into the build-* directories.
 
 If you want to create distribution files instead, use
-"make all-distributions".
+`make all-distributions`.
 
 For building just one Python release target, you have to specify
 the PYTHONFULLVERSION on the make command line:
@@ -55,17 +55,17 @@ make distribution PYTHONFULLVERSION=3.10.11
 
 The Makefile has various test targets.
 
-"make test-basic" will test the basic functionality of eGenix PyRun.
+`make test-basic` will test the basic functionality of eGenix PyRun.
 
-"make test-pip" can be used to test eGenix PyRun against various
+`make test-pip` can be used to test eGenix PyRun against various
 packages downloaded using pip.
 
-"make test-distribution" runs both test-basic and test-pip.
+`make test-distribution` runs both test-basic and test-pip.
 
-"make test-all-distributions" will run test-distribution for all
+`make test-all-distributions` will run test-distribution for all
 supported Python releases.
 
-"make test-all-pyruns" will run test-basic for all supported Python
+`make test-all-pyruns` will run test-basic for all supported Python
 releases.
 
-"make test-ssl" tests the PYRUN_HTTPSVERIFY env var.
+`make test-ssl` tests the PYRUN_HTTPSVERIFY env var.
