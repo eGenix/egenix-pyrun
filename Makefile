@@ -432,9 +432,8 @@ $(PYTHONDIR):	$(BASEDIR) $(PYTHONORIGDIR) $(PYRUNSOURCEDIR)/$(PYTHONPATCHFILE)
 	@$(ECHO) "=== Setting up the Python sources ============================================="
 	@$(ECHO) "$(OFF)"
 	$(RM) -rf $(PYTHONDIR)
-	$(MAKE) $(PYTHONORIGDIR)
         # Copy orig source dir to $(PYTHONDIR)
-	cp -a $(PYTHONORIGDIR) $(PYTHONDIR)
+	$(CP_DIR) $(PYTHONORIGDIR) $(PYTHONDIR)
         # Apply Python patches needed for pyrun
 	cd $(PYTHONDIR); \
 	patch -p0 -F10 < $(PYRUNSOURCEDIR)/$(PYTHONPATCHFILE)
@@ -478,13 +477,15 @@ $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 	touch $@
 endif
 
-config: $(PYTHONDIR)/pyconfig.h $(PYRUNSOURCEDIR)/$(MODULESSETUP)
-        # Create tmp install dir structure
+config:	$(PYTHONDIR)/pyconfig.h
+
+$(PYTHONDIR)/Makefile: $(PYTHONDIR)/pyconfig.h $(PYRUNSOURCEDIR)/$(MODULESSETUP)
+	@$(ECHO) "$(BOLD)"
+	@$(ECHO) "=== Setting up the Python modules ============================================="
+	@$(ECHO) "$(OFF)"
+        # Create full install dir structure
 	if test -d $(FULLINSTALLDIR); then $(RM) -rf $(FULLINSTALLDIR); fi
 	mkdir -p $(FULLINSTALLDIR) $(FULLINSTALLDIR)/lib $(FULLINSTALLDIR)/bin $(FULLINSTALLDIR)/include
-        # Create build dir structure
-	if test -d $(BUILDDIR); then $(RM) -rf $(BUILDDIR); fi
-	$(MAKE) $(BUILDDIR)
         # Install the custom Modules/Setup file
 	if test "$(MACOSX_PLATFORM)"; then \
 		sed 	-e 's/# @if macosx: *//' \
@@ -501,12 +502,26 @@ config: $(PYTHONDIR)/pyconfig.h $(PYRUNSOURCEDIR)/$(MODULESSETUP)
 	cd $(PYTHONDIR); \
 	$(RM) Makefile; \
 	$(MAKE) -f Makefile.pre Makefile
+	touch $@
 
-$(FULLPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNSOURCEDIR)/$(MODULESSETUP)
+modules:	$(PYTHONDIR)/Makefile
+
+$(BUILDDIR):	$(BASEDIR)
+	# Create the PyRun install dir structure
+	mkdir -p	$(BUILDDIR) \
+			$(BINDIR) \
+			$(PYRUNLIBDIR) \
+			$(PYRUNSHAREDLIBDIR) \
+			$(PYRUNSITEPACKAGESLIBDIR) \
+			$(PYRUNINCLUDEDIR)
+
+$(FULLPYTHON):	$(PYRUNSOURCEDIR)/$(MODULESSETUP)
+	# Rebuild the modules config unconditionally (since the Makefile has
+	# to be rebuilt, if the Setup changes)
+	$(MAKE) modules $(BUILDDIR)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating Python interpreter ==============================================="
 	@$(ECHO) "$(OFF)"
-	$(MAKE) config
 	cd $(PYTHONDIR); \
 	export SSL="$(PYRUN_SSL)"; \
 	$(MAKE); \
@@ -521,20 +536,12 @@ $(FULLPYTHON):	$(PYTHONDIR)/pyconfig.h $(PYRUNSOURCEDIR)/$(MODULESSETUP)
 
 interpreter:	$(FULLPYTHON)
 
-$(BUILDDIR):	$(BASEDIR)
-	mkdir -p	$(BUILDDIR) \
-			$(BINDIR) \
-			$(PYRUNLIBDIR) \
-			$(PYRUNSHAREDLIBDIR) \
-			$(PYRUNSITEPACKAGESLIBDIR) \
-			$(PYRUNINCLUDEDIR) \
-			$(PYRUNDIR)
-
-$(PYRUNDIR):	$(BUILDDIR)
+$(PYRUNDIR):	$(BASEDIR)
+	mkdir -p $(PYRUNDIR)
 
 $(PYRUNDIR)/makepyrun.py:	$(PYRUNDIR) $(PYRUNSOURCEDIR)/*.py
-	cp -a $(PYRUNSOURCEDIR)/*.py $(PYRUNDIR)
-	cp -a $(PYRUNSOURCEDIR)/freeze-* $(PYRUNDIR)
+	$(CP_DIR) $(PYRUNSOURCEDIR)/*.py $(PYRUNDIR)
+	$(CP_DIR) $(PYRUNSOURCEDIR)/freeze-* $(PYRUNDIR)
 	touch $@
 
 $(PYRUNDIR)/$(PYRUNPY):	$(FULLPYTHON) $(PYRUNDIR)/makepyrun.py
@@ -559,7 +566,7 @@ test-makepyrun:
 	$(FULLPYTHON) makepyrun.py $(PYRUNPY)
 	@$(ECHO) "Created $(PYRUNPY)."
 
-$(BINDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY)
+$(BINDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating PyRun ============================================================"
 	@$(ECHO) "$(OFF)"
@@ -674,7 +681,7 @@ test-basic:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) "--- Testing basic operation --------------------------------------"
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test.py
-	cp -ar tests $(TESTDIR); cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/testcmdline.py
+	$(CP_DIR) tests $(TESTDIR); cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/testcmdline.py
 	cd $(TESTDIR); bin/pyrun -c "import sys; print(sys.version)"
 	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun
 	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun -
