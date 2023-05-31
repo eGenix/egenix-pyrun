@@ -1,6 +1,6 @@
 # eGenix PyRun
 
-PyRun currently supports these Python releases:
+PyRun currently (actively) supports these Python releases:
 
  * Python 3.7
  * Python 3.8
@@ -15,13 +15,14 @@ standard Python.
 Please see the top of the Makefile for the patch level releases
 supported by this release of eGenix PyRun.
 
-Note: PyRun has a long history and includes references to more Python
-releases, but we only actively support a subset of those.
+Note: PyRun has a long history and includes references to several more
+Python releases, but we only actively support the above subset of those.
 
 # Build Dependencies
 
-The following development packages need to be installed on the
-build system in addition to the compiler suite:
+The following development packages need to be installed on the build system
+in addition to the compiler suite (names could be slightly different for
+your system):
 
  * libbz2-devel
  * sqlite3-devel
