@@ -1,6 +1,6 @@
 #===========================================================================
 #
-# PyRun bootloader for #$pyrun (Version #$version)
+# PyRun bootloader for #$pyrun (based on Python #$version)
 #
 #---------------------------------------------------------------------------
 #
