@@ -751,8 +751,7 @@ test-all-distributions:
 ### Cleanup
 
 clean:
-	$(RM) -rf $(BASEDIR); \
-	true
+	$(RM) -rf $(BASEDIR)
 
 clean-all:
 	@for i in $(PYTHONVERSIONS); do \
@@ -762,11 +761,7 @@ clean-all:
 	done
 
 distclean:	clean
-	$(RM) -rf \
-		$(DISTDIR) \
-		$(PYTHONORIGDIR) \
-		$(PYTHONDIR); \
-	true
+	$(RM) -rf $(DISTDIR)
 	find . \( -name '*~' -or -name '*.bak' \) -delete
 
 distclean-all:
