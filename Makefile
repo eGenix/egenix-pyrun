@@ -289,7 +289,7 @@ BINARY_DISTRIBUTION = $(PACKAGENAME)-$(PACKAGEVERSION)-py$(PYTHONVERSION)_$(PYTH
 BINARY_DISTRIBUTION_ARCHIVE = $(DISTDIR)/$(BINARY_DISTRIBUTION).tgz
 
 # Test directory used for running tests
-TESTDIR = $(PWD)/test-$(PYTHONVERSION)-$(PYTHONUNICODE)
+TESTDIR = $(PWD)/testing-$(PYTHONVERSION)-$(PYTHONUNICODE)
 
 # Directory with PyRun tests
 PYRUNTESTS = $(PWD)/tests
@@ -616,8 +616,7 @@ build-all:
 
 install-bin:	$(BINDIR)/$(PYRUN)
 	if ! test -d $(INSTALLBINDIR); then mkdir -p $(INSTALLBINDIR); fi;
-	$(CP) $(BINDIR)/$(PYRUN) $(INSTALLBINDIR)
-	$(CP) $(BINDIR)/$(PYRUN_DEBUG) $(INSTALLBINDIR)
+	$(CP_DIR) $(BINDIR)/* $(INSTALLBINDIR)
 
 install-lib:
 	if ! test -d $(INSTALLLIBDIR); then mkdir -p $(INSTALLLIBDIR); fi;
@@ -663,9 +662,10 @@ $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 	@$(ECHO) "=== Installing PyRun for Tests ==============================================="
 	@$(ECHO) "$(OFF)"
 	$(RM) -rf $(TESTDIR)
+	# Work-around for setuptools
+	export SETUPTOOLS_USE_DISTUTILS=stdlib; \
 	./install-pyrun \
 		--log \
-		--debug \
 		--setuptools-version=latest \
 		--pip-version=latest \
 		--pyrun-distribution=$(BINARY_DISTRIBUTION_ARCHIVE) \
@@ -680,8 +680,8 @@ test-basic:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) "$(OFF)"
 	@$(ECHO) "--- Testing basic operation --------------------------------------"
 	@$(ECHO) ""
-	cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test.py
-	$(CP_DIR) tests $(TESTDIR); cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/testcmdline.py
+	cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_basic.py
+	$(CP_DIR) tests $(TESTDIR); cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_cmdline.py
 	cd $(TESTDIR); bin/pyrun -c "import sys; print(sys.version)"
 	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun
 	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun -
@@ -766,7 +766,7 @@ test-all-distributions:
 ### Cleanup
 
 clean:
-	$(RM) -rf $(BASEDIR)
+	$(RM) -rf $(BASEDIR) $(TESTDIR)
 
 clean-all:
 	@for i in $(PYTHONVERSIONS); do \

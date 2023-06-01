@@ -73,7 +73,7 @@ Without options, the script installs eGenix PyRun, setuptools and pip
 in targetdir. If no local versions of setuptools or pip are found, the
 tools are downloaded from pypi.org.
 "
-COPYRIGHT="""
+COPYRIGHT='
     Copyright (c) 1997-2000, IKDS Marc-Andre Lemburg; mailto:mal@lemburg.com
     Copyright (c) 2000-2023, eGenix.com Software GmbH; mailto:info@egenix.com
 
@@ -90,7 +90,7 @@ COPYRIGHT="""
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-"""
+'
 
 # Script version
 VERSION=1.7.0

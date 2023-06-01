@@ -16,6 +16,6 @@ DEADJOE
 tmp-*/
 tmp/
 build*/
-test-*/
+testing-*/
 dist/
 *.orig
