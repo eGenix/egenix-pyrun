@@ -278,6 +278,9 @@ show-rpath:
 	    readelf -d $(BINDIR)/$(PYRUN) | grep PATH; \
 	fi
 
+# Install all binaries, or just the default ones ?  Set to 1 to enable this.
+INSTALLALLBINARIES =
+
 # Installation directories
 PREFIX = /usr/local
 INSTALLBINDIR = $(PREFIX)/bin
@@ -530,15 +533,15 @@ $(FULLPYTHON):	$(PYRUNSOURCEDIR)/$(MODULESSETUP)
 	export SSL="$(PYRUN_SSL)"; \
 	$(MAKE); \
 	$(MAKE) install; \
-	if ! test -d $(PYRUNSHAREDLIBDIR); then mkdir -p $(PYRUNSHAREDLIBDIR); fi; \
-	$(CP_DIR) -vf $(FULLSHAREDLIBDIR)/* $(PYRUNSHAREDLIBDIR); \
-	if ! test -d $(PYRUNSITEPACKAGESLIBDIR); then mkdir -p $(PYRUNSITEPACKAGESLIBDIR); fi; \
-	$(CP_DIR) -vf $(FULLSITEPACKAGESLIBDIR)/* $(PYRUNSITEPACKAGESLIBDIR); \
-	if ! test -d $(PYRUNINCLUDEDIR); then mkdir -p $(PYRUNINCLUDEDIR); fi; \
-	$(CP_DIR) -vf $(FULLINCLUDEDIR)/* $(PYRUNINCLUDEDIR)
 	touch $@
 
 interpreter:	$(FULLPYTHON)
+
+$(PYRUNINCLUDEDIR)/patchlevel.h:	$(FULLPYTHON)
+	$(CP_DIR) -vf $(FULLSHAREDLIBDIR)/* $(PYRUNSHAREDLIBDIR); \
+	$(CP_DIR) -vf $(FULLSITEPACKAGESLIBDIR)/* $(PYRUNSITEPACKAGESLIBDIR); \
+	$(CP_DIR) -vf $(FULLINCLUDEDIR)/* $(PYRUNINCLUDEDIR)
+	touch $@
 
 $(PYRUNDIR):	$(BASEDIR)
 	mkdir -p $(PYRUNDIR)
@@ -570,9 +573,7 @@ test-makepyrun:
 	$(FULLPYTHON) makepyrun.py $(PYRUNPY)
 	@$(ECHO) "Created $(PYRUNPY)."
 
-
-
-$(BINDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
+$(PYRUNDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating PyRun ============================================================"
 	@$(ECHO) "$(OFF)"
@@ -600,11 +601,16 @@ $(BINDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
 	if ! test -z "$(UPX)"; then \
 	    $(UPX) $(UPXOPTIONS) $(PYRUN); \
 	    ln -sf $(PYRUN) $(PYRUN_UPX); \
-	    $(CP) -d $(PYRUN_UPX) $(BINDIR); \
 	fi; \
+	touch $@
+
+$(BINDIR)/$(PYRUN):	$(PYRUNDIR)/$(PYRUN) $(BUILDDIR)
+	@$(ECHO) "Installing PyRun to $(BINDIR)"
+	cd $(PYRUNDIR); \
 	$(CP) $(PYRUN) $(BINDIR); \
 	$(CP) $(PYRUN_STANDARD) $(BINDIR); \
-	$(CP) $(PYRUN_DEBUG) $(BINDIR)
+	$(CP) $(PYRUN_DEBUG) $(BINDIR); \
+	if test -e $(PYRUN_UPX); then $(CP) -d $(PYRUN_UPX) $(BINDIR); fi
 	cd $(BINDIR); \
 	ln -sf $(PYRUN) $(PYRUN_GENERIC); \
 	ln -sf $(PYRUN) $(PYRUN_SYMLINK); \
@@ -629,13 +635,23 @@ build-all:
 
 install-bin:	$(BINDIR)/$(PYRUN)
 	if ! test -d $(INSTALLBINDIR); then mkdir -p $(INSTALLBINDIR); fi;
-	$(CP_DIR) $(BINDIR)/* $(INSTALLBINDIR)
+	if test $(INSTALLALLBINARIES); then \
+	   echo "Installing all PyRun binaries"; \
+	   $(CP) -a 	$(BINDIR)/* $(INSTALLBINDIR); \
+	else \
+	   echo "Installing standard set of PyRun binaries"; \
+	   $(CP) -a	$(BINDIR)/$(PYRUN) \
+			$(BINDIR)/$(PYRUN_GENERIC) \
+			$(BINDIR)/$(PYRUN_SYMLINK) \
+			$(BINDIR)/$(PYRUN_SYMLINK_GENERIC) \
+			$(INSTALLBINDIR); \
+	fi
 
-install-lib:
+install-lib:	$(PYRUNINCLUDEDIR)/patchlevel.h
 	if ! test -d $(INSTALLLIBDIR); then mkdir -p $(INSTALLLIBDIR); fi;
 	$(CP_DIR) $(PYRUNLIBDIR) $(INSTALLLIBDIR)
 
-install-include:
+install-include:	$(PYRUNINCLUDEDIR)/patchlevel.h
 	if ! test -d $(INSTALLINCLUDEDIR); then mkdir -p $(INSTALLINCLUDEDIR); fi;
 	$(CP_DIR) $(PYRUNINCLUDEDIR) $(INSTALLINCLUDEDIR)
 
