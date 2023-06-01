@@ -141,6 +141,7 @@ endif
 PYRUN_GENERIC = pyrun
 PYRUN = $(PYRUN_GENERIC)$(PYRUNVERSION)
 PYRUN_DEBUG = $(PYRUN)-debug
+PYRUN_STANDARD = $(PYRUN)-standard
 PYRUN_UPX = $(PYRUN)-upx
 
 # Symlinks to create for better Python compatibility
@@ -595,12 +596,15 @@ $(BINDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
 	$(MAKE); \
 	$(CP) $(PYRUN) $(PYRUN_DEBUG); \
 	$(STRIP) $(STRIPOPTIONS) $(PYRUN); \
-	$(CP) $(PYRUN) $(BINDIR); \
-	$(CP) $(PYRUN_DEBUG) $(BINDIR); \
+	$(CP) $(PYRUN) $(PYRUN_STANDARD); \
 	if ! test -z "$(UPX)"; then \
-	    $(UPX) $(UPXOPTIONS) -o $(PYRUN_UPX) $(PYRUN); \
-	    $(CP) $(PYRUN_UPX) $(BINDIR); \
-	fi
+	    $(UPX) $(UPXOPTIONS) $(PYRUN); \
+	    ln -sf $(PYRUN) $(PYRUN_UPX); \
+	    $(CP) -d $(PYRUN_UPX) $(BINDIR); \
+	fi; \
+	$(CP) $(PYRUN) $(BINDIR); \
+	$(CP) $(PYRUN_STANDARD) $(BINDIR); \
+	$(CP) $(PYRUN_DEBUG) $(BINDIR)
 	cd $(BINDIR); \
 	ln -sf $(PYRUN) $(PYRUN_GENERIC); \
 	ln -sf $(PYRUN) $(PYRUN_SYMLINK); \
