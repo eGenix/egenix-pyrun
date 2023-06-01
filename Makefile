@@ -141,6 +141,7 @@ endif
 PYRUN_GENERIC = pyrun
 PYRUN = $(PYRUN_GENERIC)$(PYRUNVERSION)
 PYRUN_DEBUG = $(PYRUN)-debug
+PYRUN_UPX = $(PYRUN)-upx
 
 # Symlinks to create for better Python compatibility
 ifdef PYTHON_2_BUILD
@@ -336,6 +337,8 @@ CP_DIR = $(CP) -pR
 WGET = wget
 TPUT = tput
 ECHO = /bin/echo -e 
+UPX := $(shell which upx 2> /dev/null)
+UPXOPTIONS = -9 -qqq
 
 ifdef MACOSX_PLATFORM
 ECHO = /bin/echo 
@@ -566,6 +569,8 @@ test-makepyrun:
 	$(FULLPYTHON) makepyrun.py $(PYRUNPY)
 	@$(ECHO) "Created $(PYRUNPY)."
 
+
+
 $(BINDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating PyRun ============================================================"
@@ -589,9 +594,13 @@ $(BINDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
 	export SSL="$(PYRUN_SSL)"; \
 	$(MAKE); \
 	$(CP) $(PYRUN) $(PYRUN_DEBUG); \
-	$(STRIP) $(STRIPOPTIONS) $(PYRUN)
-	$(CP) $(PYRUNDIR)/$(PYRUN) $(BINDIR)
-	$(CP) $(PYRUNDIR)/$(PYRUN_DEBUG) $(BINDIR)
+	$(STRIP) $(STRIPOPTIONS) $(PYRUN); \
+	$(CP) $(PYRUN) $(BINDIR); \
+	$(CP) $(PYRUN_DEBUG) $(BINDIR); \
+	if ! test -z "$(UPX)"; then \
+	    $(UPX) $(UPXOPTIONS) -o $(PYRUN_UPX) $(PYRUN); \
+	    $(CP) $(PYRUN_UPX) $(BINDIR); \
+	fi
 	cd $(BINDIR); \
 	ln -sf $(PYRUN) $(PYRUN_GENERIC); \
 	ln -sf $(PYRUN) $(PYRUN_SYMLINK); \
