@@ -446,6 +446,8 @@ def patch_ssl_py(libdir=LIBDIR):
         "    _create_default_https_context = _create_unverified_context\n"
         )
 
+# TODO: This may no longer needed, after we've completely phased out lib2to3
+# support in PyRun.
 def patch_lib2to3_pygram(libdir=LIBDIR):
 
     """ Patch lib2to3.pygram module.
@@ -506,6 +508,9 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
             repr_list.append('%r: %r,' % (name, value))
 
     # Build list of included lib2to3 fixers
+    #
+    # TODO: This may no longer needed, after we've completely phased out
+    # lib2to3 support in PyRun.
     import lib2to3.refactor
     fixes = lib2to3.refactor.get_all_fix_names('lib2to3.fixes')
 
@@ -522,6 +527,8 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
     f.close()
     compile_module(outputfile)
 
+# TODO: This may no longer needed, after we've completely phased out lib2to3
+# support in PyRun.
 def create_pyrun_grammar_py(inputfile='pyrun_grammar_template.py',
                             outputfile='pyrun_grammar.py'):
 
