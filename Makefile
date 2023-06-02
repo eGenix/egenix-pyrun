@@ -81,6 +81,7 @@ EXCLUDES = 	-x test \
 		-x Tkinter \
 		-x tkinter \
 		-x setuptools \
+		-x pydoc_data \
 		-x pip
 
 # Package details (used for distributions and normally passed in via

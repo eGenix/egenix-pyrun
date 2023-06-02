@@ -196,6 +196,7 @@ exclude_package_list = [
     'json.tests',
     'lib2to3.tests',
     'unittest.test',
+    'pydoc_data',
     # Python 3
     'tkinter',
     'turtledemo',
