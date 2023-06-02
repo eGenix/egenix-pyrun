@@ -69,3 +69,14 @@ supported Python releases.
 releases.
 
 `make test-ssl` tests the PYRUN_HTTPSVERIFY env var.
+
+# License
+
+eGenix PyRun is made available under the [Apache 2.0
+license](http://www.apache.org/licenses/LICENSE-2.0) (see COPYRIGHT.NOTICE
+in the source repo for details).
+
+Since PyRun is based on Python itself and creates a custom distribution of
+Python, the resulting binaries are covered by the combination of the Apache
+2.0 license, the Python license and 3rd licenses included in the Python
+source distribution.
