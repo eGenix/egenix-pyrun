@@ -342,17 +342,17 @@ CP = cp
 CP_DIR = $(CP) -pR
 WGET = wget
 TPUT = tput
-ECHO = /bin/echo -e 
+ECHO = /bin/echo -e
 UPX := $(shell which upx 2> /dev/null)
 UPXOPTIONS = -9 -qqq
 
 ifdef MACOSX_PLATFORM
-ECHO = /bin/echo 
+ECHO = /bin/echo
 TPUT = tput -T xterm
 endif
 
 ifdef FREEBSD_PLATFORM
-ECHO = /bin/echo 
+ECHO = /bin/echo
 # MAKE = gmake # We need gmake on FreeBSD
 endif
 
@@ -361,7 +361,7 @@ TPUT = tput -T xterm
 endif
 
 # Stripping the executable
-# 
+#
 # Note: strip on Macs strips too much information from the executable
 # per default, rendering the resulting executable unusable for dynamic
 # linking. See #792. Use -S to only strip the debug information like
