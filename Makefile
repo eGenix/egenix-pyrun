@@ -135,6 +135,8 @@ ifdef PYTHON_3_BUILD
  # for Unicode. Since PYTHONUNICODE is used in a lot of places, we
  # simply assign a generic term to it for Python 3.
  PYTHONUNICODE := ucs4
+ # distutils still has a dependency on lib2to3, so force exclusion:
+ EXCLUDES +=	-x lib2to3
 endif
 
 # Name of the resulting pyrun executable
@@ -329,7 +331,7 @@ endif
 
 # Setuptools' embedded distutils has a bug in the loader which causes it not
 # to work with pyrun, so disable using the embedded copy:
-export SETUPTOOLS_USE_DISTUTILS=stdlib
+#export SETUPTOOLS_USE_DISTUTILS=stdlib
 
 # Tools
 TAR = tar
@@ -692,7 +694,6 @@ $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 	@$(ECHO) "$(OFF)"
 	$(RM) -rf $(TESTDIR)
 	# Work-around for setuptools
-	export SETUPTOOLS_USE_DISTUTILS=stdlib; \
 	./install-pyrun \
 		--log \
 		--setuptools-version=latest \

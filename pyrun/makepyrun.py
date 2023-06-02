@@ -160,12 +160,21 @@ exclude_list = [
     # Python 2
     'Tkinter',
     '_tkinter',
+    'turtle',
     '_ctypes_test',
     '_testcapi',
     'parser',
+    'crypt',
+    'tabnanny',
     # Python 3
-    'idlelib',
+    '_pyio', # the Python version of the io module
     ]
+
+if PY3:
+    # Only exclude in Python 3
+    exclude_list.extend([
+        # - none so far
+    ])
 
 # List of packages to always exclude from the list of modules
 #
@@ -194,6 +203,15 @@ exclude_package_list = [
     'pip',
     'ensurepip', # ensurepip needs access to bundled whl files; see #1774
     ]
+
+if PY3:
+    # Only exclude in Python 3
+    exclude_package_list.extend([
+        # lib2to3 is not needed for modern Python 3 code anymore.  It may
+        # still be useful during development, though.
+        'lib2to3',
+        'distutils', # use setuptools' provided version instead
+    ])
 
 # Parse a line in Modules/Setup
 SETUP_LINE_RE = re.compile('^(\w+)\s+[a-zA-Z\\\\]+')
