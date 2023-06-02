@@ -95,10 +95,10 @@ if PY2:
         return codecs.open(filename, mode, encoding=encoding)
 
     import cPickle as pickle
-    
+
 else:
     import pickle
-    
+
 ### Configuration
 
 # List of modules to always include (even if they are not found
@@ -350,7 +350,7 @@ def patch_sysconfig_py(libdir=LIBDIR):
         when calling get_config_vars().
 
     """
-    if sys.version >= '2.7':
+    if sys.version_info >= (2, 7):
         # Python 2.7 and later: sysconfig module was factored out into
         # a top-level module
         patch_module(os.path.join(libdir, 'sysconfig.py'),
@@ -413,7 +413,7 @@ def patch_site_py(libdir=LIBDIR):
         '"See https?://www\.python\.org[^"]*/license(\.html)?" % sys\.version|'
         '"See https?://www\.python\.org[^"%]*/license/?"'
         ')',
-        '"See http://egenix.com/products/python/PyRun/license.html"')
+        '"See https://pyrun.org/license.html"')
     # Disable use of lib/site-python (removed in Python 3.5)
     if sys.version_info < (3, 5):
         patch_module(
@@ -431,11 +431,11 @@ def patch_ssl_py(libdir=LIBDIR):
 
     """ Patch ssl module.
 
-        We add support for the PYRUNHTTPSVERIFY OS environment
+        We add support for the PYRUN_HTTPSVERIFY OS environment
         variable.
 
     """
-    # Add support for PYRUNHTTPSVERIFY
+    # Add support for PYRUN_HTTPSVERIFY
     patch_module(
         os.path.join(libdir, 'ssl.py'),
         '^_create_default_https_context = create_default_context',
@@ -479,7 +479,7 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
     template = f.read()
     f.close()
 
-    # Build config vars and replace any occurrance of the PREFIX dir
+    # Build config vars and replace any occurrence of the PREFIX dir
     # with a variable "prefix"
     variable_list = sorted(config_vars().items())
     repr_list = []
@@ -514,7 +514,7 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
     import lib2to3.refactor
     fixes = lib2to3.refactor.get_all_fix_names('lib2to3.fixes')
 
-    # Add other temlate variables
+    # Add other template variables
     print('Creating module %s' % outputfile)
     f = open(outputfile, 'w', encoding=ENCODING)
     f.write(format_template(template,
@@ -542,7 +542,7 @@ def create_pyrun_grammar_py(inputfile='pyrun_grammar_template.py',
         lib2to3.pygram.python_grammar)
     pattern_grammar_pickle = pickle.dumps(
         lib2to3.pygram.pattern_grammar)
-    
+
     print('Creating module %s' % outputfile)
     f = open(outputfile, 'w', encoding=ENCODING)
     f.write(format_template(template,
@@ -565,10 +565,10 @@ def create_pyrun_py(inputfile='pyrun_template.py',
     f = open(inputfile, 'r', encoding=ENCODING)
     template = f.read()
     f.close()
-    
+
     assert outputfile.endswith('.py'), 'outputfile does not end with .py'
     pyrun_name = outputfile[:-3]
-    
+
     print('Writing freeze script %s' % outputfile)
     f = open(outputfile, 'w', encoding=ENCODING)
     f.write(format_template(template,
@@ -618,4 +618,4 @@ def main(pyrunfile='pyrun.py',
 
 if __name__ == '__main__':
     main(*sys.argv[1:])
-    
+
