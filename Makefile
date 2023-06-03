@@ -185,8 +185,15 @@ endif
 
 # Freeze optimization settings; the freeze.py script is run with these
 # Python optimization settings, which affect the way the stdlib modules are
-# compiled.
+# compiled. Note that user code will not automatically use these settings.
+#
+# Produce optimized code, with debug and assertions disabled.
 PYRUNFREEZEOPTIMIZATION = -O
+#
+# Produce optimized code, with doc-string removed, debug and assertions
+# disabled.  This results in a reduction of the compressed PyRun size of
+# about 8%, compared to -O.
+#PYRUNFREEZEOPTIMIZATION = -OO
 
 # Name of the freeze template and executable
 PYRUNPY = $(PYRUN).py
