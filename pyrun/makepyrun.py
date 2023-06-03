@@ -407,6 +407,11 @@ def patch_site_py(libdir=LIBDIR):
         os.path.join(libdir, 'site.py'),
         '^( *)main\(\)',
         '\\1pass #main()')
+    # Adjust license file name
+    patch_module(
+        os.path.join(libdir, 'site.py'),
+        '"LICENSE[.a-zA-Z]*"',
+        '"LICENSE.eGenix-PyRun"')
     # Add license URL
     patch_module(
         os.path.join(libdir, 'site.py'),
