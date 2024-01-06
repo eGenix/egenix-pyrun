@@ -10,7 +10,7 @@
     ---------------------------------------------------------------------
 
     Copyright (c) 1997-2000, IKDS Marc-Andre Lemburg; mailto:mal@lemburg.com
-    Copyright (c) 2000-2023, eGenix.com Software GmbH; mailto:info@egenix.com
+    Copyright (c) 2000-2024, eGenix.com Software GmbH; mailto:info@egenix.com
 
                             All Rights Reserved.
 
