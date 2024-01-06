@@ -12,11 +12,12 @@ since PyRun has to patch to the Python source code in order to
 implement extensions needed to make PyRun more compatible with
 standard Python.
 
-Please see the top of the Makefile for the patch level releases
-supported by this release of eGenix PyRun.
+Please see the top of the 'Makefile' for the patch level releases supported
+by this release of eGenix PyRun.
 
 Note: PyRun has a long history and includes references to several more
-Python releases, but we only actively support the above subset of those.
+Python releases, but we only actively support the above subset of those at
+the moment.
 
 # Build Dependencies
 
@@ -37,7 +38,7 @@ The tests need a few extra libs:
 # Building
 
 `make build-all` will build eGenix PyRun for all supported Python
-releases and place the results into the build-* directories.
+releases and place the results into the 'build-*' directories.
 
 If you want to create distribution files instead, use
 `make all-distributions`.
@@ -45,38 +46,38 @@ If you want to create distribution files instead, use
 For building just one Python release target, you have to specify
 the PYTHONFULLVERSION on the make command line:
 
-make build PYTHONFULLVERSION=3.10.11
+ make build PYTHONFULLVERSION=3.10.11 
 
 or
 
-make distribution PYTHONFULLVERSION=3.10.11
+ make distribution PYTHONFULLVERSION=3.10.11 
 
 # Testing
 
 The Makefile has various test targets.
 
-`make test-basic` will test the basic functionality of eGenix PyRun.
+- `make test-basic` will test the basic functionality of eGenix PyRun.
 
-`make test-pip` can be used to test eGenix PyRun against various
+- `make test-pip` can be used to test eGenix PyRun against various
 packages downloaded using pip.
 
-`make test-distribution` runs both test-basic and test-pip.
+- `make test-distribution` runs both test-basic and test-pip.
 
-`make test-all-distributions` will run test-distribution for all
+- `make test-all-distributions` will run test-distribution for all
 supported Python releases.
 
-`make test-all-pyruns` will run test-basic for all supported Python
+- `make test-all-pyruns` will run test-basic for all supported Python
 releases.
 
-`make test-ssl` tests the PYRUN_HTTPSVERIFY env var.
+- `make test-ssl` tests the PYRUN_HTTPSVERIFY env var.
 
 # License
 
 eGenix PyRun is made available under the [Apache 2.0
 license](http://www.apache.org/licenses/LICENSE-2.0) (see COPYRIGHT.NOTICE
-in the source repo for details).
+for details).
 
 Since PyRun is based on Python itself and creates a custom distribution of
 Python, the resulting binaries are covered by the combination of the Apache
-2.0 license, the Python license and 3rd licenses included in the Python
-source distribution.
+2.0 license, the Python license (see LICENSE.Python) and 3rd licenses
+included in the Python source distribution.
