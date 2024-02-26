@@ -841,7 +841,7 @@ create-python-patch:	$(PYTHONORIGDIR) $(PYTHONDIR)
 		-x 'Setup' \
 		$(PYTHONORIGDIFFDIR) . | \
 		sed '/Only in .*/d' \
-		>  $(PYRUNDIR)/$(PYTHONPATCHFILE)
+		>  $(PYRUNSOURCEDIR)/$(PYTHONPATCHFILE)
 
 create-all-patches:
 	@for i in $(PYTHONVERSIONS); do \
