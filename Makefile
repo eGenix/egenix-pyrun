@@ -27,11 +27,11 @@
 # Note: When changing the versions here, also update them in the product
 # Makefile.
 #
-# Latest as of 2023-05-24:
-PYTHON_310_VERSION = 3.10.11
-PYTHON_39_VERSION = 3.9.16
-PYTHON_38_VERSION = 3.8.16
-PYTHON_37_VERSION = 3.7.16
+# Latest as of 2024-02-26:
+PYTHON_310_VERSION = 3.10.13
+PYTHON_39_VERSION = 3.9.18
+PYTHON_38_VERSION = 3.8.18
+PYTHON_37_VERSION = 3.7.17
 PYTHON_36_VERSION = 3.6.15
 PYTHON_27_VERSION = 2.7.18
 

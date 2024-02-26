@@ -1,8 +1,7 @@
 # eGenix PyRun
 
 [eGenix PyRun](https://pyrun.org) is an open source, compressed, single
-file Python 3.10 compatible run-time, which fits into merely 5 MB on
-disk.
+file Python compatible run-time, which fits into merely 5 MB on disk.
 
 It can be used to ship pure Python products as a single file on Unix
 platforms, to create Python Docker images with very small footprint to speed
@@ -62,11 +61,11 @@ If you want to create distribution files instead, use
 For building just one Python release target, you have to specify
 the PYTHONFULLVERSION on the make command line:
 
-`make build PYTHONFULLVERSION=3.10.11`
+`make build PYTHONFULLVERSION=3.10.13`
 
 or
 
-`make distribution PYTHONFULLVERSION=3.10.11`
+`make distribution PYTHONFULLVERSION=3.10.13`
 
 # Testing
 
