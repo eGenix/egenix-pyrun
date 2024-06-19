@@ -34,7 +34,7 @@
 # created for building pyrun. As such it has access to the
 # configuration of the final pyrun executable.
 #
-import sys, os, re, pprint, zlib
+import sys, os, re
 
 try:
     # sysconfig was added to Python 2.7 as top-level module
