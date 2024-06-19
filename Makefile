@@ -442,7 +442,6 @@ $(PYTHONORIGDIR):	$(BASEDIR)
 	    $(ECHO) "Extracting local copy $(PYTHONTARBALL)."; \
 	    $(TAR) xfz $(PYTHONTARBALL) ; \
 	fi
-	touch $@
 
 python-orig:	$(PYTHONORIGDIR)
 
