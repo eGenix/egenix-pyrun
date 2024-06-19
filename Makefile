@@ -24,13 +24,10 @@
 
 # Python versions to use for pyrun
 #
-# Note: When changing the versions here, also update them in the product
-# Makefile.
-#
-# Latest as of 2024-02-26:
-PYTHON_310_VERSION = 3.10.13
-PYTHON_39_VERSION = 3.9.18
-PYTHON_38_VERSION = 3.8.18
+# Latest as of 2024-06-19:
+PYTHON_310_VERSION = 3.10.14
+PYTHON_39_VERSION = 3.9.19
+PYTHON_38_VERSION = 3.8.19
 PYTHON_37_VERSION = 3.7.17
 PYTHON_36_VERSION = 3.6.15
 PYTHON_27_VERSION = 2.7.18
@@ -160,7 +157,7 @@ endif
 ARCHIVE = $(PYRUN)-$(PYRUNFULLVERSION)-$(PLATFORM)
 
 # Location of the Python tarball
-PYTHONTARBALL = /downloads/egenix-build-environment/Python-$(PYTHONFULLVERSION).tgz
+PYTHONTARBALL = /downloads/python/Python-$(PYTHONFULLVERSION).tgz
 PYTHONSOURCEURL = https://www.python.org/ftp/python/$(PYTHONFULLVERSION)/Python-$(PYTHONFULLVERSION).tgz
 
 # Base dir used for a PyRun build
@@ -230,7 +227,7 @@ PYRUNDIRCODEPREFIX = "$(PYRUNDIR)=<pyrun>"
 
 # PyRun build dir.  This is used to prepare all the PyRun parts for
 # installation.  It is used by `make install` as source of the build files.
-BUILDDIR = $(BASEDIR)/pyrun-install
+BUILDDIR = $(BASEDIR)/pyrun-installation
 
 # Target dir of binaries
 BINDIR = $(BUILDDIR)/bin
@@ -818,7 +815,7 @@ clean-all:
 	done
 
 distclean:	clean
-	$(RM) -rf $(DISTDIR) $(TESTDIR)
+	$(RM) -rf $(DISTDIR) $(TESTDIR) $(BUILDDIR)
 	find . \( -name '*~' -or -name '*.bak' \) -delete
 
 distclean-all:
