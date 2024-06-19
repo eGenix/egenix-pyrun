@@ -1,6 +1,6 @@
 diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/distutils/sysconfig.py ./Lib/distutils/sysconfig.py
 --- ../Python-3.7.17/Lib/distutils/sysconfig.py	2023-06-05 22:45:13.000000000 +0200
-+++ ./Lib/distutils/sysconfig.py	2024-02-26 18:35:13.746724453 +0100
++++ ./Lib/distutils/sysconfig.py	2024-06-19 18:03:37.635634497 +0200
 @@ -439,6 +439,10 @@
          platform=sys.platform,
          multiarch=getattr(sys.implementation, '_multiarch', ''),
@@ -14,7 +14,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/distutils/sysconfig.py ./L
      global _config_vars
 diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
 --- ../Python-3.7.17/Lib/importlib/_bootstrap.py	2023-06-05 22:45:13.000000000 +0200
-+++ ./Lib/importlib/_bootstrap.py	2024-02-26 18:35:13.746724453 +0100
++++ ./Lib/importlib/_bootstrap.py	2024-06-19 18:03:37.635634497 +0200
 @@ -791,6 +791,10 @@
  
      @classmethod
@@ -47,7 +47,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/importlib/_bootstrap.py ./
      @classmethod
 diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/lib2to3/pgen2/driver.py ./Lib/lib2to3/pgen2/driver.py
 --- ../Python-3.7.17/Lib/lib2to3/pgen2/driver.py	2023-06-05 22:45:13.000000000 +0200
-+++ ./Lib/lib2to3/pgen2/driver.py	2024-02-26 18:35:13.746724453 +0100
++++ ./Lib/lib2to3/pgen2/driver.py	2024-06-19 18:03:37.635634497 +0200
 @@ -108,6 +108,14 @@
      head, tail = os.path.splitext(gt)
      if tail == ".txt":
@@ -65,7 +65,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/lib2to3/pgen2/driver.py ./
  
 diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/lib2to3/refactor.py ./Lib/lib2to3/refactor.py
 --- ../Python-3.7.17/Lib/lib2to3/refactor.py	2023-06-05 22:45:13.000000000 +0200
-+++ ./Lib/lib2to3/refactor.py	2024-02-26 18:35:13.746724453 +0100
++++ ./Lib/lib2to3/refactor.py	2024-06-19 18:03:37.635634497 +0200
 @@ -30,6 +30,16 @@
  
  def get_all_fix_names(fixer_pkg, remove_prefix=True):
@@ -85,7 +85,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/lib2to3/refactor.py ./Lib/
      for finder, name, ispkg in pkgutil.iter_modules(pkg.__path__):
 diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/pkgutil.py ./Lib/pkgutil.py
 --- ../Python-3.7.17/Lib/pkgutil.py	2023-06-05 22:45:13.000000000 +0200
-+++ ./Lib/pkgutil.py	2024-02-26 18:35:13.746724453 +0100
++++ ./Lib/pkgutil.py	2024-06-19 18:03:37.635634497 +0200
 @@ -315,20 +315,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
@@ -129,7 +129,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/pkgutil.py ./Lib/pkgutil.p
      def get_source(self, fullname=None):
 diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/sysconfig.py ./Lib/sysconfig.py
 --- ../Python-3.7.17/Lib/sysconfig.py	2023-06-05 22:45:13.000000000 +0200
-+++ ./Lib/sysconfig.py	2024-02-26 18:35:13.746724453 +0100
++++ ./Lib/sysconfig.py	2024-06-19 18:03:37.635634497 +0200
 @@ -344,12 +344,16 @@
  
  
@@ -150,7 +150,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.7.17/Lib/sysconfig.py ./Lib/sysconf
  def _generate_posix_vars():
 diff -ur -x importlib.h -x Setup ../Python-3.7.17/Makefile.pre.in ./Makefile.pre.in
 --- ../Python-3.7.17/Makefile.pre.in	2023-06-05 22:45:13.000000000 +0200
-+++ ./Makefile.pre.in	2024-02-26 18:35:13.746724453 +0100
++++ ./Makefile.pre.in	2024-06-19 18:03:37.639634540 +0200
 @@ -129,6 +129,10 @@
  MULTIARCH=	@MULTIARCH@
  MULTIARCH_CPPFLAGS = @MULTIARCH_CPPFLAGS@
@@ -197,7 +197,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.7.17/Makefile.pre.in ./Makefile.pre
  # Here are a couple of targets for MacOSX again, to install a full
 diff -ur -x importlib.h -x Setup ../Python-3.7.17/Python/import.c ./Python/import.c
 --- ../Python-3.7.17/Python/import.c	2023-06-05 22:45:13.000000000 +0200
-+++ ./Python/import.c	2024-02-26 18:35:13.746724453 +0100
++++ ./Python/import.c	2024-06-19 18:03:37.639634540 +0200
 @@ -1353,6 +1353,23 @@
      if (d == NULL) {
          goto err_return;
@@ -237,7 +237,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.7.17/Python/import.c ./Python/impor
      int in_importlib = 0;
 diff -ur -x importlib.h -x Setup ../Python-3.7.17/Python/pylifecycle.c ./Python/pylifecycle.c
 --- ../Python-3.7.17/Python/pylifecycle.c	2023-06-05 22:45:13.000000000 +0200
-+++ ./Python/pylifecycle.c	2024-02-26 18:35:13.746724453 +0100
++++ ./Python/pylifecycle.c	2024-06-19 18:03:37.639634540 +0200
 @@ -1912,6 +1912,14 @@
                  errors = err;
              }
@@ -255,7 +255,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.7.17/Python/pylifecycle.c ./Python/
              if (!encoding) {
 diff -ur -x importlib.h -x Setup ../Python-3.7.17/Python/sysmodule.c ./Python/sysmodule.c
 --- ../Python-3.7.17/Python/sysmodule.c	2023-06-05 22:45:13.000000000 +0200
-+++ ./Python/sysmodule.c	2024-02-26 18:35:13.746724453 +0100
++++ ./Python/sysmodule.c	2024-06-19 18:03:37.639634540 +0200
 @@ -1553,6 +1553,50 @@
  #endif   /* ANDROID_API_LEVEL */
  
