@@ -131,6 +131,7 @@ PYTHON_38_BUILD := $(shell test "$(PYTHONVERSION)" = "3.8" && echo "1")
 PYTHON_39_BUILD := $(shell test "$(PYTHONVERSION)" = "3.9" && echo "1")
 PYTHON_310_BUILD := $(shell test "$(PYTHONVERSION)" = "3.10" && echo "1")
 PYTHON_311_BUILD := $(shell test "$(PYTHONVERSION)" = "3.11" && echo "1")
+PYTHON_311_OR_LATER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -ge 11 && echo "1")
 
 # Special Python environment setups
 ifdef PYTHON_3_BUILD
@@ -197,11 +198,33 @@ PYRUNFREEZEOPTIMIZATION = -O
 # about 8%, compared to -O.
 #PYRUNFREEZEOPTIMIZATION = -OO
 
+# Starting with Python 3.11, fine grained error location reporting was
+# added. This requires a lot of extra space for storing the char-in-line
+# information and contributes a lot to the size of the binary.
+#
+# We disable creating those debug ranges for PyRun itself, but leave it
+# enabled for when using PyRun. Use the PYTHONNODEBUGRANGES env var to
+# disable this for code using PyRun as well - when running the code.
+ifdef PYTHON_311_OR_LATER_BUILD
+ PYRUNFREEZEDEBUGRANGES = -X no_debug_ranges
+else
+ PYRUNFREEZEDEBUGRANGES =
+endif
+
 # Name of the freeze template and executable
 PYRUNPY = $(PYRUN).py
 
 # Name of the special eGenix PyRun Modules/Setup file
 MODULESSETUP = Setup.PyRun-$(PYTHONVERSION)
+
+# Name of the target Modules/Setup file
+ifdef PYTHON_311_OR_LATER_BUILD
+ # The logic changed in 3.11 to use Setup.local instead of editing Setup
+ # directly
+ MODULESSETUPTARGET = Setup.local
+else
+ MODULESSETUPTARGET = Setup
+endif
 
 # Name of the pyrun Python patch file
 PYTHONPATCHFILE = Python-$(PYTHONVERSION).patch
@@ -277,18 +300,10 @@ DISTBUILDDIR  = $(BASEDIR)/pyrun-dist
 #     We use this to enable using egenix-pyopenssl with pyrun and without
 #     having to set LD_LIBRARY_PATH
 #
+# Use the "show-rpath" target for debugging purposes.
+#
 PYRUNORIGIN = \$$ORIGIN
 PYRUNRPATH := $(PYRUNORIGIN):$(PYRUNORIGIN)/../lib:$(PYRUNORIGIN)/../lib/python$(PYRUNVERSION)/site-packages/OpenSSL
-
-# rpath test target:
-show-rpath:
-	echo "Makefile setting:"
-	echo "PYRUNRPATH = $(PYRUNRPATH)"
-	if [ -e $(BINDIR)/$(PYRUN) ]; then \
-	    echo ""; \
-	    echo "Binary $(BINDIR)/$(PYRUN):"; \
-	    readelf -d $(BINDIR)/$(PYRUN) | grep PATH; \
-	fi
 
 # Install all binaries, or just the default ones ?  Set to 1 to enable this.
 INSTALLALLBINARIES =
@@ -431,9 +446,9 @@ update-product-version:
 ### Build process
 
 $(BASEDIR):
-	mkdir -p	$(BASEDIR)
+	mkdir -p $(BASEDIR)
 
-$(PYTHONORIGDIR):	$(BASEDIR)
+$(PYTHONORIGDIR):
 	cd $(BASEDIR); \
 	if test -z $(PYTHONTARBALL) || ! test -e $(PYTHONTARBALL); then \
 	    $(ECHO) "Downloading and extracting $(PYTHONSOURCEURL)."; \
@@ -503,18 +518,22 @@ $(PYTHONDIR)/Makefile: $(PYTHONDIR)/pyconfig.h $(PYRUNSOURCEDIR)/$(MODULESSETUP)
 	@$(ECHO) "$(OFF)"
         # Create full install dir structure
 	if test -d $(FULLINSTALLDIR); then $(RM) -rf $(FULLINSTALLDIR); fi
-	mkdir -p $(FULLINSTALLDIR) $(FULLINSTALLDIR)/lib $(FULLINSTALLDIR)/bin $(FULLINSTALLDIR)/include
-        # Install the custom Modules/Setup file
+	mkdir -p $(FULLINSTALLDIR) $(FULLINSTALLDIR)/lib $(FULLINSTALLDIR)/bin \
+		 $(FULLINSTALLDIR)/include
+        # Install the custom "Modules/Setup" file
 	if test "$(MACOSX_PLATFORM)"; then \
 		sed 	-e 's/# @if macosx: *//' \
-			$(PYRUNSOURCEDIR)/$(MODULESSETUP) > $(PYTHONDIR)/Modules/Setup; \
+			$(PYRUNSOURCEDIR)/$(MODULESSETUP) \
+			> $(PYTHONDIR)/Modules/$(MODULESSETUPTARGET); \
 	elif test "$(FREEBSD_PLATFORM)"; then \
 		sed 	-e 's/# @if freebsd: *//' \
-			$(PYRUNSOURCEDIR)/$(MODULESSETUP) > $(PYTHONDIR)/Modules/Setup; \
+			$(PYRUNSOURCEDIR)/$(MODULESSETUP) \
+			> $(PYTHONDIR)/Modules/$(MODULESSETUPTARGET); \
 	else \
 		sed 	-e 's/# @if not macosx: *//' \
 			-e 's/# @if not freebsd: *//' \
-			$(PYRUNSOURCEDIR)/$(MODULESSETUP) > $(PYTHONDIR)/Modules/Setup; \
+			$(PYRUNSOURCEDIR)/$(MODULESSETUP) \
+			> $(PYTHONDIR)/Modules/$(MODULESSETUPTARGET); \
 	fi;
         # Recreate the Makefile after the above changes
 	cd $(PYTHONDIR); \
@@ -599,7 +618,9 @@ $(PYRUNDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
 	unset PYTHONPATH; export PYTHONPATH; \
 	export PYTHONHOME=$(FULLINSTALLDIR); \
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
-	$(FULLPYTHON) $(PYRUNFREEZEOPTIMIZATION) \
+	$(FULLPYTHON) \
+		$(PYRUNFREEZEOPTIMIZATION) \
+		$(PYRUNFREEZEDEBUGRANGES) \
 		freeze.py -d \
 		-o $(PYRUNDIR) \
 		-r $(PYRUNLIBDIRCODEPREFIX) \
@@ -615,6 +636,7 @@ $(PYRUNDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
 	$(CP) $(PYRUN) $(PYRUN_STANDARD); \
 	if ! test -z "$(UPX)"; then \
 	    $(UPX) $(UPXOPTIONS) $(PYRUN); \
+	    $(CHMOD) +x $(PYRUN); \
 	    ln -sf $(PYRUN) $(PYRUN_UPX); \
 	fi; \
 	touch $@
@@ -834,7 +856,7 @@ spring-clean:
 
 ### Misc other targets
 
-create-python-patch:	$(PYTHONORIGDIR) $(PYTHONDIR)
+create-python-patch:
 	@$(ECHO) "Creating patch for $(PYTHONVERSION)"
 	cd $(PYTHONDIR); \
 	diff -ur \
@@ -872,3 +894,13 @@ print-vars:
 
 print-env:
 	env | sort
+
+# rpath test target:
+show-rpath:
+	echo "Makefile setting:"
+	echo "PYRUNRPATH = $(PYRUNRPATH)"
+	if [ -e $(BINDIR)/$(PYRUN) ]; then \
+	    echo ""; \
+	    echo "Binary $(BINDIR)/$(PYRUN):"; \
+	    readelf -d $(BINDIR)/$(PYRUN) | grep PATH; \
+	fi

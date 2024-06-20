@@ -1,0 +1,325 @@
+diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
+--- ../Python-3.11.9/Lib/importlib/_bootstrap.py	2024-04-02 10:25:04.000000000 +0200
++++ ./Lib/importlib/_bootstrap.py	2024-06-19 22:16:02.680313376 +0200
+@@ -919,6 +919,10 @@
+ 
+     @classmethod
+     def find_spec(cls, fullname, path=None, target=None):
++        if fullname == '__main__': # eGenix PyRun
++            # The main module will be loaded by the import.c loader
++            # and doesn't need to be loaded again.
++            return None
+         info = _call_with_frames_removed(_imp.find_frozen, fullname)
+         if info is None:
+             return None
+@@ -957,6 +961,10 @@
+         _warnings.warn("FrozenImporter.find_module() is deprecated and "
+                        "slated for removal in Python 3.12; use find_spec() instead",
+                        DeprecationWarning)
++        if fullname == '__main__': # eGenix PyRun
++            # The main module will be loaded by the import.c loader
++            # and doesn't need to be loaded again.
++            return None
+         return cls if _imp.is_frozen(fullname) else None
+ 
+     @staticmethod
+@@ -977,6 +985,7 @@
+         spec = module.__spec__
+         name = spec.name
+         code = _call_with_frames_removed(_imp.get_frozen_object, name)
++        module.__file__ = code.co_filename # eGenix PyRun
+         exec(code, module.__dict__)
+ 
+     @classmethod
+diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/inspect.py ./Lib/inspect.py
+--- ../Python-3.11.9/Lib/inspect.py	2024-04-02 10:25:04.000000000 +0200
++++ ./Lib/inspect.py	2024-06-19 22:16:02.680313376 +0200
+@@ -1682,7 +1682,8 @@
+         raise TypeError('{!r} is not a frame or traceback object'.format(frame))
+ 
+     filename = getsourcefile(frame) or getfile(frame)
+-    if context > 0:
++    # When running code using exec(), the lineno may be None (eGenix PyRun)
++    if context > 0 and lineno is not None:
+         start = lineno - 1 - context//2
+         try:
+             lines, lnum = findsource(frame)
+diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/pkgutil.py ./Lib/pkgutil.py
+--- ../Python-3.11.9/Lib/pkgutil.py	2024-04-02 10:25:04.000000000 +0200
++++ ./Lib/pkgutil.py	2024-06-19 22:16:02.680313376 +0200
+@@ -317,20 +317,27 @@
+         return self.etc[2]==imp.PKG_DIRECTORY
+ 
+     def get_code(self, fullname=None):
++        # eGenix PyRun needs pkgutil to also work for frozen modules,
++        # since pkgutil is used by the runpy module, which is needed
++        # to implement the -m command line switch.
++        if self.code is not None:
++            return self.code
+         fullname = self._fix_name(fullname)
+-        if self.code is None:
+-            mod_type = self.etc[2]
+-            if mod_type==imp.PY_SOURCE:
+-                source = self.get_source(fullname)
+-                self.code = compile(source, self.filename, 'exec')
+-            elif mod_type==imp.PY_COMPILED:
+-                self._reopen()
+-                try:
+-                    self.code = read_code(self.file)
+-                finally:
+-                    self.file.close()
+-            elif mod_type==imp.PKG_DIRECTORY:
+-                self.code = self._get_delegate().get_code()
++        mod_type = self.etc[2]
++        if mod_type == imp.PY_FROZEN:
++            self.code = imp.get_frozen_object(fullname)
++            return self.code
++        elif mod_type==imp.PY_SOURCE:
++            source = self.get_source(fullname)
++            self.code = compile(source, self.filename, 'exec')
++        elif mod_type==imp.PY_COMPILED:
++            self._reopen()
++            try:
++                self.code = read_code(self.file)
++            finally:
++                self.file.close()
++        elif mod_type==imp.PKG_DIRECTORY:
++            self.code = self._get_delegate().get_code()
+         return self.code
+ 
+     def get_source(self, fullname=None):
+diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/sysconfig.py ./Lib/sysconfig.py
+--- ../Python-3.11.9/Lib/sysconfig.py	2024-04-02 10:25:04.000000000 +0200
++++ ./Lib/sysconfig.py	2024-06-19 22:16:02.680313376 +0200
+@@ -455,10 +455,14 @@
+ 
+ def _get_sysconfigdata_name():
+     multiarch = getattr(sys.implementation, '_multiarch', '')
+-    return os.environ.get(
++    name = os.environ.get(
+         '_PYTHON_SYSCONFIGDATA_NAME',
+         f'_sysconfigdata_{sys.abiflags}_{sys.platform}_{multiarch}',
+     )
++    # Make sure we create a valid Python module name and not
++    # a name like _sysconfigdata_m_linux_x86_64-linux-gnu as is
++    # done by the original Python sources (eGenix PyRun)
++    return name.replace('-', '_')
+ 
+ 
+ def _generate_posix_vars():
+diff -ur -x importlib.h -x Setup ../Python-3.11.9/Makefile.pre.in ./Makefile.pre.in
+--- ../Python-3.11.9/Makefile.pre.in	2024-04-02 10:25:04.000000000 +0200
++++ ./Makefile.pre.in	2024-06-19 23:55:58.800327342 +0200
+@@ -132,6 +132,10 @@
+ MULTIARCH=	@MULTIARCH@
+ MULTIARCH_CPPFLAGS = @MULTIARCH_CPPFLAGS@
+ 
++# Name of the _sysconfigdata Python module (eGenix PyRun)
++SYSCONFIGDATA_NAME = $(subst -,_,_sysconfigdata_$(ABIFLAGS)_$(MACHDEP)_$(MULTIARCH))
++SYSCONFIGDATA_PY = $(SYSCONFIGDATA_NAME).py
++
+ # Install prefix for architecture-independent files
+ prefix=		@prefix@
+ 
+@@ -498,6 +502,8 @@
+ 		$(OBJECT_OBJS) \
+ 		$(PYTHON_OBJS) \
+ 		$(MODULE_OBJS) \
++		$(LIBEXPAT_OBJS) \
++		$(LIBMPDEC_OBJS) \
+ 		$(MODOBJS)
+ 
+ LIBRARY_OBJS=	\
+@@ -2137,7 +2143,7 @@
+ 			esac; \
+ 		done; \
+ 	done
+-	$(INSTALL_DATA) `cat pybuilddir.txt`/_sysconfigdata_$(ABIFLAGS)_$(MACHDEP)_$(MULTIARCH).py \
++	$(INSTALL_DATA) `cat pybuilddir.txt`/$(SYSCONFIGDATA_PY) \
+ 		$(DESTDIR)$(LIBDEST); \
+ 	$(INSTALL_DATA) $(srcdir)/LICENSE $(DESTDIR)$(LIBDEST)/LICENSE.txt
+ 	if test -d $(DESTDIR)$(LIBDEST)/distutils/tests; then \
+@@ -2297,7 +2303,7 @@
+ 		--install-scripts=$(BINDIR) \
+ 		--install-platlib=$(DESTSHARED) \
+ 		--root=$(DESTDIR)/
+-	-rm $(DESTDIR)$(DESTSHARED)/_sysconfigdata_$(ABIFLAGS)_$(MACHDEP)_$(MULTIARCH).py
++	-rm $(DESTDIR)$(DESTSHARED)/$(SYSCONFIGDATA_PY)
+ 	-rm -r $(DESTDIR)$(DESTSHARED)/__pycache__
+ 
+ # Here are a couple of targets for MacOSX again, to install a full
+diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/import.c ./Python/import.c
+--- ../Python-3.11.9/Python/import.c	2024-04-02 10:25:04.000000000 +0200
++++ ./Python/import.c	2024-06-19 22:16:02.684313419 +0200
+@@ -1404,6 +1404,25 @@
+     if (d == NULL) {
+         goto err_return;
+     }
++
++    /* eGenix PyRun: Remember the filename as the __file__ attribute,
++       for all frozen modules except the special _frozen_importlib one
++       (doing this breaks bootstrapping for some reason)
++
++       Note: this function is only called during startup of the
++       interpreter and by C extensions. All other imports of frozen
++       modules are handled by the importlib. See
++       importlib._bootstrap.FrozenImporter for details.
++
++    */
++    if (PyUnicode_CompareWithASCIIString(name, "_frozen_importlib") != 0) {
++        if (PyDict_SetItemString(
++                d,
++                "__file__",
++                ((PyCodeObject *)co)->co_filename))
++            PyErr_Clear(); /* Not important enough to report */
++    }
++
+     m = exec_code_in_module(tstate, name, d, co);
+     if (m == NULL) {
+         goto err_return;
+@@ -1489,8 +1508,12 @@
+ static void
+ remove_importlib_frames(PyThreadState *tstate)
+ {
++/*  eGenix PyRun provides its own frozen version of these modules:
+     const char *importlib_filename = "<frozen importlib._bootstrap>";
+     const char *external_filename = "<frozen importlib._bootstrap_external>";
++ */
++    const char *importlib_filename = "<pyrun>/importlib/_bootstrap.py";
++    const char *external_filename = "<pyrun>/importlib/_bootstrap.py";
+     const char *remove_frames = "_call_with_frames_removed";
+     int always_trim = 0;
+     int in_importlib = 0;
+diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/initconfig.c ./Python/initconfig.c
+--- ../Python-3.11.9/Python/initconfig.c	2024-04-02 10:25:04.000000000 +0200
++++ ./Python/initconfig.c	2024-06-19 22:16:02.684313419 +0200
+@@ -167,7 +167,12 @@
+ 
+ /* UTF-8 mode (PEP 540): if equals to 1, use the UTF-8 encoding, and change
+    stdin and stdout error handler to "surrogateescape". */
+-int Py_UTF8Mode = 0;
++
++/* For eGenix PyRun we use UTF-8 as default.  This should provide a
++   better user experience than the Python default of using the locale
++   settings for determining the stdin/stdout encodings.  */
++int Py_UTF8Mode = 1;
++
+ int Py_DebugFlag = 0; /* Needed by parser.c */
+ int Py_VerboseFlag = 0; /* Needed by import.c */
+ int Py_QuietFlag = 0; /* Needed by sysmodule.c */
+diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/preconfig.c ./Python/preconfig.c
+--- ../Python-3.11.9/Python/preconfig.c	2024-04-02 10:25:04.000000000 +0200
++++ ./Python/preconfig.c	2024-06-19 22:16:02.684313419 +0200
+@@ -289,7 +289,13 @@
+ 
+        Py_UTF8Mode=1 enables the UTF-8 mode. PYTHONUTF8 environment variable
+        is ignored (even if use_environment=1). */
+-    config->utf8_mode = 0;
++
++    /* For eGenix PyRun we use UTF-8 as default.  This should provide a
++       better user experience than the Python default of using the locale
++       settings for determining the stdin/stdout encodings.  */
++    /*config->utf8_mode = 0;*/
++    config->utf8_mode = 1;
++
+     config->coerce_c_locale = 0;
+     config->coerce_c_locale_warn = 0;
+ 
+@@ -315,7 +321,13 @@
+        environment variables. */
+     config->coerce_c_locale = -1;
+     config->coerce_c_locale_warn = -1;
+-    config->utf8_mode = -1;
++
++    /* For eGenix PyRun we use UTF-8 as default.  This should provide a
++       better user experience than the Python default of using the locale
++       settings for determining the stdin/stdout encodings.  */
++    /*config->utf8_mode = -1;*/
++    config->utf8_mode = 1;
++
+ #ifdef MS_WINDOWS
+     config->legacy_windows_fs_encoding = 0;
+ #endif
+@@ -331,7 +343,13 @@
+     config->configure_locale = 0;
+     config->isolated = 1;
+     config->use_environment = 0;
+-    config->utf8_mode = 0;
++
++    /* For eGenix PyRun we use UTF-8 as default.  This should provide a
++       better user experience than the Python default of using the locale
++       settings for determining the stdin/stdout encodings.  */
++    /*config->utf8_mode = 0;*/
++    config->utf8_mode = 1;
++
+     config->dev_mode = 0;
+ #ifdef MS_WINDOWS
+     config->legacy_windows_fs_encoding = 0;
+diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/sysmodule.c ./Python/sysmodule.c
+--- ../Python-3.11.9/Python/sysmodule.c	2024-04-02 10:25:04.000000000 +0200
++++ ./Python/sysmodule.c	2024-06-19 22:16:02.684313419 +0200
+@@ -1993,6 +1993,56 @@
+ }
+ #endif   /* ANDROID_API_LEVEL */
+ 
++/*** eGenix PyRun Extension ***********************************************/
++
++#define SYS_SETFLAG(c_flag, config_flag, flag_name, c_value, config_value) \
++    if (strcmp(flagname, flag_name) == 0) {	\
++	old_value = c_flag;			\
++	if (value != -1) {			\
++	    c_flag = c_value;                   \
++	    config->config_flag = config_value; \
++	}			                \
++    } else
++
++static PyObject *
++sys_setflag(PyObject* self, PyObject* args)
++{
++    char *flagname;
++    int value = -1, old_value = value;
++    PyInterpreterState *interp = _PyInterpreterState_Get();
++    PyConfig *config = &interp->config;
++
++    if (!PyArg_ParseTuple(args, "s|i", &flagname, &value))
++        goto onError;
++
++    /* TODO: This will need to be updated to hack the current PyConfig
++             used by the interpreter */
++    SYS_SETFLAG(Py_DebugFlag, parser_debug, "debug", value, value)
++    SYS_SETFLAG(Py_OptimizeFlag, optimization_level, "optimize", value, value)
++    SYS_SETFLAG(Py_DontWriteBytecodeFlag, write_bytecode, "dont_write_bytecode", value, !value)
++    SYS_SETFLAG(Py_VerboseFlag, verbose, "verbose", value, value)
++    SYS_SETFLAG(Py_HashRandomizationFlag, use_hash_seed, "hash_randomization", value, value)
++    SYS_SETFLAG(Py_InspectFlag, inspect, "inspect", value, value)
++    {
++        PyErr_SetString(PyExc_ValueError,
++                        "unknown flag name");
++	goto onError;
++    }
++    return PyLong_FromLong((long)old_value);
++
++ onError:
++    return NULL;
++}
++
++#undef SYS_SETFLAG
++
++PyDoc_STRVAR(sys_setflag__doc__,
++"_setflag(flagname, value) -> old_value\n\
++Set the given interpreter flag and return its previous value.");
++
++/*** End of eGenix PyRun Extension ****************************************/
++
++
+ static PyMethodDef sys_methods[] = {
+     /* Might as well keep this in alphabetic order */
+     SYS_ADDAUDITHOOK_METHODDEF
+@@ -2031,6 +2081,7 @@
+     SYS_IS_FINALIZING_METHODDEF
+     SYS_MDEBUG_METHODDEF
+     SYS_SETSWITCHINTERVAL_METHODDEF
++    {"_setflag", sys_setflag, METH_VARARGS, sys_setflag__doc__},
+     SYS_GETSWITCHINTERVAL_METHODDEF
+     SYS_SETDLOPENFLAGS_METHODDEF
+     {"setprofile", sys_setprofile, METH_O, setprofile_doc},
