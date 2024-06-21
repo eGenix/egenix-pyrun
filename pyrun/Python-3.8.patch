@@ -285,20 +285,39 @@ diff -ur -x importlib.h -x Setup ../Python-3.8.19/Python/preconfig.c ./Python/pr
      config->legacy_windows_fs_encoding = 0;
 diff -ur -x importlib.h -x Setup ../Python-3.8.19/Python/sysmodule.c ./Python/sysmodule.c
 --- ../Python-3.8.19/Python/sysmodule.c	2024-03-19 16:40:39.000000000 +0100
-+++ ./Python/sysmodule.c	2024-06-19 18:03:38.603644770 +0200
-@@ -1986,6 +1986,54 @@
++++ ./Python/sysmodule.c	2024-06-21 19:17:56.045768254 +0200
+@@ -1985,6 +1985,71 @@
+ #endif   /* ANDROID_API_LEVEL */
  
  
- 
-+/*** PyRun Extension ***************************************************/
++/*** eGenix PyRun Extension ***********************************************/
++
++/* Note:
++
++   We set both the Python global flag variables (e.g. Py_VerboseFlag),
++   as well as the interpreter config flags, since different versions of
++   Python starting with 3.7 use the two inconsistenty. Some global flags
++   have been phased in favor of config variables, while other global
++   flags remain in use.
++
++   The global flags will probably eventually get removed, now that we
++   are starting to have multiple interpreter support.
++
++   Also note that we are changing the interpreter config variables
++   directly in the config structure and at runtime. Unfortunately, the
++   PyConfig API does not have an option to do this properly, so we need
++   to hack the changes directly into internal structures. Not nice, but
++   what can you do...
++
++*/
 +
 +#define SYS_SETFLAG(c_flag, config_flag, flag_name, c_value, config_value) \
-+    if (strcmp(flagname, flag_name) == 0) {	\
-+	old_value = c_flag;			\
-+	if (value != -1) {			\
-+	    c_flag = c_value;                   \
-+	    config->config_flag = config_value; \
-+	}			                \
++    if (strcmp(flagname, flag_name) == 0) {	    \
++	    old_value = c_flag;			            \
++	    if (value != -1) {			            \
++    	    c_flag = c_value;                   \
++	        config->config_flag = config_value; \
++	    }			                            \
 +    } else
 +
 +static PyObject *
@@ -316,7 +335,6 @@ diff -ur -x importlib.h -x Setup ../Python-3.8.19/Python/sysmodule.c ./Python/sy
 +    SYS_SETFLAG(Py_OptimizeFlag, optimization_level, "optimize", value, value)
 +    SYS_SETFLAG(Py_DontWriteBytecodeFlag, write_bytecode, "dont_write_bytecode", value, !value)
 +    SYS_SETFLAG(Py_VerboseFlag, verbose, "verbose", value, value)
-+    SYS_SETFLAG(Py_HashRandomizationFlag, use_hash_seed, "hash_randomization", value, value)
 +    SYS_SETFLAG(Py_InspectFlag, inspect, "inspect", value, value)
 +    {
 +        PyErr_SetString(PyExc_ValueError,
@@ -335,13 +353,12 @@ diff -ur -x importlib.h -x Setup ../Python-3.8.19/Python/sysmodule.c ./Python/sy
 +"_setflag(flagname, value) -> old_value\n\
 +Set the given interpreter flag and return its previous value.");
 +
-+/*** End of PyRun Extension ***********************************************/
++/*** End of eGenix PyRun Extension ****************************************/
 +
-+
+ 
  static PyMethodDef sys_methods[] = {
      /* Might as well keep this in alphabetic order */
-     SYS_ADDAUDITHOOK_METHODDEF
-@@ -2027,6 +2075,7 @@
+@@ -2027,6 +2092,7 @@
      SYS_SETSWITCHINTERVAL_METHODDEF
      SYS_GETSWITCHINTERVAL_METHODDEF
      SYS_SETDLOPENFLAGS_METHODDEF
