@@ -331,8 +331,14 @@ OPT = -g -O3 -Wall -Wstrict-prototypes
 export OPT
 
 # Python configure options
-#PYTHON_CONFIGURE_OPTIONS = ""
-PYTHON_CONFIGURE_OPTIONS = "--enable-optimizations"
+
+# Regular builds
+PYTHON_DEFAULT_CONFIGURE_OPTIONS = "--enable-optimizations"
+# Dev builds, which don't need to be optimized
+PYTHON_DEV_CONFIGURE_OPTIONS = ""
+
+# ... use the default options for regular builds
+PYTHON_CONFIGURE_OPTIONS = $(PYTHON_DEFAULT_CONFIGURE_OPTIONS)
 
 # Build platform
 LINUX_PLATFORM := $(shell test "`uname -s`" = "Linux" && echo "1")
@@ -365,6 +371,7 @@ RM = /bin/rm
 STRIP = strip
 CP = cp
 CP_DIR = $(CP) -pR
+CHMOD = chmod
 WGET = wget
 TPUT = tput
 ECHO = /bin/echo -e
@@ -696,7 +703,7 @@ install:	install-bin install-lib install-include
 
 ### Packaging
 
-$(BINARY_DISTRIBUTION_ARCHIVE):
+$(BINARY_DISTRIBUTION_ARCHIVE):	$(BINDIR)/$(PYRUN) $(PYRUNINCLUDEDIR)/patchlevel.h
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating PyRun Distribution =============================================="
 	@$(ECHO) "$(OFF)"
@@ -719,6 +726,18 @@ distribution:	announce-distribution logs
 all-distributions:
 	@for i in $(PYTHONVERSIONS); do \
 	  $(MAKE) distribution PYTHONFULLVERSION=$$i; $(ECHO) ""; \
+	done
+
+# This should not be used for building production distributions; it's
+# meant to be used during development, since it runs builds in parallel
+# and without PGO
+dev-build-all-distributions:
+	@$(ECHO) "Building everything in parallel..."
+	@for i in $(PYTHONVERSIONS); do \
+	  ($(MAKE) -j 5 distribution \
+		PYTHONFULLVERSION=$$i \
+		PYTHON_CONFIGURE_OPTIONS="$(PYTHON_DEV_CONFIGURE_OPTIONS)" \
+		&); \
 	done
 
 ### Testing
