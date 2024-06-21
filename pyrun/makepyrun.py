@@ -57,6 +57,7 @@ ENCODING = 'utf-8'
 # Python version flags
 PY2 = (sys.version_info[0] == 2)
 PY3 = (sys.version_info[0] == 3)
+PY311GE = (sys.version_info[:1] >= (3, 11))
 
 # Python module dir
 LIBDIR = sysconfig.get_config_var('LIBDEST')
@@ -175,6 +176,15 @@ if PY3:
     exclude_list.extend([
         # - none so far
     ])
+
+if PY311GE:
+    # Only exclude in Python 3.11+
+    exclude_list.extend([
+        'asynchat',
+        'asyncore',
+        'smtpd',
+    ])
+
 
 # List of packages to always exclude from the list of modules
 #
