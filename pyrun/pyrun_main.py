@@ -56,7 +56,6 @@ pyrun_inspect = int(os.environ.get('PYTHONINSPECT', 0))
 pyrun_unbuffered = int(os.environ.get('PYTHONUNBUFFERED', 0))
 pyrun_optimized = int(os.environ.get('PYTHONOPTIMIZE', 0))
 pyrun_dontwritebytecode = False
-pyrun_hashrandomization = False # doesn't work: see below
 
 ### Python 2 vs. 3
 
@@ -201,7 +200,6 @@ pyrun_inspect = %(pyrun_inspect)r
 pyrun_unbuffered = %(pyrun_unbuffered)r
 pyrun_optimized = %(pyrun_optimized)r
 pyrun_dontwritebytecode = %(pyrun_dontwritebytecode)r
-pyrun_hashrandomization = %(pyrun_hashrandomization)r
 
 """ % globals()).splitlines()
     if extra_lines:
@@ -409,8 +407,6 @@ def pyrun_parse_cmdline():
         sys._setflag('verbose', pyrun_verbose)
     if pyrun_debug:
         sys._setflag('debug', pyrun_debug)
-    if pyrun_hashrandomization:
-        sys._setflag('hash_randomization', pyrun_hashrandomization)
     if pyrun_inspect:
         sys._setflag('inspect', pyrun_inspect)
     if pyrun_dontwritebytecode:
