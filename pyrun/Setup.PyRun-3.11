@@ -171,6 +171,7 @@ _curses_panel _curses_panel.c
 ossaudiodev ossaudiodev.c
 
 # needs -lreadline or -leditline, sometimes termcap, termlib, or tinfo
+MODULE_READLINE_LDFLAGS=-lreadline
 readline readline.c
 
 # AIX has shadow passwords, but does not provide getspent API
