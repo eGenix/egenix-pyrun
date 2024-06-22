@@ -544,7 +544,7 @@ $(PYTHONDIR)/Makefile: $(PYTHONDIR)/pyconfig.h $(PYRUNSOURCEDIR)/$(MODULESSETUP)
 	fi;
         # Recreate the Makefile after the above changes
 	cd $(PYTHONDIR); \
-	$(RM) Makefile; \
+	$(RM) -f Makefile; \
 	$(MAKE) -f Makefile.pre Makefile
 	touch $@
 
@@ -728,13 +728,19 @@ all-distributions:
 	  $(MAKE) distribution PYTHONFULLVERSION=$$i; $(ECHO) ""; \
 	done
 
-# This should not be used for building production distributions; it's
-# meant to be used during development, since it runs builds in parallel
-# and without PGO
+# These targets should not be used for building production
+# distributions; it's meant to be used during development, since it runs
+# builds in parallel and without PGO
+
+dev-build-distribution:
+	@$(ECHO) "Building a dev distribution..."
+	$(MAKE) distribution \
+		PYTHON_CONFIGURE_OPTIONS="$(PYTHON_DEV_CONFIGURE_OPTIONS)"
+
 dev-build-all-distributions:
-	@$(ECHO) "Building everything in parallel..."
+	@$(ECHO) "Building dev distributions in parallel..."
 	@for i in $(PYTHONVERSIONS); do \
-	  ($(MAKE) -j 5 distribution \
+	  ($(MAKE) distribution \
 		PYTHONFULLVERSION=$$i \
 		PYTHON_CONFIGURE_OPTIONS="$(PYTHON_DEV_CONFIGURE_OPTIONS)" \
 		&); \

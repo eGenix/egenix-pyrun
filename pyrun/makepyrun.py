@@ -57,7 +57,9 @@ ENCODING = 'utf-8'
 # Python version flags
 PY2 = (sys.version_info[0] == 2)
 PY3 = (sys.version_info[0] == 3)
-PY311GE = (sys.version_info[:1] >= (3, 11))
+PY311GE = (sys.version_info[:2] >= (3, 11))
+PY311 = (sys.version_info[:2] == (3, 11))
+PY312 = (sys.version_info[:2] == (3, 12))
 
 # Python module dir
 LIBDIR = sysconfig.get_config_var('LIBDEST')
@@ -84,10 +86,6 @@ PYRUN_VERSION = sys.version.split()[0]
 PYRUN_RELEASE = __version__
 
 ### Python 2 vs. 3
-
-# Runtime flags
-PY2 = (sys.version_info[0] == 2)
-PY3 = (sys.version_info[0] == 3)
 
 if PY2:
     # Use the codec.open function instead of the builtin open
@@ -185,6 +183,38 @@ if PY311GE:
         'smtpd',
     ])
 
+if PY311:
+    # Only exclude in Python 3.11:
+    #
+    # These modules are deepfrozen in Python 3.11, so don't include them
+    # as frozen modules as well.
+    #
+    exclude_list.extend([
+        'abc',
+        'codecs',
+        '_collections_abc',
+        'frozen_only',
+        'genericpath',
+        'getpath',
+        '__hello__',
+        'importlib._bootstrap_external',
+        'importlib._bootstrap',
+        'importlib.machinery',
+        'importlib.util',
+        'io',
+        'ntpath',
+        'os',
+        '__phello__',
+        '__phello__.ham.eggs',
+        '__phello__.ham',
+        '__phello__.spam',
+        'posixpath',
+        'runpy',
+        '_sitebuiltins',
+        'site',
+        'stat',
+        'zipimport',
+    ])
 
 # List of packages to always exclude from the list of modules
 #

@@ -1,6 +1,6 @@
 diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
 --- ../Python-3.11.9/Lib/importlib/_bootstrap.py	2024-04-02 10:25:04.000000000 +0200
-+++ ./Lib/importlib/_bootstrap.py	2024-06-21 19:01:05.414903254 +0200
++++ ./Lib/importlib/_bootstrap.py	2024-06-22 00:24:25.935026682 +0200
 @@ -919,6 +919,10 @@
  
      @classmethod
@@ -33,7 +33,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/importlib/_bootstrap.py ./
      @classmethod
 diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/inspect.py ./Lib/inspect.py
 --- ../Python-3.11.9/Lib/inspect.py	2024-04-02 10:25:04.000000000 +0200
-+++ ./Lib/inspect.py	2024-06-21 19:01:05.414903254 +0200
++++ ./Lib/inspect.py	2024-06-22 00:24:25.935026682 +0200
 @@ -1682,7 +1682,8 @@
          raise TypeError('{!r} is not a frame or traceback object'.format(frame))
  
@@ -46,7 +46,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/inspect.py ./Lib/inspect.p
              lines, lnum = findsource(frame)
 diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/pkgutil.py ./Lib/pkgutil.py
 --- ../Python-3.11.9/Lib/pkgutil.py	2024-04-02 10:25:04.000000000 +0200
-+++ ./Lib/pkgutil.py	2024-06-21 19:01:05.414903254 +0200
++++ ./Lib/pkgutil.py	2024-06-22 00:24:25.935026682 +0200
 @@ -317,20 +317,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
  
@@ -90,7 +90,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/pkgutil.py ./Lib/pkgutil.p
      def get_source(self, fullname=None):
 diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/sysconfig.py ./Lib/sysconfig.py
 --- ../Python-3.11.9/Lib/sysconfig.py	2024-04-02 10:25:04.000000000 +0200
-+++ ./Lib/sysconfig.py	2024-06-21 19:01:05.414903254 +0200
++++ ./Lib/sysconfig.py	2024-06-22 00:24:25.935026682 +0200
 @@ -455,10 +455,14 @@
  
  def _get_sysconfigdata_name():
@@ -109,7 +109,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.11.9/Lib/sysconfig.py ./Lib/sysconf
  def _generate_posix_vars():
 diff -ur -x importlib.h -x Setup ../Python-3.11.9/Makefile.pre.in ./Makefile.pre.in
 --- ../Python-3.11.9/Makefile.pre.in	2024-04-02 10:25:04.000000000 +0200
-+++ ./Makefile.pre.in	2024-06-21 19:01:05.414903254 +0200
++++ ./Makefile.pre.in	2024-06-22 00:24:25.935026682 +0200
 @@ -132,6 +132,10 @@
  MULTIARCH=	@MULTIARCH@
  MULTIARCH_CPPFLAGS = @MULTIARCH_CPPFLAGS@
@@ -150,7 +150,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.11.9/Makefile.pre.in ./Makefile.pre
  # Here are a couple of targets for MacOSX again, to install a full
 diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/import.c ./Python/import.c
 --- ../Python-3.11.9/Python/import.c	2024-04-02 10:25:04.000000000 +0200
-+++ ./Python/import.c	2024-06-21 19:01:05.414903254 +0200
++++ ./Python/import.c	2024-06-22 00:24:25.935026682 +0200
 @@ -1404,6 +1404,25 @@
      if (d == NULL) {
          goto err_return;
@@ -192,7 +192,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/import.c ./Python/impor
      int in_importlib = 0;
 diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/initconfig.c ./Python/initconfig.c
 --- ../Python-3.11.9/Python/initconfig.c	2024-04-02 10:25:04.000000000 +0200
-+++ ./Python/initconfig.c	2024-06-21 19:01:05.414903254 +0200
++++ ./Python/initconfig.c	2024-06-22 00:24:25.935026682 +0200
 @@ -167,7 +167,12 @@
  
  /* UTF-8 mode (PEP 540): if equals to 1, use the UTF-8 encoding, and change
@@ -209,7 +209,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/initconfig.c ./Python/i
  int Py_QuietFlag = 0; /* Needed by sysmodule.c */
 diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/preconfig.c ./Python/preconfig.c
 --- ../Python-3.11.9/Python/preconfig.c	2024-04-02 10:25:04.000000000 +0200
-+++ ./Python/preconfig.c	2024-06-21 19:01:05.414903254 +0200
++++ ./Python/preconfig.c	2024-06-22 00:24:25.935026682 +0200
 @@ -289,7 +289,13 @@
  
         Py_UTF8Mode=1 enables the UTF-8 mode. PYTHONUTF8 environment variable
@@ -257,7 +257,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/preconfig.c ./Python/pr
      config->legacy_windows_fs_encoding = 0;
 diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/sysmodule.c ./Python/sysmodule.c
 --- ../Python-3.11.9/Python/sysmodule.c	2024-04-02 10:25:04.000000000 +0200
-+++ ./Python/sysmodule.c	2024-06-21 19:17:05.249222155 +0200
++++ ./Python/sysmodule.c	2024-06-22 00:24:25.935026682 +0200
 @@ -1993,6 +1993,72 @@
  }
  #endif   /* ANDROID_API_LEVEL */
@@ -339,3 +339,16 @@ diff -ur -x importlib.h -x Setup ../Python-3.11.9/Python/sysmodule.c ./Python/sy
      SYS_GETSWITCHINTERVAL_METHODDEF
      SYS_SETDLOPENFLAGS_METHODDEF
      {"setprofile", sys_setprofile, METH_O, setprofile_doc},
+diff -ur -x importlib.h -x Setup ../Python-3.11.9/Tools/scripts/freeze_modules.py ./Tools/scripts/freeze_modules.py
+--- ../Python-3.11.9/Tools/scripts/freeze_modules.py	2024-04-02 10:25:04.000000000 +0200
++++ ./Tools/scripts/freeze_modules.py	2024-06-22 00:24:51.623304464 +0200
+@@ -88,6 +88,9 @@
+     'zipimport',
+ }
+
++# eGenix PyRun: disable all frozen modules
++#FROZEN.clear()
++
+
+ #######################################
+ # platform-specific helpers
