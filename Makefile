@@ -99,13 +99,15 @@ PACKAGEVERSION = 2.5.0
 # locations which possibly more recent versions before going to the standard
 # system paths.  /usr/local is common on Linux, /usr/contrib on HP-UX,
 # /usr/sfw on Solaris/OpenIndiana, fallback is /usr.
-PYRUN_SSL = $(shell if ( test -n "$(SSL)" ); then echo $(SSL); \
+PYRUN_SSL := $(shell if ( test -n "$(SSL)" ); then echo $(SSL); \
 		    elif ( test -e /usr/include/openssl/ssl.h ); then echo /usr; \
 		    elif ( test -e /usr/local/ssl/include/openssl/ssl.h ); then echo /usr/local/ssl; \
 		    elif ( test -e /usr/contrib/ssl/include/openssl/ssl.h ); then echo /usr/contrib/ssl; \
 		    elif ( test -e /usr/sfw/include/openssl/ssl.h ); then echo /usr/sfw; \
 		    else echo /usr; \
 		    fi)
+SSL = $(PYRUN_SSL)
+export SSL
 
 ### runtime build parameters
 
@@ -185,6 +187,11 @@ ifdef PYTHON_2_BUILD
 else
  FREEZEDIR = $(PYRUNDIR)/freeze-3
 endif
+
+# PyRun C compiler optimization settings
+PYRUN_OPT := -g -O3 -Wall -Wstrict-prototypes
+OPT = $(PYRUN_OPT)
+export OPT
 
 # Freeze optimization settings; the freeze.py script is run with these
 # Python optimization settings, which affect the way the stdlib modules are
@@ -325,10 +332,6 @@ TESTDIR = $(PWD)/testing-$(PYTHONVERSION)-$(PYTHONUNICODE)
 
 # Directory with PyRun tests
 PYRUNTESTS = $(PWD)/tests
-
-# Compiler optimization settings
-OPT = -g -O3 -Wall -Wstrict-prototypes
-export OPT
 
 # Python configure options
 
@@ -567,7 +570,6 @@ $(FULLPYTHON):	$(PYRUNSOURCEDIR)/$(MODULESSETUP)
 	@$(ECHO) "=== Creating Python interpreter ==============================================="
 	@$(ECHO) "$(OFF)"
 	cd $(PYTHONDIR); \
-	export SSL="$(PYRUN_SSL)"; \
 	$(MAKE); \
 	$(MAKE) install; \
 	touch $@
@@ -636,7 +638,6 @@ $(PYRUNDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
 	        $(PYRUNDIR)/$(PYRUNPY)
 	cd $(PYRUNDIR); \
 	export LD_RUN_PATH="$(PYRUNRPATH)"; \
-	export SSL="$(PYRUN_SSL)"; \
 	$(MAKE); \
 	$(CP) $(PYRUN) $(PYRUN_DEBUG); \
 	$(STRIP) $(STRIPOPTIONS) $(PYRUN); \
