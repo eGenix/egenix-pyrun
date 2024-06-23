@@ -17,10 +17,10 @@ it, in order to present it to the wider open source and Python community.
 
 PyRun currently (actively) supports these Python releases on Unix platforms:
 
-- Python 3.7
 - Python 3.8
 - Python 3.9
 - Python 3.10
+- Python 3.11
 
 For each release, only one patch level version is supported,
 since PyRun has to patch to the Python source code in order to
@@ -33,6 +33,12 @@ by this release of eGenix PyRun.
 Note: PyRun has a long history and includes references to several additional
 Python releases, but we only actively support the above subset of those at
 the moment.
+
+## Removal of supported versions
+
+We usualy remove active support for Python versions after [they have
+been end-of-lifed](https://devguide.python.org/versions/), ie. no longer
+receive security releases.
 
 # Build Dependencies
 
