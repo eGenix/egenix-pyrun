@@ -337,6 +337,7 @@ PYRUNTESTS = $(PWD)/tests
 
 # Regular builds
 PYTHON_DEFAULT_CONFIGURE_OPTIONS = "--enable-optimizations"
+#PYTHON_DEFAULT_CONFIGURE_OPTIONS = "--enable-optimizations --with-lto=yes"
 # Dev builds, which don't need to be optimized
 PYTHON_DEV_CONFIGURE_OPTIONS = ""
 
