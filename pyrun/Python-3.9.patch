@@ -235,6 +235,23 @@ diff -ur -x importlib.h -x Setup ../Python-3.9.19/Python/import.c ./Python/impor
      const char *remove_frames = "_call_with_frames_removed";
      int always_trim = 0;
      int in_importlib = 0;
+diff -ur -x importlib.h -x Setup ../Python-3.9.19/Python/initconfig.c ./Python/initconfig.c
+--- ../Python-3.9.19/Python/initconfig.c	2024-03-19 16:48:02.000000000 +0100
++++ ./Python/initconfig.c	2024-06-24 00:12:50.733550628 +0200
+@@ -155,7 +155,12 @@
+ 
+ /* UTF-8 mode (PEP 540): if equals to 1, use the UTF-8 encoding, and change
+    stdin and stdout error handler to "surrogateescape". */
+-int Py_UTF8Mode = 0;
++
++/* For eGenix PyRun we use UTF-8 as default.  This should provide a
++   better user experience than the Python default of using the locale
++   settings for determining the stdin/stdout encodings.  */
++int Py_UTF8Mode = 1;
++
+ int Py_DebugFlag = 0; /* Needed by parser.c */
+ int Py_VerboseFlag = 0; /* Needed by import.c */
+ int Py_QuietFlag = 0; /* Needed by sysmodule.c */
 diff -ur -x importlib.h -x Setup ../Python-3.9.19/Python/preconfig.c ./Python/preconfig.c
 --- ../Python-3.9.19/Python/preconfig.c	2024-03-19 16:48:02.000000000 +0100
 +++ ./Python/preconfig.c	2024-06-21 20:13:51.965771773 +0200
