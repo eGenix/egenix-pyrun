@@ -562,7 +562,7 @@ $(BUILDDIR):	$(BASEDIR)
 			$(PYRUNSITEPACKAGESLIBDIR) \
 			$(PYRUNINCLUDEDIR)
 
-$(FULLPYTHON):	$(PYRUNSOURCEDIR)/$(MODULESSETUP)
+$(FULLPYTHON):	$(PYTHONDIR) $(PYRUNSOURCEDIR)/$(MODULESSETUP)
 	# Rebuild the modules config unconditionally (since the Makefile has
 	# to be rebuilt, if the Setup changes)
 	$(MAKE) modules $(BUILDDIR)
