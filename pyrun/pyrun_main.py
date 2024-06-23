@@ -52,6 +52,7 @@ pyrun_ignore_environment = False
 pyrun_ignore_pth_files = False
 pyrun_skip_site_main = False
 pyrun_skip_user_site = False
+pyrun_safe_path = int(os.environ.get('PYTHONSAFEPATH', 0))
 pyrun_inspect = int(os.environ.get('PYTHONINSPECT', 0))
 pyrun_unbuffered = int(os.environ.get('PYTHONUNBUFFERED', 0))
 pyrun_optimized = int(os.environ.get('PYTHONOPTIMIZE', 0))
@@ -124,11 +125,11 @@ def pyrun_help(extra_lines=()):
     """
     # Format the help text
     help_text = ("""\
-Usage: %s [pyrunoptions] <script> [parameters]
+Usage: %s [pyrunoptions] [<script>] [parameters]
 
 Version: %s %s
 
-Available pyrun options:
+Available PyRun command line options:
 
 -b:       run the given <script> file as bytecode
 -c:       compile and run <script> directly as Python code
@@ -143,6 +144,7 @@ Available pyrun options:
 -E:       ignore environment variables (only PYTHONPATH)
 -I:       isolate from environment: same as -E -s
 -O:       run in optimized mode (-OO also removes doc-strings)
+-P:       don't add script or current dir to sys.path
 -R:       not implemented; use PYTHONHASHSEED instead
 -S:       skip running site.main() and disable support for .pth files
 -V:       print the pyrun version and exit
@@ -154,6 +156,8 @@ Most Python environment variables are supported.
 
 Without options, the given <script> file is loaded and run. Parameters
 are passed to the script via sys.argv as normal.
+
+Interactive mode is started, if no <script> file is given.
 
 """ % (pyrun_name,
        pyrun_version,
@@ -200,6 +204,7 @@ pyrun_inspect = %(pyrun_inspect)r
 pyrun_unbuffered = %(pyrun_unbuffered)r
 pyrun_optimized = %(pyrun_optimized)r
 pyrun_dontwritebytecode = %(pyrun_dontwritebytecode)r
+pyrun_safe_path = %(pyrun_safe_path)r
 
 """ % globals()).splitlines()
     if extra_lines:
@@ -239,7 +244,7 @@ def pyrun_parse_cmdline():
     import getopt
 
     # Parse sys.argv
-    valid_options = 'vVmcbiESdOu3h?sBRIW:X:'
+    valid_options = 'vVmcbiESdOu3h?sBPRIW:X:'
     try:
         parsed_options, remaining_argv = getopt.getopt(pyrun_argv[1:],
                                                        valid_options)
@@ -344,6 +349,11 @@ def pyrun_parse_cmdline():
             global pyrun_skip_site_user_site
             pyrun_skip_site_user_site = True
 
+        elif arg == '-P':
+            # Disable adding the script or current dir to sys.path
+            global pyrun_safe_path
+            pyrun_safe_path = True
+
         elif arg == '-I':
             # Isolate Python from user environment. We implement this as
             # a combination of -E and -s, since PyRun already isolates
@@ -399,8 +409,7 @@ def pyrun_parse_cmdline():
 
         i += 1
 
-    # Update Python flags, if needed; note that the sys.flag setting
-    # will not get updated by this.
+    # Update Python flags, if needed
     if pyrun_optimized:
         sys._setflag('optimize', pyrun_optimized)
     if pyrun_verbose:
@@ -409,6 +418,8 @@ def pyrun_parse_cmdline():
         sys._setflag('debug', pyrun_debug)
     if pyrun_inspect:
         sys._setflag('inspect', pyrun_inspect)
+    if pyrun_safe_path:
+        sys._setflag('safe_path', pyrun_safe_path)
     if pyrun_dontwritebytecode:
         sys._setflag('dont_write_bytecode', pyrun_dontwritebytecode)
         sys.dont_write_bytecode = pyrun_dontwritebytecode
@@ -556,9 +567,13 @@ def pyrun_setup_sys_path(pyrun_script=None):
     python_site_package = join(python_lib, 'site-packages')
     # all path variables should be normalized now
 
-    # Build sys.path; start with the script directory (location of
-    # the script to be run)
-    sys.path = [pyrun_script_dir]
+    # Build sys.path
+    if not pyrun_safe_path:
+        # start with the script directory (location of the script to be
+        # run)
+        sys.path = [pyrun_script_dir]
+    else:
+        sys.path = []
 
     # Add PYTHONPATH; note: these are not processed for .pth files
     if not pyrun_ignore_environment:
