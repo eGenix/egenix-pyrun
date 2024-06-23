@@ -418,7 +418,8 @@ def pyrun_parse_cmdline():
         sys._setflag('debug', pyrun_debug)
     if pyrun_inspect:
         sys._setflag('inspect', pyrun_inspect)
-    if pyrun_safe_path:
+    if pyrun_safe_path and sys.version_info[:2] >= (3, 11):
+        # config var is only available in Python 3.11+
         sys._setflag('safe_path', pyrun_safe_path)
     if pyrun_dontwritebytecode:
         sys._setflag('dont_write_bytecode', pyrun_dontwritebytecode)
