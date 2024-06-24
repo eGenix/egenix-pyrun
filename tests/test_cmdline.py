@@ -41,11 +41,13 @@ def python_version(runtime):
 
 def match_result(result, pattern):
 
-    m = re.match(pattern.replace('[0]', '\[0\]'), result, re.MULTILINE)
+    pattern = pattern.replace('[0]', r'\[0\]')
+    m = re.match(pattern, result, re.MULTILINE)
     if m is None:
         print ('*** Result  %r does not match\n'
                '    pattern %r' % (result, pattern))
-    return m
+        return False
+    return True
 
 def test_cmd_line(runtime=PYRUN):
 
@@ -221,7 +223,7 @@ def test_v_flag(runtime=PYRUN):
                  runtime)
     assert match_result(
         result,
-        "verbose=1\n(import .*|# zipimport: found .*|# destroy sitecustomize.*)"
+        "verbose=1\n.*"
         )
 
     result = run('%s -vv -c '
@@ -230,7 +232,7 @@ def test_v_flag(runtime=PYRUN):
                  runtime)
     assert match_result(
         result,
-        "verbose=2\n(import .*|# zipimport: found .*|# destroy sitecustomize.*)"
+        "verbose=2\n.*"
         )
 
 def test_s_flag(runtime=PYRUN):
@@ -357,6 +359,22 @@ def test_I_flag(runtime=PYRUN):
         runtime)
     assert 'True' in result
 
+def test_P_flag(runtime=PYRUN):
+
+    os.chdir(TESTDIR)
+
+    cwd = os.getcwd()
+    result = run(
+        '%s -c '
+        '"print (sys.path[0])"' %
+        runtime).strip()
+    assert result == cwd, (result, cwd)
+    result = run(
+        '%s -P -c '
+        '"print (sys.path[0])"' %
+        runtime).strip()
+    assert result != cwd, (result, cwd)
+
 ###
 
 if __name__ == '__main__':
@@ -379,4 +397,5 @@ if __name__ == '__main__':
     test_E_flag(runtime)
     test_I_flag(runtime)
     test_s_flag(runtime)
+    test_P_flag(runtime)
     print('%s passes all command line tests' % runtime)
