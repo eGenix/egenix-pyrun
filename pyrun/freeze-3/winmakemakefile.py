@@ -20,25 +20,8 @@ int WINAPI WinMain(
 SERVICETEMPLATE = """
 extern int PythonService_main(int, char **);
 
-/* For Py_GetArgcArgv(); set by main() */
-static char **orig_argv;
-static int  orig_argc;
-
-/* Make the *original* argc/argv available to other modules.
-   This is rare, but it is needed by the secureware extension. */
-
-void
-Py_GetArgcArgv(int *argc, char ***argv)
-{
-    *argc = orig_argc;
-    *argv = orig_argv;
-}
-
 int main( int argc, char **argv)
 {
-    orig_argc = argc;	/* For Py_GetArgcArgv() */
-    orig_argv = argv;
-
     PyImport_FrozenModules = _PyImport_FrozenModules;
     return PythonService_main(argc, argv);
 }
@@ -56,7 +39,7 @@ def get_custom_entry_point(subsystem):
     try:
         return subsystem_details[subsystem][:2]
     except KeyError:
-        raise ValueError("The subsystem %s is not known" % subsystem)
+        raise ValueError("The subsystem %s is not known" % subsystem) from None
 
 
 def makemakefile(outfp, vars, files, target):
@@ -112,7 +95,7 @@ def realwork(vars, moddefns, target):
     print()
 
     print('$(temp_dir):')
-    print('  if not exist $(temp_dir)\. mkdir $(temp_dir)')
+    print(r'  if not exist $(temp_dir)\. mkdir $(temp_dir)')
     print()
 
     objects = []
@@ -123,7 +106,7 @@ def realwork(vars, moddefns, target):
             base = os.path.basename(file)
             base, ext = os.path.splitext(base)
             objects.append(base + ".obj")
-            print('$(temp_dir)\%s.obj: "%s"' % (base, file))
+            print(r'$(temp_dir)\%s.obj: "%s"' % (base, file))
             print("\t@$(CC) -c -nologo /Fo$* $(cdl) $(c_debug) /D BUILD_FREEZE", end=' ')
             print('"-I$(pythonhome)/Include"  "-I$(pythonhome)/PC" \\')
             print("\t\t$(cflags) $(cdebug) $(cinclude) \\")
@@ -143,7 +126,7 @@ def realwork(vars, moddefns, target):
     print() ; print()
 
     print("OBJS=", end=' ')
-    for obj in objects: print('"$(temp_dir)\%s"' % (obj), end=' ')
+    for obj in objects: print(r'"$(temp_dir)\%s"' % (obj), end=' ')
     print() ; print()
 
     print("LIBS=", end=' ')
@@ -161,5 +144,5 @@ def realwork(vars, moddefns, target):
     print("<<")
     print()
     print("clean:")
-    print("\t-rm -f *.obj")
-    print("\t-rm -f $(target).exe")
+    print("\t-del /f *.obj")
+    print("\t-del /f $(target).exe")

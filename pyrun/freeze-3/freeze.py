@@ -95,6 +95,7 @@ import os
 import sys
 import sysconfig
 
+
 # Import the freeze-private modules
 
 import checkextensions
@@ -103,6 +104,7 @@ import makefreeze
 import makemakefile
 import parsesetup
 import bkfile
+
 
 # Main program
 
@@ -123,9 +125,7 @@ def main():
 
     # default the exclude list for each platform
     if win: exclude = exclude + [
-        'dos', 'dospath', 'mac', 'macpath', 'macfs', 'MACFS', 'posix',
-        'ce',
-        ]
+        'dos', 'dospath', 'mac', 'macfs', 'MACFS', 'posix', ]
 
     fail_import = exclude[:]
 
@@ -136,6 +136,11 @@ def main():
     makefile = 'Makefile'
     subsystem = 'console'
 
+    if sys.platform == "darwin" and sysconfig.get_config_var("PYTHONFRAMEWORK"):
+        print(f"{sys.argv[0]} cannot be used with framework builds of Python", file=sys.stderr)
+        sys.exit(1)
+
+
     # parse command line by first replacing any "-i" options with the
     # file contents.
     pos = 1
@@ -143,7 +148,8 @@ def main():
         # last option can not be "-i", so this ensures "pos+1" is in range!
         if sys.argv[pos] == '-i':
             try:
-                options = open(sys.argv[pos+1]).read().split()
+                with open(sys.argv[pos+1]) as infp:
+                    options = infp.read().split()
             except IOError as why:
                 usage("File name '%s' specified with the -i option "
                       "can not be read - %s" % (sys.argv[pos+1], why) )
@@ -218,12 +224,15 @@ def main():
 
     # locations derived from options
     version = '%d.%d' % sys.version_info[:2]
-    flagged_version = version + sys.abiflags
+    if hasattr(sys, 'abiflags'):
+        flagged_version = version + sys.abiflags
+    else:
+        flagged_version = version
     if win:
         extensions_c = 'frozen_extensions.c'
     if ishome:
         print("(Using Python source directory)")
-        binlib = exec_prefix
+        configdir = exec_prefix
         incldir = os.path.join(prefix, 'Include')
         config_h_dir = exec_prefix
         config_c_in = os.path.join(prefix, 'Modules', 'config.c.in')
@@ -232,25 +241,21 @@ def main():
         if win:
             frozendllmain_c = os.path.join(exec_prefix, 'Pc\\frozen_dllmain.c')
     else:
-        # Since the location of the config dir changed between Python
-        # versions, it's better to get the name via the sysconfig module
-        # function get_makefile_filename() (the Makefile is placed into this
-        # dir during install)
-        config_dir = os.path.dirname(sysconfig.get_makefile_filename())
-        binlib = os.path.join(exec_prefix, config_dir)
+        configdir = sysconfig.get_config_var('LIBPL')
         incldir = os.path.join(prefix, 'include', 'python%s' % flagged_version)
         config_h_dir = os.path.join(exec_prefix, 'include',
                                     'python%s' % flagged_version)
-        config_c_in = os.path.join(binlib, 'config.c.in')
-        frozenmain_c = os.path.join(binlib, 'frozenmain.c')
-        makefile_in = os.path.join(binlib, 'Makefile')
-        frozendllmain_c = os.path.join(binlib, 'frozen_dllmain.c')
+        config_c_in = os.path.join(configdir, 'config.c.in')
+        frozenmain_c = os.path.join(configdir, 'frozenmain.c')
+        makefile_in = os.path.join(configdir, 'Makefile')
+        frozendllmain_c = os.path.join(configdir, 'frozen_dllmain.c')
+    libdir = sysconfig.get_config_var('LIBDIR')
     supp_sources = []
     defines = []
     includes = ['-I' + incldir, '-I' + config_h_dir]
 
     # sanity check of directories and files
-    check_dirs = [prefix, exec_prefix, binlib, incldir]
+    check_dirs = [prefix, exec_prefix, configdir, incldir]
     if not win:
         # These are not directories on Windows.
         check_dirs = check_dirs + extensions
@@ -453,13 +458,12 @@ def main():
 
     # generate config.c and Makefile
     builtins.sort()
-    infp = open(config_c_in)
     with open(config_c_in) as infp, bkfile.open(config_c, 'w') as outfp:
         makeconfig.makeconfig(infp, outfp, builtins)
 
     cflags = ['$(BASECFLAGS)', '$(OPT)']
     cppflags = defines + includes
-    libs = [os.path.join(binlib, '$(LDLIBRARY)')]
+    libs = [os.path.join(libdir, '$(LDLIBRARY)')]
 
     somevars = {}
     if os.path.exists(makefile_in):

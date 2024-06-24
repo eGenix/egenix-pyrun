@@ -118,7 +118,7 @@ def get_extension_defn(moduleName, mapFileName, prefix):
 
     for exc in exclude:
         if exc in module.sourceFiles:
-            modules.sourceFiles.remove(exc)
+            module.sourceFiles.remove(exc)
 
     return module
 
@@ -130,7 +130,8 @@ def parse_dsp(dsp):
     ret = []
     dsp_path, dsp_name = os.path.split(dsp)
     try:
-        lines = open(dsp, "r").readlines()
+        with open(dsp, "r") as fp:
+            lines = fp.readlines()
     except IOError as msg:
         sys.stderr.write("%s: %s\n" % (dsp, msg))
         return None

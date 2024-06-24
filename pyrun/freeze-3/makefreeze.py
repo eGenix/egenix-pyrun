@@ -1,6 +1,9 @@
 import marshal
 import bkfile
+import sys
 
+# The frozen array struct changed in 3.11
+PY311GE = (sys.version_info[:2] >= (3, 11))
 
 # Write a file containing frozen code for the modules in the dictionary.
 
@@ -94,7 +97,17 @@ def makefreeze(base, dict, debug=0, entry_point=None, fail_import=()):
             outfp.write('extern unsigned char M_%s[];\n' % mangled)
         outfp.write(header)
         for mod, mangled, size in done:
-            outfp.write('\t{"%s", M_%s, %d},\n' % (mod, mangled, size))
+            if PY311GE:
+                # New 3.11 format for packages
+                if size < 0:
+                    size = -size
+                    is_package = 1
+                else:
+                    is_package = 0
+                outfp.write('\t{"%s", M_%s, %d, %d},\n' % (mod, mangled, size, is_package))
+            else:
+                # Old format
+                outfp.write('\t{"%s", M_%s, %d},\n' % (mod, mangled, size))
         outfp.write('\n')
         # The following modules have a NULL code pointer, indicating
         # that the frozen program should not search for them on the host
@@ -111,14 +124,12 @@ def makefreeze(base, dict, debug=0, entry_point=None, fail_import=()):
 # Write a C initializer for a module containing the frozen python code.
 # The array is called M_<mod>.
 
-def writecode(outfp, mod, str):
-    outfp.write('unsigned char M_%s[] = {' % mod)
-    for i in range(0, len(str), 16):
-        outfp.write('\n\t')
-        for c in bytes(str[i:i+16]):
-            outfp.write('%d,' % c)
-    outfp.write('\n};\n')
-
-## def writecode(outfp, mod, str):
-##     outfp.write('unsigned char M_%s[%d] = "%s";\n' % (mod, len(str),
-##     '\\"'.join(map(lambda s: repr(s)[1:-1], str.split('"')))))
+def writecode(fp, mod, data):
+    print('unsigned char M_%s[] = {' % mod, file=fp)
+    indent = ' ' * 4
+    for i in range(0, len(data), 16):
+        print(indent, file=fp, end='')
+        for c in bytes(data[i:i+16]):
+            print('%d,' % c, file=fp, end='')
+        print('', file=fp)
+    print('};', file=fp)

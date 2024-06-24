@@ -1,4 +1,4 @@
-_orig_open = open
+from builtins import open as _orig_open
 
 def open(file, mode='r', bufsize=-1):
     if 'w' not in mode:
