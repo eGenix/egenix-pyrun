@@ -329,13 +329,24 @@ def find_module_source(modname):
 
 def compile_module(filename):
 
-    """ Compile a Python module filename to .pyc and .pyo byte
-        code files.
+    """ Byte compile a Python module filename to .pyc/.pyo files.
 
     """
-    from distutils.util import byte_compile
-    byte_compile([filename], optimize=0, verbose=0)
-    byte_compile([filename], optimize=1, verbose=0)
+    if PY3:
+        import compileall
+        for optimize in (0, 1, 2):
+            compileall.compile_file(
+                filename,
+                quiet=1,
+                optimize=optimize,
+            )
+    else:
+        # For Python 2 it's better to use distutils, since this supports
+        # generating optimized files with different levels than the
+        # running Python interpreter
+        from distutils.util import byte_compile
+        for optimize in (0, 1, 2):
+            byte_compile([filename], optimize=optimize, verbose=0)
 
 def config_vars():
 
