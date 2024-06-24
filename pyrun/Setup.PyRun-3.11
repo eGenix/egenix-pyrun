@@ -159,12 +159,15 @@ _crypt _cryptmodule.c
 _uuid _uuidmodule.c
 
 # needs -lffi and -ldl
+MODULE__CTYPES_LDFLAGS=-lffi -dl
 _ctypes _ctypes/_ctypes.c _ctypes/callbacks.c _ctypes/callproc.c _ctypes/stgdict.c _ctypes/cfield.c
 
 # needs -lncurses, -lncursesw or -lcurses, sometimes -ltermcap
+MODULE__CURSES_LDFLAGS=-lncurses
 _curses _cursesmodule.c
 # needs -lncurses and -lpanel
 MODULE__CURSES_PANEL_CFLAGS=-I /usr/include/ncursesw
+MODULE__CURSES_PANEL_LDFLAGS=-lncurses -lpanel
 _curses_panel _curses_panel.c
 
 # needs sys/soundcard.h or linux/soundcard.h (Linux, FreeBSD)
