@@ -78,7 +78,7 @@ def makefreeze(base, dict, debug=0, entry_point=None, fail_import=()):
         m = dict[mod]
         mangled = "__".join(mod.split("."))
         if m.__code__:
-            file = 'M_' + mangled + '.c'
+            file = '_Py_M_' + mangled + '.c'
             with bkfile.open(base + file, 'w') as outfp:
                 files.append(file)
                 if debug:
@@ -94,7 +94,7 @@ def makefreeze(base, dict, debug=0, entry_point=None, fail_import=()):
         print("generating table of frozen modules")
     with bkfile.open(base + 'frozen.c', 'w') as outfp:
         for mod, mangled, size in done:
-            outfp.write('extern unsigned char M_%s[];\n' % mangled)
+            outfp.write('extern const unsigned char _Py_M_%s[];\n' % mangled)
         outfp.write(header)
         for mod, mangled, size in done:
             if PY311GE:
@@ -104,10 +104,10 @@ def makefreeze(base, dict, debug=0, entry_point=None, fail_import=()):
                     is_package = 1
                 else:
                     is_package = 0
-                outfp.write('\t{"%s", M_%s, %d, %d},\n' % (mod, mangled, size, is_package))
+                outfp.write('\t{"%s", _Py_M_%s, %d, %d},\n' % (mod, mangled, size, is_package))
             else:
                 # Old format
-                outfp.write('\t{"%s", M_%s, %d},\n' % (mod, mangled, size))
+                outfp.write('\t{"%s", _Py_M_%s, %d},\n' % (mod, mangled, size))
         outfp.write('\n')
         # The following modules have a NULL code pointer, indicating
         # that the frozen program should not search for them on the host
@@ -122,10 +122,10 @@ def makefreeze(base, dict, debug=0, entry_point=None, fail_import=()):
 
 
 # Write a C initializer for a module containing the frozen python code.
-# The array is called M_<mod>.
+# The array is called _Py_M_<mod>.
 
 def writecode(fp, mod, data):
-    print('unsigned char M_%s[] = {' % mod, file=fp)
+    print('const unsigned char _Py_M_%s[] = {' % mod, file=fp)
     indent = ' ' * 4
     for i in range(0, len(data), 16):
         print(indent, file=fp, end='')
