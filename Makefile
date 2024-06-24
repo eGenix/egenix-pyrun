@@ -609,7 +609,7 @@ test-makepyrun:
 	$(FULLPYTHON) makepyrun.py $(PYRUNPY)
 	@$(ECHO) "Created $(PYRUNPY)."
 
-$(PYRUNDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
+$(PYRUNDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(FREEZEDIR) $(BUILDDIR)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating PyRun ============================================================"
 	@$(ECHO) "$(OFF)"
@@ -739,12 +739,11 @@ dev-build-all-distributions:
 
 ### Testing
 
-$(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
+$(TESTDIR)/bin/$(PYRUN):
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Installing PyRun for Tests ==============================================="
 	@$(ECHO) "$(OFF)"
 	$(RM) -rf $(TESTDIR)
-	# Work-around for setuptools
 	./install-pyrun \
 		--log \
 		--setuptools-version=latest \
@@ -762,11 +761,14 @@ test-basic:	$(TESTDIR)/bin/$(PYRUN)
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_basic.py
 	$(CP_DIR) tests $(TESTDIR); cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_cmdline.py
+	@$(ECHO) ""
+	@$(ECHO) "--- Testing direct execution of commands -------------------------"
+	@$(ECHO) ""
 	cd $(TESTDIR); bin/pyrun -c "import sys; print(sys.version)"
 	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun
 	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun -
 	@$(ECHO) ""
-	@$(ECHO) "--- Testing module imports ---------------------------------------"
+	@$(ECHO) "--- Testing module runs ------------------------------------------"
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pyrun -m timeit
 	@$(ECHO) ""
@@ -847,6 +849,9 @@ test-all-distributions:
 
 clean:
 	$(RM) -rf $(BASEDIR)
+
+clean-test:
+	$(RM) -rf $(TESTDIR)
 
 clean-all:
 	@for i in $(PYTHONVERSIONS); do \
