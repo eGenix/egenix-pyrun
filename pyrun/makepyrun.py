@@ -27,7 +27,7 @@
     limitations under the License.
 
 """
-# Compatible to Python 2.6, 2.7 and 3.4+
+# Compatible to Python 2.7 and 3.7+
 
 #
 # Note: This script is run by the temporary Python installation
@@ -57,6 +57,7 @@ ENCODING = 'utf-8'
 # Python version flags
 PY2 = (sys.version_info[0] == 2)
 PY3 = (sys.version_info[0] == 3)
+PY310GE = (sys.version_info[:2] >= (3, 10))
 PY311GE = (sys.version_info[:2] >= (3, 11))
 PY311 = (sys.version_info[:2] == (3, 11))
 PY312 = (sys.version_info[:2] == (3, 12))
@@ -139,6 +140,10 @@ include_list = [
     'dbm',
     'future_builtins',
     'hashlib',
+    'math',
+    'cmath',
+    'resource',
+    'syslog',
     #'parser',
     'pyexpat',
     # Python 3
@@ -245,13 +250,16 @@ exclude_package_list = [
     'ensurepip', # ensurepip needs access to bundled whl files; see #1774
     ]
 
-if PY3:
-    # Only exclude in Python 3
+if PY310GE:
+    # Only exclude in Python 3.10+
     exclude_package_list.extend([
-        # lib2to3 is not needed for modern Python 3 code anymore.  It may
-        # still be useful during development, though.
+        # lib2to3 is not needed for modern Python 3 code anymore. If
+        # still needed for development, please add as dev dependency to
+        # your app
         'lib2to3',
-        'distutils', # use setuptools' provided version instead
+        # distutils is deprecated as stdlib package. Please use the
+        # setuptools' provided version instead
+        'distutils',
     ])
 
 # Parse a line in Modules/Setup
@@ -331,6 +339,8 @@ def compile_module(filename):
 
     """ Byte compile a Python module filename to .pyc/.pyo files.
 
+        Files for all supported optimization levels are generated (0-2).
+
     """
     if PY3:
         import compileall
@@ -409,9 +419,10 @@ def patch_sysconfig_py(libdir=LIBDIR):
                      '_CONFIG_VARS += +None',
                      'import pyrun_config; _CONFIG_VARS = pyrun_config.config_vars')
         # Unfortunately, the distutils version was kept around as well
-        patch_module(os.path.join(libdir, 'distutils', 'sysconfig.py'),
-                     '_config_vars += +None',
-                     'import pyrun_config; _config_vars = pyrun_config.config_vars')
+        if not PY310GE:
+            patch_module(os.path.join(libdir, 'distutils', 'sysconfig.py'),
+                         '_config_vars += +None',
+                         'import pyrun_config; _config_vars = pyrun_config.config_vars')
         # Disable is_python_build() check during startup.
         patch_module(os.path.join(libdir, 'sysconfig.py'),
                      '_PYTHON_BUILD += +is_python_build\(.*\)',
@@ -503,8 +514,8 @@ def patch_ssl_py(libdir=LIBDIR):
         "    _create_default_https_context = _create_unverified_context\n"
         )
 
-# TODO: This may no longer needed, after we've completely phased out lib2to3
-# support in PyRun.
+# This is no longer needed for Python 3.10+, since we're no longer
+# including lib2to3 in PyRun.
 def patch_lib2to3_pygram(libdir=LIBDIR):
 
     """ Patch lib2to3.pygram module.
@@ -564,12 +575,14 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
         else:
             repr_list.append('%r: %r,' % (name, value))
 
+
     # Build list of included lib2to3 fixers
-    #
-    # TODO: This may no longer needed, after we've completely phased out
-    # lib2to3 support in PyRun.
-    import lib2to3.refactor
-    fixes = lib2to3.refactor.get_all_fix_names('lib2to3.fixes')
+    if not PY310GE:
+        # Only supported in Python 2 build of PyRun
+        import lib2to3.refactor
+        fixes = lib2to3.refactor.get_all_fix_names('lib2to3.fixes')
+    else:
+        fixes = []
 
     # Add other template variables
     print('Creating module %s' % outputfile)
@@ -584,8 +597,8 @@ def create_pyrun_config_py(inputfile='pyrun_config_template.py',
     f.close()
     compile_module(outputfile)
 
-# TODO: This may no longer needed, after we've completely phased out lib2to3
-# support in PyRun.
+# This is no longer needed for Python 3.10+, since we're no longer
+# including lib2to3 in PyRun.
 def create_pyrun_grammar_py(inputfile='pyrun_grammar_template.py',
                             outputfile='pyrun_grammar.py'):
 
@@ -655,8 +668,10 @@ def main(pyrunfile='pyrun.py',
                            outputfile=os.path.join(libdir, 'pyrun_config.py'))
 
     # Create pyrun_grammar module
-    create_pyrun_grammar_py(inputfile='pyrun_grammar_template.py',
-                            outputfile=os.path.join(libdir, 'pyrun_grammar.py'))
+    if not PY310GE:
+        # Only supported in Python 2 builds of PyRun
+        create_pyrun_grammar_py(inputfile='pyrun_grammar_template.py',
+                                outputfile=os.path.join(libdir, 'pyrun_grammar.py'))
 
     # Patch sysconfig module
     patch_sysconfig_py(libdir)
@@ -671,7 +686,9 @@ def main(pyrunfile='pyrun.py',
     patch_ssl_py(libdir)
 
     # Patch lib2to3.pygram
-    patch_lib2to3_pygram(libdir)
+    if not PY310GE:
+        # Only supported in Python 2 builds of PyRun
+        patch_lib2to3_pygram(libdir)
 
 if __name__ == '__main__':
     main(*sys.argv[1:])
