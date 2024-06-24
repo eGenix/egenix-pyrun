@@ -22,7 +22,7 @@ OPTIONS:
        --python=3.10
            install PyRun for Python version 2.7, 3.7 - 3.10 (default)
        --python-unicode=ucs2
-           install PyRun for Python Unicode version 
+           install PyRun for Python Unicode version
            ucs2 (default for Python 2) or ucs4 (default for Python 3)
        --pyrun=2.5.0
            install PyRun version 2.5.0 (default)
@@ -438,7 +438,7 @@ fi
 # Double check Python compatibility
 #
 # Python 2.7 support was dropped from setuptools in version 45.0.0
-# and from pip in version 
+# and from pip in version
 #
 if [ "$PYTHON_VERSION" == "2.7" ]; then
     # setuptools dropped Python 2.7 support in setuptools 45.0, so
@@ -753,6 +753,9 @@ if (( $INSTALL_PIP )); then
 	    exit 1
 	fi
 	cd $PIP_DIR
+	if [ ! -e setup.py ]; then
+	    echo "from setuptools import setup; setup()" > setup.py
+	fi
 	../bin/$PYRUN_EXECUTABLE setup.py install >> $LOG_FILE 2>&1
 	rc=$?
 	if (( $rc )); then
@@ -772,6 +775,9 @@ if (( $INSTALL_PIP )); then
 	    exit $rc
 	fi
 	cd pip-*
+	if [ ! -e setup.py ]; then
+	    echo "from setuptools import setup; setup()" > setup.py
+	fi
 	../bin/$PYRUN_EXECUTABLE setup.py install >> $LOG_FILE 2>&1
 	rc=$?
 	cd ..
