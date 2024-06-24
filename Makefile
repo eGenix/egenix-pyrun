@@ -372,7 +372,7 @@ TAR = tar
 # MAKE is a predefined variable
 RM = /bin/rm
 STRIP = strip
-CP = cp
+CP = cp -p
 CP_DIR = $(CP) -pR
 CHMOD = chmod
 WGET = wget
@@ -503,7 +503,6 @@ $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 		--libdir=$(FULLINSTALLDIR)/lib \
 		--enable-unicode=$(PYTHONUNICODE) \
 		$(PYTHON_CONFIGURE_OPTIONS)
-	touch $@
 else
 $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 	@$(ECHO) "$(BOLD)"
@@ -517,7 +516,6 @@ $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
 		--libdir=$(FULLINSTALLDIR)/lib \
 		--without-ensurepip \
 		$(PYTHON_CONFIGURE_OPTIONS)
-	touch $@
 endif
 
 config:	$(PYTHONDIR)/pyconfig.h
@@ -549,7 +547,6 @@ $(PYTHONDIR)/Makefile: $(PYTHONDIR)/pyconfig.h $(PYRUNSOURCEDIR)/$(MODULESSETUP)
 	cd $(PYTHONDIR); \
 	$(RM) -f Makefile; \
 	$(MAKE) -f Makefile.pre Makefile
-	touch $@
 
 modules:	$(PYTHONDIR)/Makefile
 
@@ -571,28 +568,25 @@ $(FULLPYTHON):	$(PYTHONDIR) $(PYRUNSOURCEDIR)/$(MODULESSETUP)
 	@$(ECHO) "$(OFF)"
 	cd $(PYTHONDIR); \
 	$(MAKE); \
-	$(MAKE) install; \
-	touch $@
+	$(MAKE) install
 
 interpreter:	$(FULLPYTHON)
 
 $(PYRUNINCLUDEDIR)/patchlevel.h:	$(FULLPYTHON)
-	$(CP_DIR) -vf $(FULLSHAREDLIBDIR)/* $(PYRUNSHAREDLIBDIR)
+	$(CP_DIR) -f $(FULLSHAREDLIBDIR)/* $(PYRUNSHAREDLIBDIR)
 	# Remove test and xx modules
-	$(RM) -vf $(PYRUNSHAREDLIBDIR)/*_test*
-	$(RM) -vf $(PYRUNSHAREDLIBDIR)/xx*
-	$(RM) -vf $(PYRUNSHAREDLIBDIR)/_xx*
-	$(CP_DIR) -vf $(FULLSITEPACKAGESLIBDIR)/* $(PYRUNSITEPACKAGESLIBDIR)
-	$(CP_DIR) -vf $(FULLINCLUDEDIR)/* $(PYRUNINCLUDEDIR)
-	touch $@
+	$(RM) -f $(PYRUNSHAREDLIBDIR)/*_test*
+	$(RM) -f $(PYRUNSHAREDLIBDIR)/xx*
+	$(RM) -f $(PYRUNSHAREDLIBDIR)/_xx*
+	$(CP_DIR) -f $(FULLSITEPACKAGESLIBDIR)/* $(PYRUNSITEPACKAGESLIBDIR)
+	$(CP_DIR) -f $(FULLINCLUDEDIR)/* $(PYRUNINCLUDEDIR)
 
 $(PYRUNDIR):	$(BASEDIR)
 	mkdir -p $(PYRUNDIR)
 
 $(PYRUNDIR)/makepyrun.py:	$(PYRUNDIR) $(PYRUNSOURCEDIR)/*.py
-	$(CP_DIR) $(PYRUNSOURCEDIR)/*.py $(PYRUNDIR)
-	$(CP_DIR) $(PYRUNSOURCEDIR)/freeze-* $(PYRUNDIR)
-	touch $@
+	$(CP_DIR) -f $(PYRUNSOURCEDIR)/*.py $(PYRUNDIR)
+	$(CP_DIR) -f $(PYRUNSOURCEDIR)/freeze-* $(PYRUNDIR)
 
 $(PYRUNDIR)/$(PYRUNPY):	$(FULLPYTHON) $(PYRUNDIR)/makepyrun.py
 	@$(ECHO) "$(BOLD)"
@@ -604,7 +598,6 @@ $(PYRUNDIR)/$(PYRUNPY):	$(FULLPYTHON) $(PYRUNDIR)/makepyrun.py
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
 	$(FULLPYTHON) makepyrun.py $(PYRUNPY)
 	@$(ECHO) "Created $(PYRUNPY)."
-	touch $@
 
 prepare:	$(PYRUNDIR)/$(PYRUNPY)
 
@@ -646,10 +639,9 @@ $(PYRUNDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(BUILDDIR)
 	    $(UPX) $(UPXOPTIONS) $(PYRUN); \
 	    $(CHMOD) +x $(PYRUN); \
 	    ln -sf $(PYRUN) $(PYRUN_UPX); \
-	fi; \
-	touch $@
+	fi
 
-$(BINDIR)/$(PYRUN):	$(PYRUNDIR)/$(PYRUN) $(BUILDDIR)
+$(BINDIR)/$(PYRUN):	$(PYRUNDIR)/$(PYRUN)
 	@$(ECHO) "Installing PyRun to $(BINDIR)"
 	cd $(PYRUNDIR); \
 	$(CP) $(PYRUN) $(BINDIR); \
@@ -665,7 +657,6 @@ $(BINDIR)/$(PYRUN):	$(PYRUNDIR)/$(PYRUN) $(BUILDDIR)
 	@$(ECHO) "$(OFF)"
 	@$(ECHO) "The eGenix PyRun runtime interpreter is called: $(BINDIR)/$(PYRUN)"
 	@$(ECHO) ""
-	touch $@
 
 runtime:	$(BINDIR)/$(PYRUN)
 
@@ -718,7 +709,6 @@ $(BINARY_DISTRIBUTION_ARCHIVE):	$(BINDIR)/$(PYRUN) $(PYRUNINCLUDEDIR)/patchlevel
 	@$(ECHO) "$(OFF)"
 	@$(ECHO) "The eGenix PyRun Distribution is called: $(BINARY_DISTRIBUTION_ARCHIVE)"
 	@$(ECHO) ""
-	touch $@
 
 distribution:	announce-distribution logs
 	$(MAKE) $(BINARY_DISTRIBUTION_ARCHIVE) \
@@ -761,7 +751,6 @@ $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 		--pip-version=latest \
 		--pyrun-distribution=$(BINARY_DISTRIBUTION_ARCHIVE) \
 		$(TESTDIR)
-	touch $@
 
 test-install-pyrun:	$(TESTDIR)/bin/$(PYRUN)
 
