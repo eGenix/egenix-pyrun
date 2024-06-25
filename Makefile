@@ -432,7 +432,7 @@ TODAY := $(shell date +'%Y-%m-%d')
 BUILDLOGDIR = build-logs
 BUILDLOG = $(BUILDLOGDIR)/$(BINARY_DISTRIBUTION)-$@-$(DATE).log
 BUILDLOGGZ = $(BUILDLOG).gz
-LOGREDIR =  2>&1 | tee $(BUILDLOG); gzip $(BUILDLOG); $(ECHO) "Wrote build log to $(BUILDLOGGZ)"; $(ECHO) ""
+LOGREDIR =  2>&1 | tee $(BUILDLOG); gzip -f $(BUILDLOG); $(ECHO) "Wrote build log to $(BUILDLOGGZ)"; $(ECHO) ""
 TODAYSBUILDLOGS = $(BUILDLOGDIR)/*-$(TODAY)-*.log*
 
 ### Generic targets
@@ -773,14 +773,20 @@ $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 
 test-install-pyrun:	$(TESTDIR)/bin/$(PYRUN)
 
-test-basic:	$(TESTDIR)/bin/$(PYRUN)
+$(TESTDIR)/tests:	$(PYRUNTESTS)
+	$(CP_DIR) $(PYRUNTESTS) $(TESTDIR)/tests;
+
+test-basic:	$(TESTDIR)/bin/$(PYRUN) $(TESTDIR)/tests
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Running Tests ============================================================="
 	@$(ECHO) "$(OFF)"
 	@$(ECHO) "--- Testing basic operation --------------------------------------"
 	@$(ECHO) ""
-	cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_basic.py
-	$(CP_DIR) tests $(TESTDIR); cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_cmdline.py
+	cd $(TESTDIR); bin/pyrun tests/test_basic.py
+	@$(ECHO) ""
+	@$(ECHO) "--- Testing command line options ---------------------------------"
+	@$(ECHO) ""
+	cd $(TESTDIR); bin/pyrun tests/test_cmdline.py
 	@$(ECHO) ""
 	@$(ECHO) "--- Testing direct execution of commands -------------------------"
 	@$(ECHO) ""
@@ -793,7 +799,7 @@ test-basic:	$(TESTDIR)/bin/$(PYRUN)
 	cd $(TESTDIR); bin/pyrun -m timeit
 	@$(ECHO) ""
 
-test-ssl:	$(TESTDIR)/bin/$(PYRUN)
+test-ssl:	$(TESTDIR)/bin/$(PYRUN) $(TESTDIR)/tests
 	@$(ECHO) "--- Testing SSL installation  ------------------------------------"
 	@$(ECHO) ""
 ifdef PYTHON_2_BUILD
@@ -801,9 +807,9 @@ ifdef PYTHON_2_BUILD
 else
 	cd $(TESTDIR); bin/pip install -U pip setuptools pyopenssl
 endif
-	export -n PYRUN_HTTPSVERIFY; cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_ssl.py
-	export PYRUN_HTTPSVERIFY=0; cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_ssl.py
-	export PYRUN_HTTPSVERIFY=1; cd $(TESTDIR); bin/pyrun $(PYRUNTESTS)/test_ssl.py
+	export -n PYRUN_HTTPSVERIFY; cd $(TESTDIR); bin/pyrun tests/test_ssl.py
+	export PYRUN_HTTPSVERIFY=0; cd $(TESTDIR); bin/pyrun tests/test_ssl.py
+	export PYRUN_HTTPSVERIFY=1; cd $(TESTDIR); bin/pyrun tests/test_ssl.py
 	@$(ECHO) ""
 
 ifdef PYTHON_2_BUILD
@@ -855,21 +861,29 @@ test-pip-latest:
 
 test-distribution:	test-basic test-pip test-pip-latest
 
-test-all-pyruns:
+_test-all-pyruns:
 	@for i in $(PYTHONVERSIONS); do \
 	  $(MAKE) test-basic \
-		PYTHONFULLVERSION=$$i \
-		$(LOGREDIR); \
+		PYTHONFULLVERSION=$$i; \
+	  $(ECHO) ""; \
+	done
+
+test-all-pyruns:
+	PYTHONFULLVERSION="-all"; \
+	$(MAKE) _test-all-pyruns \
+		$(LOGREDIR)
+
+_test-all-distributions:
+	@for i in $(PYTHONVERSIONS); do \
+	  $(MAKE) test-distribution \
+		PYTHONFULLVERSION=$$i; \
 	  $(ECHO) ""; \
 	done
 
 test-all-distributions:
-	@for i in $(PYTHONVERSIONS); do \
-	  $(MAKE) test-distribution \
-		PYTHONFULLVERSION=$$i \
-		$(LOGREDIR); \
-	  $(ECHO) ""; \
-	done
+	PYTHONFULLVERSION="-all"; \
+	$(MAKE) _test-all-distributions \
+		$(LOGREDIR)
 
 ### Cleanup
 
