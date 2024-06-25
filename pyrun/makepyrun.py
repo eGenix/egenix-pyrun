@@ -48,6 +48,9 @@ except ImportError:
 ### Globals
 
 # PyRun release version
+#
+# Keep this in sync with the PACKAGEVERSION in the top-level Makefile
+#
 __version__ = '2.5.0'
 
 # Debug level
@@ -73,7 +76,12 @@ BUILDDIR = sysconfig.get_config_vars().get(
     os.path.abspath(os.environ.get('PYTHONDIR', '')))
 
 # Python module Setup file
-SETUPFILE = os.path.join(sysconfig.get_config_var('LIBPL'), 'Setup')
+if PY311GE:
+    # Starting with Python 3.11, we're using the Setup.local as our
+    # custom Setup file
+    SETUPFILE = os.path.join(sysconfig.get_config_var('LIBPL'), 'Setup.local')
+else:
+    SETUPFILE = os.path.join(sysconfig.get_config_var('LIBPL'), 'Setup')
 
 # Prefix used for building pyrun; this is replaced in pyrun_config.py
 # with logic to dynamically determine the prefix at runtime.
@@ -172,7 +180,7 @@ exclude_list = [
     'parser',
     'crypt',
     'tabnanny',
-    # Python 3
+    # Python 2 + 3
     '_pyio', # the Python version of the io module
     ]
 
