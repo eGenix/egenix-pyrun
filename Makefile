@@ -60,13 +60,20 @@ ALLPYTHONVERSIONS = \
 	$(PYTHON_311_VERSION)
 
 # Python Unicode version
+#
+# Only needed for Python 2 and early Python 3.x versions
+#
 PYTHONUNICODE = ucs2
 
 # Python 3 ABI flags (see PEP 3149)
 #
-# These should probably be determined by running a standard Python 3
-# and checking sys.abiflags. Hardcoding them here for now, since they
-# rarely change.
+# These should probably be determined by running a standard Python 3 and
+# checking sys.abiflags. Hardcoding them here for now, since they rarely
+# change.
+#
+# The ABI flags were only used in paths for Python 3.x - 3.7. Python
+# 3.8+ no longer use these flags for e.g. include file paths.
+#
 PYTHONABI = m
 
 # Packages and modules to exclude from the runtime (note that each
@@ -88,8 +95,10 @@ EXCLUDES = 	-x test \
 # the product Makefile)
 PACKAGENAME = egenix-pyrun
 
-# Package version; note that you have to keep this in sync with
-# runtime/makepyrun.py
+# Package version
+#
+# Note that you have to keep this in sync with runtime/makepyrun.py
+#
 PACKAGEVERSION = 2.5.0
 #PACKAGEVERSION = $(shell cd runtime; python -c "from makepyrun import __version__; print __version__")
 
@@ -119,7 +128,7 @@ PYTHONMAJORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\+\)\..*
 PYTHONMINORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/[0-9]\.\([0-9]\+\)\..*/\1/')
 PYRUNFULLVERSION = $(PYTHONFULLVERSION)
 PYRUNVERSION = $(PYTHONVERSION)
-PLATFORM := $(shell python -c "from distutils.util import get_platform; print get_platform()")
+PLATFORM := $(shell uname -s -m | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]')
 
 # Python build flags
 PYTHON_2_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "2" && echo "1")
@@ -127,21 +136,35 @@ PYTHON_27_BUILD := $(shell test "$(PYTHONVERSION)" = "2.7" && echo "1")
 PYTHON_3_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "3" && echo "1")
 PYTHON_36_BUILD := $(shell test "$(PYTHONVERSION)" = "3.6" && echo "1")
 PYTHON_37_BUILD := $(shell test "$(PYTHONVERSION)" = "3.7" && echo "1")
-PYTHON_37_OR_EARLIER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -lt 8 && echo "1")
+PYTHON_37_OR_EARLIER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -le 7 && echo "1")
 PYTHON_38_BUILD := $(shell test "$(PYTHONVERSION)" = "3.8" && echo "1")
 PYTHON_39_BUILD := $(shell test "$(PYTHONVERSION)" = "3.9" && echo "1")
+PYTHON_39_OR_EARLIER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -le 9 && echo "1")
 PYTHON_310_BUILD := $(shell test "$(PYTHONVERSION)" = "3.10" && echo "1")
+PYTHON_310_OR_LATER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -ge 10 && echo "1")
 PYTHON_311_BUILD := $(shell test "$(PYTHONVERSION)" = "3.11" && echo "1")
 PYTHON_311_OR_LATER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -ge 11 && echo "1")
 
 # Special Python environment setups
+
 ifdef PYTHON_3_BUILD
  # We support Python 3.5+ only, which no longer has different versions
  # for Unicode. Since PYTHONUNICODE is used in a lot of places, we
  # simply assign a generic term to it for Python 3.
  PYTHONUNICODE := ucs4
+endif
+
+ifdef PYTHON_310_OR_LATER_BUILD
  # distutils still has a dependency on lib2to3, so force exclusion:
  EXCLUDES +=	-x lib2to3
+endif
+
+# Setuptools' embedded distutils has a bug in the loader which causes it
+# not to work with pyrun for Python 3.8 and 3.9, so disable using the
+# embedded copy:
+ifdef PYTHON_39_OR_EARLIER_BUILD
+ SETUPTOOLS_USE_DISTUTILS = stdlib
+ export SETUPTOOLS_USE_DISTUTILS
 endif
 
 # Name of the resulting pyrun executable
@@ -363,17 +386,13 @@ ifdef MACOSX_INTEL_PLATFORM
  PYTHON_CONFIGURE_OPTIONS = MACOSX_DEPLOYMENT_TARGET=10.5
 endif
 
-# Setuptools' embedded distutils has a bug in the loader which causes it not
-# to work with pyrun, so disable using the embedded copy:
-#export SETUPTOOLS_USE_DISTUTILS=stdlib
-
 # Tools
 TAR = tar
 # MAKE is a predefined variable
 RM = /bin/rm
 STRIP = strip
 CP = cp -p
-CP_DIR = $(CP) -pR
+CP_DIR = cp -pR
 CHMOD = chmod
 WGET = wget
 TPUT = tput
@@ -739,7 +758,7 @@ dev-build-all-distributions:
 
 ### Testing
 
-$(TESTDIR)/bin/$(PYRUN):
+$(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Installing PyRun for Tests ==============================================="
 	@$(ECHO) "$(OFF)"
@@ -750,6 +769,7 @@ $(TESTDIR)/bin/$(PYRUN):
 		--pip-version=latest \
 		--pyrun-distribution=$(BINARY_DISTRIBUTION_ARCHIVE) \
 		$(TESTDIR)
+	touch $@
 
 test-install-pyrun:	$(TESTDIR)/bin/$(PYRUN)
 
@@ -837,12 +857,18 @@ test-distribution:	test-basic test-pip test-pip-latest
 
 test-all-pyruns:
 	@for i in $(PYTHONVERSIONS); do \
-	  $(MAKE) test-basic PYTHONFULLVERSION=$$i; $(ECHO) ""; \
+	  $(MAKE) test-basic \
+		PYTHONFULLVERSION=$$i \
+		$(LOGREDIR); \
+	  $(ECHO) ""; \
 	done
 
 test-all-distributions:
 	@for i in $(PYTHONVERSIONS); do \
-	  $(MAKE) test-distribution PYTHONFULLVERSION=$$i; $(ECHO) ""; \
+	  $(MAKE) test-distribution \
+		PYTHONFULLVERSION=$$i \
+		$(LOGREDIR); \
+	  $(ECHO) ""; \
 	done
 
 ### Cleanup
