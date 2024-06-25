@@ -160,24 +160,24 @@ setup_modules = [
     '_ssl',
     '_statistics',
     '_struct',
-    '_typing',
+    '_typing', # Was added in 3.11
     '_uuid',
     #'_xxsubinterpreters', # not included in PyRun
     '_zoneinfo',
     'array',
-    'audioop',
+    'audioop', # Deprecated in 3.11
     'binascii',
     'cmath',
     'fcntl',
     'grp',
     'math',
     'mmap',
-    'ossaudiodev',
+    'ossaudiodev', # Deprecated in 3.11
     'pyexpat',
     'readline',
     'resource',
     'select',
-    'spwd',
+    'spwd', # Deprecated in 3.11
     'syslog',
     'termios',
     'unicodedata',
