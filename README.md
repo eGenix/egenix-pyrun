@@ -25,15 +25,16 @@ some numbers for recent versions:
 -rwxr-xr-x 1 lemburg lemburg 4.8M Jun 25 13:38 pyrun3.8
 ```
 
-As you can see, Python'S footprint has grown a bit recently. The major
+As you can see, Python's footprint has grown a bit recently. The major
 jump between 3.10 and 3.11 is due to the new byte code VM, which makes
 Python a lot faster compared to previous versions. It's a classical
-space-runtime tradeoff, but well worth it.
+size-runtime tradeoff, but well worth it.
 
 The small file sizes are the result of freezing most of the Python
 stdlib directly into the binary, compiling most stdlib C extensions
-statically and running the [executable compressor upx](https://upx.github.io/)
-on the resulting binary.
+statically, stripping debug information and running the
+[executable compressor upx](https://upx.github.io/) against the
+resulting binary.
 
 # Supported Python Versions
 
