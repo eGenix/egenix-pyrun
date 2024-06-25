@@ -205,9 +205,9 @@ PYRUNSOURCEDIR = $(PWD)/pyrun
 # PYRUNDIR is a copy of PYRUNSOURCEDIR used to freeze pyrun
 PYRUNDIR = $(BASEDIR)/pyrun-build
 ifdef PYTHON_2_BUILD
- FREEZEDIR = $(PYRUNDIR)/freeze-2
+ PYRUNFREEZEDIR = freeze-2
 else
- FREEZEDIR = $(PYRUNDIR)/freeze-3
+ PYRUNFREEZEDIR = freeze-3
 endif
 
 # PyRun C compiler optimization settings
@@ -477,6 +477,7 @@ $(BASEDIR):
 	mkdir -p $(BASEDIR)
 
 $(PYTHONORIGDIR):
+	$(MAKE) $(BASEDIR)
 	cd $(BASEDIR); \
 	if test -z $(PYTHONTARBALL) || ! test -e $(PYTHONTARBALL); then \
 	    $(ECHO) "Downloading and extracting $(PYTHONSOURCEURL)."; \
@@ -488,7 +489,7 @@ $(PYTHONORIGDIR):
 
 python-orig:	$(PYTHONORIGDIR)
 
-$(PYTHONDIR):	$(BASEDIR) $(PYTHONORIGDIR) $(PYRUNSOURCEDIR)/$(PYTHONPATCHFILE)
+$(PYTHONDIR):	$(PYTHONORIGDIR) $(PYRUNSOURCEDIR)/$(PYTHONPATCHFILE)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Setting up the Python sources ============================================="
 	@$(ECHO) "$(OFF)"
@@ -506,7 +507,8 @@ sources: $(PYTHONDIR)
 # source directory.  This is to avoid unnecessary rebuilds in case the
 # source directory changes for whatever reason during builds.
 
-$(PYTHONDIR)/Include/patchlevel.h:	$(PYTHONDIR)
+$(PYTHONDIR)/Include/patchlevel.h:
+	$(MAKE) $(PYTHONDIR)
 
 ifdef PYTHON_2_BUILD
 $(PYTHONDIR)/pyconfig.h:	$(PYTHONDIR)/Include/patchlevel.h
@@ -568,7 +570,8 @@ $(PYTHONDIR)/Makefile: $(PYTHONDIR)/pyconfig.h $(PYRUNSOURCEDIR)/$(MODULESSETUP)
 
 modules:	$(PYTHONDIR)/Makefile
 
-$(BUILDDIR):	$(BASEDIR)
+$(BUILDDIR):
+	$(MAKE) $(BASEDIR)
 	# Create the PyRun install dir structure
 	mkdir -p	$(BUILDDIR) \
 			$(BINDIR) \
@@ -577,10 +580,10 @@ $(BUILDDIR):	$(BASEDIR)
 			$(PYRUNSITEPACKAGESLIBDIR) \
 			$(PYRUNINCLUDEDIR)
 
-$(FULLPYTHON):	$(PYTHONDIR) $(PYRUNSOURCEDIR)/$(MODULESSETUP)
+$(FULLPYTHON):	$(PYTHONDIR)/Makefile $(PYRUNSOURCEDIR)/$(MODULESSETUP) $(BUILDDIR)
 	# Rebuild the modules config unconditionally (since the Makefile has
 	# to be rebuilt, if the Setup changes)
-	$(MAKE) modules $(BUILDDIR)
+	$(MAKE) modules
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating Python interpreter ==============================================="
 	@$(ECHO) "$(OFF)"
@@ -599,12 +602,14 @@ $(PYRUNINCLUDEDIR)/patchlevel.h:	$(FULLPYTHON)
 	$(CP_DIR) -f $(FULLSITEPACKAGESLIBDIR)/* $(PYRUNSITEPACKAGESLIBDIR)
 	$(CP_DIR) -f $(FULLINCLUDEDIR)/* $(PYRUNINCLUDEDIR)
 
-$(PYRUNDIR):	$(BASEDIR)
+$(PYRUNDIR):
+	$(MAKE) $(BASEDIR)
+	# Create the PyRun freeze dir structure
 	mkdir -p $(PYRUNDIR)
 
 $(PYRUNDIR)/makepyrun.py:	$(PYRUNDIR) $(PYRUNSOURCEDIR)/*.py
-	$(CP_DIR) -f $(PYRUNSOURCEDIR)/*.py $(PYRUNDIR)
-	$(CP_DIR) -f $(PYRUNSOURCEDIR)/freeze-* $(PYRUNDIR)
+	$(CP) -f $(PYRUNSOURCEDIR)/*.py $(PYRUNDIR)
+	$(CP_DIR) -f $(PYRUNSOURCEDIR)/$(PYRUNFREEZEDIR) $(PYRUNDIR)
 
 $(PYRUNDIR)/$(PYRUNPY):	$(FULLPYTHON) $(PYRUNDIR)/makepyrun.py
 	@$(ECHO) "$(BOLD)"
@@ -627,14 +632,14 @@ test-makepyrun:
 	$(FULLPYTHON) makepyrun.py $(PYRUNPY)
 	@$(ECHO) "Created $(PYRUNPY)."
 
-$(PYRUNDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(FREEZEDIR) $(BUILDDIR)
+$(PYRUNDIR)/$(PYRUN):	$(FULLPYTHON) $(PYRUNDIR)/$(PYRUNPY) $(PYRUNSOURCEDIR)/$(PYRUNFREEZEDIR)
 	@$(ECHO) "$(BOLD)"
 	@$(ECHO) "=== Creating PyRun ============================================================"
 	@$(ECHO) "$(OFF)"
         # Cleanup the PyRun freeze build dir
 	cd $(PYRUNDIR); $(RM) -f *.c *.o
         # Run freeze to build pyrun
-	cd $(FREEZEDIR); \
+	cd $(PYRUNDIR)/$(PYRUNFREEZEDIR); \
 	unset PYTHONPATH; export PYTHONPATH; \
 	export PYTHONHOME=$(FULLINSTALLDIR); \
 	unset PYTHONINSPECT; export PYTHONINSPECT; \
@@ -848,7 +853,7 @@ test-pip:	$(TESTDIR)/bin/$(PYRUN)
 	cd $(TESTDIR); bin/pip install Django
 endif
 
-test-pip-latest:
+test-pip-latest:	$(TESTDIR)/bin/$(PYRUN)
 	$(RM) -rf $(TESTDIR)
 	$(MAKE) test-install-pyrun
 	@$(ECHO) "--- Upgrading to latest pip --------------------------------------"
@@ -868,7 +873,6 @@ _test-all-pyruns:
 	done
 
 test-all-pyruns:
-	PYTHONFULLVERSION="-all"; \
 	$(MAKE) _test-all-pyruns \
 		$(LOGREDIR)
 
@@ -880,7 +884,6 @@ _test-all-distributions:
 	done
 
 test-all-distributions:
-	PYTHONFULLVERSION="-all"; \
 	$(MAKE) _test-all-distributions \
 		$(LOGREDIR)
 
@@ -901,7 +904,9 @@ clean-all:
 
 distclean:	clean
 	$(RM) -rf $(DISTDIR) $(TESTDIR) $(BUILDDIR)
-	find . \( -name '*~' -or -name '*.bak' \) -delete
+	find . \( -name '*~' -or -name '*.bak' -or \
+		-name '__pycache__' -or -name '*.pyo' -or \
+		-name '*.pyc' \) -delete
 
 distclean-all:
 	@for i in $(PYTHONVERSIONS); do \
