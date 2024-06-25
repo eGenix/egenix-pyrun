@@ -598,6 +598,11 @@ if [ "$PYRUN_EXECUTABLE" != "pyrun" ]; then
     $ECHO "" >> $LOG_FILE 2>&1
 fi
 
+#
+# TODO: Replace this logic with the https://bootstrap.pypa.io/get-pip.py
+# helper script
+#
+
 # Install setuptools
 if (( $INSTALL_SETUPTOOLS )); then
     if [ ! -e $LOCAL_SETUPTOOLS_DISTRIBUTION ]; then
