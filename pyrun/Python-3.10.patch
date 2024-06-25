@@ -1,6 +1,6 @@
 diff -ur -x importlib.h -x Setup ../Python-3.10.14/Lib/importlib/_bootstrap.py ./Lib/importlib/_bootstrap.py
 --- ../Python-3.10.14/Lib/importlib/_bootstrap.py	2024-03-19 22:46:16.000000000 +0100
-+++ ./Lib/importlib/_bootstrap.py	2024-06-21 20:22:05.083057492 +0200
++++ ./Lib/importlib/_bootstrap.py	2024-06-25 01:36:03.378340804 +0200
 @@ -825,6 +825,10 @@
 
      @classmethod
@@ -33,7 +33,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.10.14/Lib/importlib/_bootstrap.py .
      @classmethod
 diff -ur -x importlib.h -x Setup ../Python-3.10.14/Lib/inspect.py ./Lib/inspect.py
 --- ../Python-3.10.14/Lib/inspect.py	2024-03-19 22:46:16.000000000 +0100
-+++ ./Lib/inspect.py	2024-06-21 20:22:05.083057492 +0200
++++ ./Lib/inspect.py	2024-06-25 01:36:03.382340847 +0200
 @@ -1618,7 +1618,8 @@
          raise TypeError('{!r} is not a frame or traceback object'.format(frame))
 
@@ -46,7 +46,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.10.14/Lib/inspect.py ./Lib/inspect.
              lines, lnum = findsource(frame)
 diff -ur -x importlib.h -x Setup ../Python-3.10.14/Lib/pkgutil.py ./Lib/pkgutil.py
 --- ../Python-3.10.14/Lib/pkgutil.py	2024-03-19 22:46:16.000000000 +0100
-+++ ./Lib/pkgutil.py	2024-06-21 20:22:05.083057492 +0200
++++ ./Lib/pkgutil.py	2024-06-25 01:36:03.382340847 +0200
 @@ -317,20 +317,27 @@
          return self.etc[2]==imp.PKG_DIRECTORY
 
@@ -90,7 +90,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.10.14/Lib/pkgutil.py ./Lib/pkgutil.
      def get_source(self, fullname=None):
 diff -ur -x importlib.h -x Setup ../Python-3.10.14/Lib/sysconfig.py ./Lib/sysconfig.py
 --- ../Python-3.10.14/Lib/sysconfig.py	2024-03-19 22:46:16.000000000 +0100
-+++ ./Lib/sysconfig.py	2024-06-21 20:22:05.083057492 +0200
++++ ./Lib/sysconfig.py	2024-06-25 01:36:03.382340847 +0200
 @@ -401,10 +401,14 @@
 
  def _get_sysconfigdata_name():
@@ -109,7 +109,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.10.14/Lib/sysconfig.py ./Lib/syscon
  def _generate_posix_vars():
 diff -ur -x importlib.h -x Setup ../Python-3.10.14/Makefile.pre.in ./Makefile.pre.in
 --- ../Python-3.10.14/Makefile.pre.in	2024-03-19 22:46:16.000000000 +0100
-+++ ./Makefile.pre.in	2024-06-21 20:22:05.083057492 +0200
++++ ./Makefile.pre.in	2024-06-25 01:36:03.382340847 +0200
 @@ -127,6 +127,10 @@
  MULTIARCH=	@MULTIARCH@
  MULTIARCH_CPPFLAGS = @MULTIARCH_CPPFLAGS@
@@ -156,7 +156,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.10.14/Makefile.pre.in ./Makefile.pr
  # Here are a couple of targets for MacOSX again, to install a full
 diff -ur -x importlib.h -x Setup ../Python-3.10.14/Python/import.c ./Python/import.c
 --- ../Python-3.10.14/Python/import.c	2024-03-19 22:46:16.000000000 +0100
-+++ ./Python/import.c	2024-06-21 20:22:05.083057492 +0200
++++ ./Python/import.c	2024-06-25 12:09:21.849644846 +0200
 @@ -1192,6 +1192,23 @@
      if (d == NULL) {
          goto err_return;
@@ -190,13 +190,13 @@ diff -ur -x importlib.h -x Setup ../Python-3.10.14/Python/import.c ./Python/impo
      const char *external_filename = "<frozen importlib._bootstrap_external>";
 + */
 +    const char *importlib_filename = "<pyrun>/importlib/_bootstrap.py";
-+    const char *external_filename = "<pyrun>/importlib/_bootstrap.py";
++    const char *external_filename = "<pyrun>/importlib/_bootstrap_external.py";
      const char *remove_frames = "_call_with_frames_removed";
      int always_trim = 0;
      int in_importlib = 0;
 diff -ur -x importlib.h -x Setup ../Python-3.10.14/Python/initconfig.c ./Python/initconfig.c
 --- ../Python-3.10.14/Python/initconfig.c	2024-03-19 22:46:16.000000000 +0100
-+++ ./Python/initconfig.c	2024-06-24 00:12:41.905455779 +0200
++++ ./Python/initconfig.c	2024-06-25 01:36:03.382340847 +0200
 @@ -152,7 +152,12 @@
 
  /* UTF-8 mode (PEP 540): if equals to 1, use the UTF-8 encoding, and change
@@ -213,7 +213,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.10.14/Python/initconfig.c ./Python/
  int Py_QuietFlag = 0; /* Needed by sysmodule.c */
 diff -ur -x importlib.h -x Setup ../Python-3.10.14/Python/preconfig.c ./Python/preconfig.c
 --- ../Python-3.10.14/Python/preconfig.c	2024-03-19 22:46:16.000000000 +0100
-+++ ./Python/preconfig.c	2024-06-21 20:22:05.083057492 +0200
++++ ./Python/preconfig.c	2024-06-25 01:36:03.382340847 +0200
 @@ -293,7 +293,13 @@
 
         Py_UTF8Mode=1 enables the UTF-8 mode. PYTHONUTF8 environment variable
@@ -261,7 +261,7 @@ diff -ur -x importlib.h -x Setup ../Python-3.10.14/Python/preconfig.c ./Python/p
      config->legacy_windows_fs_encoding = 0;
 diff -ur -x importlib.h -x Setup ../Python-3.10.14/Python/sysmodule.c ./Python/sysmodule.c
 --- ../Python-3.10.14/Python/sysmodule.c	2024-03-19 22:46:16.000000000 +0100
-+++ ./Python/sysmodule.c	2024-06-22 14:42:30.796821537 +0200
++++ ./Python/sysmodule.c	2024-06-25 01:36:03.382340847 +0200
 @@ -2016,6 +2016,83 @@
  }
 
