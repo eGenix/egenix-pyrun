@@ -163,7 +163,7 @@ setup_modules = [
     '_typing', # Was added in 3.11
     '_uuid',
     #'_xxsubinterpreters', # not included in PyRun
-    '_zoneinfo',
+    '_zoneinfo', # Was added in 3.9
     'array',
     'audioop', # Deprecated in 3.11
     'binascii',
