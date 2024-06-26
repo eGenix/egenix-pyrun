@@ -75,11 +75,15 @@ your system):
 - sqlite3-devel
 - openssl-devel
 - zlib-devel
+- upx
 
 The tests need a few extra libs:
 
 - libxml2-devel
 - libxslt-devel
+
+If you want to get some extra compression, you can download the latest upx
+version available on [executable compressor upx](https://upx.github.io/).
 
 ## Building
 
