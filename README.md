@@ -1,13 +1,11 @@
 <div align="center">
-  <p>eGenix proudly presents:</p>
+  <p><a href="https://www.egenix.com/">eGenix</a> proudly presents:</p>
   <img alt="eGenix PyRun Logo" src="docs/logo-with-text.svg" width="500">
-  <p></p>
-  <p><i>Your friendly, lean, open source Python runtime</i></p>
   <p></p>
 </div>
 
-[eGenix PyRun](https://pyrun.org) is an Apache licensed, compressed,
-single file [Python}(https://python.org/) compatible run-time, which
+[eGenix PyRun](https://pyrun.org) is an Apache licensed, open-source, compressed,
+single file [Python](https://python.org/) compatible run-time, which
 fits into merely 5-6 MB on disk.
 
 It can be used to ship pure Python products as a single file on Unix
