@@ -1,7 +1,9 @@
-<div align="center" style="margin-bottom: 2em">
-  <p style="margin-bottom: 1em">eGenix proudly presents:</p>
+<div align="center">
+  <p>eGenix proudly presents:</p>
   <img alt="eGenix PyRun Logo" src="docs/logo-with-text.svg" width="500">
-  <p style="margin-top: 1em"><i>Your friendly, lean, open source Python runtime</i></p>
+  <p></p>
+  <p><i>Your friendly, lean, open source Python runtime</i></p>
+  <p></p>
 </div>
 
 [eGenix PyRun](https://pyrun.org) is an Apache licensed, compressed,
