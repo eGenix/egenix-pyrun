@@ -73,22 +73,23 @@ receive security releases.
 ## Build Dependencies
 
 The following development packages need to be installed on the build system
-in addition to the compiler suite (names could be slightly different for
-your system):
+in addition to the compiler suite. The  names could be slightly different for
+your system:
 
-- libbz2-devel
-- sqlite3-devel
-- openssl-devel
-- zlib-devel
-- upx
+- libbz2-devel / libbz2-dev
+- sqlite3-devel / libsqlite3-dev
+- openssl-devel / libssl-dev
+- zlib-devel / zlib1g-dev
+- upx / upx-ucl
 
 The tests need a few extra libs:
 
-- libxml2-devel
-- libxslt-devel
+- libxml2-devel /libxml2-dev
+- libxslt-devel / libxslt-dev
 
 If you want to get some extra compression, you can download the latest upx
 version available on [executable compressor upx](https://upx.github.io/).
+The OS packages for upx often lag behind.
 
 ## Building
 
