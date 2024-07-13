@@ -87,6 +87,14 @@ The tests need a few extra libs:
 - libxml2-devel /libxml2-dev
 - libxslt-devel / libxslt-dev
 
+Some additional development packages may be useful to add, depending on your
+needs. These are for stdlib modules, which are not included in the PyRun binary,
+but still built as shared lib, if you need them:
+
+- readline-devel / libreadline-dev
+- libuuid-devel / uuid-dev
+- libffi-devel / libffi-dev/
+
 If you want to get some extra compression, you can download the latest upx
 version available on [executable compressor upx](https://upx.github.io/).
 The OS packages for upx often lag behind.
