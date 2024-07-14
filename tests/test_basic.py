@@ -118,7 +118,7 @@ else:
 # Check imports of all modules installed via Setup
 
 # These are all modules built for Python 3.11
-setup_modules = [
+setup_modules_311 = [
     '_asyncio',
     '_bisect',
     '_blake2',
@@ -152,9 +152,9 @@ setup_modules = [
     '_queue',
     '_random',
     '_sha1',
-    '_sha256',
+    '_sha256', # Removed in 3.12
     '_sha3',
-    '_sha512',
+    '_sha512', # Removed in 3.12
     '_socket',
     '_sqlite3',
     '_ssl',
@@ -187,7 +187,18 @@ setup_modules = [
 # _dbm                  _gdbm                 _lzma
 # _tkinter              nis
 
-print('Try loading Setup compiled Python 3.11 stdlib modules...')
+# Same for Python 3.12
+setup_modules_312 = setup_modules_311.copy()
+setup_modules_312.remove('_sha256')
+setup_modules_312.remove('_sha512')
+setup_modules_312.append('_sha2')
+
+if PYTHON_VERSION >= (3, 12):
+    setup_modules = setup_modules_312
+else:
+    setup_modules = setup_modules_311
+
+print('Try loading Setup compiled Python stdlib modules...')
 for modname in setup_modules:
     try:
         __import__(modname)

@@ -25,6 +25,7 @@
 # Python versions to use for pyrun
 #
 # Latest as of 2024-06-19:
+PYTHON_312_VERSION = 3.12.4
 PYTHON_311_VERSION = 3.11.9
 PYTHON_310_VERSION = 3.10.14
 PYTHON_39_VERSION = 3.9.19
@@ -34,7 +35,7 @@ PYTHON_36_VERSION = 3.6.15
 PYTHON_27_VERSION = 2.7.18
 
 # Python version to use as basis for pyrun (select a default one)
-PYTHONFULLVERSION = $(PYTHON_311_VERSION)
+PYTHONFULLVERSION = $(PYTHON_312_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_310_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_39_VERSION)
 #PYTHONFULLVERSION = $(PYTHON_38_VERSION)
@@ -47,7 +48,8 @@ PYTHONVERSIONS = \
 	$(PYTHON_38_VERSION) \
 	$(PYTHON_39_VERSION) \
 	$(PYTHON_310_VERSION) \
-	$(PYTHON_311_VERSION)
+	$(PYTHON_311_VERSION) \
+	$(PYTHON_312_VERSION)
 
 # All available versions:
 ALLPYTHONVERSIONS = \
@@ -57,7 +59,8 @@ ALLPYTHONVERSIONS = \
 	$(PYTHON_38_VERSION) \
 	$(PYTHON_39_VERSION) \
 	$(PYTHON_310_VERSION) \
-	$(PYTHON_311_VERSION)
+	$(PYTHON_311_VERSION) \
+	$(PYTHON_312_VERSION)
 
 # Python Unicode version
 #
@@ -144,6 +147,7 @@ PYTHON_310_BUILD := $(shell test "$(PYTHONVERSION)" = "3.10" && echo "1")
 PYTHON_310_OR_LATER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -ge 10 && echo "1")
 PYTHON_311_BUILD := $(shell test "$(PYTHONVERSION)" = "3.11" && echo "1")
 PYTHON_311_OR_LATER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -ge 11 && echo "1")
+PYTHON_312_BUILD := $(shell test "$(PYTHONVERSION)" = "3.12" && echo "1")
 
 # Special Python environment setups
 
@@ -934,6 +938,12 @@ create-all-patches:
 	@for i in $(PYTHONVERSIONS); do \
 	  $(MAKE) create-python-patch PYTHONFULLVERSION=$$i; $(ECHO) ""; \
 	done
+
+create-modules-setup:
+	@$(ECHO) "Creating $(MODULESSETUPTARGET) for $(PYTHONVERSION)"
+	cd $(PYTHONDIR); \
+	cp -a Modules/$(MODULESSETUPTARGET) \
+		$(PYRUNSOURCEDIR)/$(MODULESSETUP)
 
 print-exported-python-api:	$(BINDIR)/$(PYRUN)
 	nm $(BINDIR)/$(PYRUN) | egrep -v ' T _?Py' | sort -k 2

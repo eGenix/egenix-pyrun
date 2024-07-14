@@ -63,9 +63,10 @@ ENCODING = 'utf-8'
 PY2 = (sys.version_info[0] == 2)
 PY3 = (sys.version_info[0] == 3)
 PY310GE = (sys.version_info[:2] >= (3, 10))
-PY311GE = (sys.version_info[:2] >= (3, 11))
 PY311 = (sys.version_info[:2] == (3, 11))
+PY311GE = (sys.version_info[:2] >= (3, 11))
 PY312 = (sys.version_info[:2] == (3, 12))
+PY312GE = (sys.version_info[:2] >= (3, 12))
 
 # Python module dir
 LIBDIR = sysconfig.get_config_var('LIBDEST')
@@ -138,8 +139,6 @@ include_list = [
     #'_multibytecodec',
     '_scproxy',
     '_sha',
-    '_sha256',
-    '_sha512',
     '_sqlite3',
     #'_subprocess',
     #'audioop',
@@ -162,6 +161,24 @@ include_list = [
     # isn't universally installed everywhere.  See #1793 and #1794.
     #'_lzma',
     ]
+
+# The SHA modules were renamed in 3.12; SHA3 was added in Python 3
+if PY312GE:
+    include_list.extend([
+        '_sha2',
+        '_sha3',
+    ])
+elif PY3:
+    include_list.extend([
+        '_sha256',
+        '_sha512',
+        '_sha3',
+    ])
+else:
+    include_list.extend([
+        '_sha256',
+        '_sha512',
+    ])
 
 # List of modules to always exclude from the list of modules
 #
