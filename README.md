@@ -24,6 +24,7 @@ Since PyRun is all about reducing the deployment footprint, here are
 some numbers for recent versions:
 
 ```
+-rwxr-xr-x 1 lemburg lemburg 5.6M Jul 14 15:00 pyrun3.12
 -rwxr-xr-x 1 lemburg lemburg 5.5M Jun 25 15:48 pyrun3.11
 -rwxr-xr-x 1 lemburg lemburg 4.8M Jun 25 14:16 pyrun3.10
 -rwxr-xr-x 1 lemburg lemburg 4.9M Jun 25 13:47 pyrun3.9
@@ -49,6 +50,7 @@ PyRun currently (actively) supports these Python releases on Unix platforms:
 - Python 3.9
 - Python 3.10
 - Python 3.11
+- Python 3.12
 
 For each release, only one patch level version is supported,
 since PyRun has to patch to the Python source code in order to
@@ -107,14 +109,19 @@ releases and place the results into the `build/` subdirectories.
 If you want to create distribution files instead, use
 `make all-distributions`.
 
-For building just one Python release target, you have to specify the
+For building a distribution archive just for the lastest supported Python release,
+simply run
+
+```
+make distribution
+```
+
+and then pick up the distribution archive in `dist/`.
+
+For building a distribution for a specific Python release target, you have to specify the
 `PYTHONFULLVERSION` variable on the make command line (using the full
 patch level version, as the name suggests):
 
-```
-make build PYTHONFULLVERSION=3.11.9
-```
-or
 ```
 make distribution PYTHONFULLVERSION=3.11.9
 ```
@@ -154,7 +161,7 @@ Please note that some tests will fail due to the way PyRun works:
   CPython, but most environment variables work as expected. See `pyrun
   -h` for a list of available command line options.
 
-There are a few more limitations, which we will list in the docs once we
+There are a few additional limitations, which we will list in the docs once we
 have them available on Github.
 
 # Installing PyRun
@@ -204,7 +211,7 @@ The binary with the one file runtime is called `pyrunX.X`, with X.X
 marking the supported Python version, e.g. `pyrun3.11` for the Python
 3.11 edition.
 
-You can simply copy this file to you app dir and then use it right away.
+You can simply copy this file to your app dir and then use it right away.
 
 The file can be extracted from the distribution archives. Just make sure
 you extract it from the right archive for your platform.
@@ -290,6 +297,10 @@ scale data applications.
 Please [contact us](mailto:sales@egenix.com) for more information.
 
 # Version history
+
+## 2.6.0
+
+- Added support for Python 3.12
 
 ## 2.5.0
 
