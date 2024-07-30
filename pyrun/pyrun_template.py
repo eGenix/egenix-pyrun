@@ -44,6 +44,14 @@ COPYRIGHT = """\
 ### Imports
 
 import sys
+
+# Debugging tools
+# print (f'PyRun: debugging issue #9')
+# print (f'sys.executable = {sys.executable!r}')
+# print (f'sys.argv = {sys.argv!r}')
+# print (f'sys.path = {sys.path!r}')
+# print ()
+
 import pyrun_main
 
 ### Entry point
