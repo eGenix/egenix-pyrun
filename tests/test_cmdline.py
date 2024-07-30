@@ -9,7 +9,9 @@ import os, sys, subprocess, re, shutil
 
 PYRUN = 'pyrun'
 PYTHON = 'python2.7'
-TESTDIR = os.path.abspath('tests')
+TESTDIR = os.environ.get('TESTDIR', os.path.abspath('tests'))
+if not os.path.exists(TESTDIR):
+    TESTDIR = os.path.abspath('../tests')
 
 # Enable debug output ?
 _debug = 0
