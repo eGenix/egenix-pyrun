@@ -5,7 +5,8 @@
     regular Python sysconfig module.
 
 """
-import sys, os
+import sys
+import os
 
 # This template is used by makepyrun.py to build the pyrun_config.py
 # module used by PyRun.
@@ -29,6 +30,21 @@ pyrun_copyright = (
     "Copyright (c) 1997-2000, Marc-Andre Lemburg; mailto:mal@lemburg.com\n"
     "Copyright (c) 2000-2024, eGenix.com Software GmbH; mailto:info@egenix.com\n"
     "All Rights Reserved.\n\n")
+
+# System settings
+pyrun_argv = sys.argv[:] # save original sys.argv
+if not sys.executable:
+    # Work around an issue in Python 3.11+ where in some cases,
+    # sys.executable can be set to an empty string instead of the name
+    # of the binary. Use the first entry in argv instead. See Github
+    # issue #9
+    if pyrun_argv:
+        # The binary name will usually be in sys.argv[0]
+        sys.executable = pyrun_argv[0]
+    else:
+        # Simply use a sane default, if all else fails
+        sys.executable = 'pyrun'
+pyrun_path = sys.path[:] # save original sys.path
 
 # Name and version
 pyrun_name = '#$pyrun'
