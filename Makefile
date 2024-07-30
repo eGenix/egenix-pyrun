@@ -360,11 +360,14 @@ PYRUNTESTS = $(PWD)/tests
 
 # Python configure options
 
-# Regular builds
+# Default builds
 PYTHON_DEFAULT_CONFIGURE_OPTIONS = "--enable-optimizations"
-#PYTHON_DEFAULT_CONFIGURE_OPTIONS = "--enable-optimizations --with-lto=yes"
+
+# Release builds
+PYTHON_FINAL_CONFIGURE_OPTIONS = "--enable-optimizations --with-lto=yes"
+
 # Dev builds, which don't need to be optimized
-PYTHON_DEV_CONFIGURE_OPTIONS = ""
+PYTHON_DEV_CONFIGURE_OPTIONS = "--disable-optimizations"
 
 # ... use the default options for regular builds
 PYTHON_CONFIGURE_OPTIONS = $(PYTHON_DEFAULT_CONFIGURE_OPTIONS)
@@ -741,6 +744,9 @@ distribution:	announce-distribution logs
 	$(MAKE) $(BINARY_DISTRIBUTION_ARCHIVE) \
 		$(LOGREDIR)
 
+dev-distribution:
+	$(MAKE) $(BINARY_DISTRIBUTION_ARCHIVE)
+
 all-distributions:
 	@for i in $(PYTHONVERSIONS); do \
 	  $(MAKE) distribution PYTHONFULLVERSION=$$i; $(ECHO) ""; \
@@ -748,19 +754,34 @@ all-distributions:
 
 # These targets should not be used for building production
 # distributions; it's meant to be used during development, since it runs
-# builds in parallel and without PGO
+# builds in parallel, without PGO and without logging.
+#
+# When switching from and to dev mode, you should run "make clean" to
+# make sure the config options are properly taken into account.
+
+dev-build:
+	@$(ECHO) "Building pyrun in dev mode..."
+	$(MAKE) $(BINDIR)/$(PYRUN) \
+		PYTHON_CONFIGURE_OPTIONS="$(PYTHON_DEV_CONFIGURE_OPTIONS)"
+
+dev-build-all:
+	@$(ECHO) "Building all pyruns in dev mode and in parallel..."
+	@for i in $(PYTHONVERSIONS); do \
+	  ($(MAKE) dev-build \
+		PYTHONFULLVERSION=$$i \
+		&); \
+	done
 
 dev-build-distribution:
 	@$(ECHO) "Building a dev distribution..."
-	$(MAKE) distribution \
+	$(MAKE) dev-distribution \
 		PYTHON_CONFIGURE_OPTIONS="$(PYTHON_DEV_CONFIGURE_OPTIONS)"
 
 dev-build-all-distributions:
 	@$(ECHO) "Building dev distributions in parallel..."
 	@for i in $(PYTHONVERSIONS); do \
-	  ($(MAKE) distribution \
+	  ($(MAKE) dev-build-distribution \
 		PYTHONFULLVERSION=$$i \
-		PYTHON_CONFIGURE_OPTIONS="$(PYTHON_DEV_CONFIGURE_OPTIONS)" \
 		&); \
 	done
 
@@ -768,7 +789,7 @@ dev-build-all-distributions:
 
 $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 	@$(ECHO) "$(BOLD)"
-	@$(ECHO) "=== Installing PyRun for Tests ==============================================="
+	@$(ECHO) "=== Installing $(PYRUN) for Tests ==============================================="
 	@$(ECHO) "$(OFF)"
 	$(RM) -rf $(TESTDIR)
 	./install-pyrun \
@@ -786,42 +807,52 @@ $(TESTDIR)/tests:	$(PYRUNTESTS)
 
 test-basic:	$(TESTDIR)/bin/$(PYRUN) $(TESTDIR)/tests
 	@$(ECHO) "$(BOLD)"
-	@$(ECHO) "=== Running Tests ============================================================="
+	@$(ECHO) "=== Running Basic Tests with $(PYRUN) ==========================================="
 	@$(ECHO) "$(OFF)"
 	@$(ECHO) "--- Testing basic operation --------------------------------------"
 	@$(ECHO) ""
-	cd $(TESTDIR); bin/pyrun tests/test_basic.py
+	cd $(TESTDIR); bin/$(PYRUN) tests/test_basic.py
 	@$(ECHO) ""
 	@$(ECHO) "--- Testing command line options ---------------------------------"
 	@$(ECHO) ""
-	cd $(TESTDIR); bin/pyrun tests/test_cmdline.py
+	@$(ECHO) "Using relative pyrun path..."
+	cd $(TESTDIR); bin/$(PYRUN) tests/test_cmdline.py
+	@$(ECHO) ""
+	@$(ECHO) "Running from bin/ dir..."
+	cd $(TESTDIR)/bin; $(PYRUN) ../tests/test_cmdline.py
 	@$(ECHO) ""
 	@$(ECHO) "--- Testing direct execution of commands -------------------------"
 	@$(ECHO) ""
-	cd $(TESTDIR); bin/pyrun -c "import sys; print(sys.version)"
-	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun
-	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/pyrun -
+	cd $(TESTDIR); bin/$(PYRUN) -c "import sys; print(sys.version)"
+	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/$(PYRUN)
+	cd $(TESTDIR); echo "import sys; print(sys.version)" | bin/$(PYRUN) -
 	@$(ECHO) ""
 	@$(ECHO) "--- Testing module runs ------------------------------------------"
 	@$(ECHO) ""
-	cd $(TESTDIR); bin/pyrun -m timeit
+	cd $(TESTDIR); bin/$(PYRUN) -m timeit
 	@$(ECHO) ""
 
 test-ssl:	$(TESTDIR)/bin/$(PYRUN) $(TESTDIR)/tests
-	@$(ECHO) "--- Testing SSL installation  ------------------------------------"
+	@$(ECHO) "$(BOLD)"
+	@$(ECHO) "=== Running SSL Tests with $(PYRUN) ==========================================="
+	@$(ECHO) "$(OFF)"
+	@$(ECHO) "--- Testing SSL installation ------------------------------------"
 	@$(ECHO) ""
 ifdef PYTHON_2_BUILD
 	cd $(TESTDIR); export EGENIX_CRYPTO_CONFIRM=1; bin/pip install egenix-pyopenssl
 else
 	cd $(TESTDIR); bin/pip install -U pip setuptools pyopenssl
 endif
-	export -n PYRUN_HTTPSVERIFY; cd $(TESTDIR); bin/pyrun tests/test_ssl.py
-	export PYRUN_HTTPSVERIFY=0; cd $(TESTDIR); bin/pyrun tests/test_ssl.py
-	export PYRUN_HTTPSVERIFY=1; cd $(TESTDIR); bin/pyrun tests/test_ssl.py
+	export -n PYRUN_HTTPSVERIFY; cd $(TESTDIR); bin/$(PYRUN) tests/test_ssl.py
+	export PYRUN_HTTPSVERIFY=0; cd $(TESTDIR); bin/$(PYRUN) tests/test_ssl.py
+	export PYRUN_HTTPSVERIFY=1; cd $(TESTDIR); bin/$(PYRUN) tests/test_ssl.py
 	@$(ECHO) ""
 
 ifdef PYTHON_2_BUILD
 test-pip:	$(TESTDIR)/bin/$(PYRUN)
+	@$(ECHO) "$(BOLD)"
+	@$(ECHO) "=== Running pip Tests with $(PYRUN) ==========================================="
+	@$(ECHO) "$(OFF)"
 	@$(ECHO) "--- Testing pip installation (pure Python) -----------------------"
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pip install Genshi
@@ -840,6 +871,9 @@ test-pip:	$(TESTDIR)/bin/$(PYRUN)
 	cd $(TESTDIR); bin/pip install Django
 else
 test-pip:	$(TESTDIR)/bin/$(PYRUN)
+	@$(ECHO) "$(BOLD)"
+	@$(ECHO) "=== Running pip Tests with $(PYRUN) ==========================================="
+	@$(ECHO) "$(OFF)"
 	@$(ECHO) "--- Testing pip installation (pure Python) -----------------------"
 	@$(ECHO) ""
 	cd $(TESTDIR); bin/pip install requests
@@ -858,6 +892,9 @@ test-pip:	$(TESTDIR)/bin/$(PYRUN)
 endif
 
 test-pip-latest:	$(TESTDIR)/bin/$(PYRUN)
+	@$(ECHO) "$(BOLD)"
+	@$(ECHO) "=== Running pip upgrade Tests with $(PYRUN) ===================================="
+	@$(ECHO) "$(OFF)"
 	$(RM) -rf $(TESTDIR)
 	$(MAKE) test-install-pyrun
 	@$(ECHO) "--- Upgrading to latest pip --------------------------------------"
