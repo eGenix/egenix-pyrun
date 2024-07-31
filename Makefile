@@ -120,12 +120,13 @@ PYRUN_SSL := $(shell if ( test -n "$(SSL)" ); then echo $(SSL); \
 SSL = $(PYRUN_SSL)
 export SSL
 
-### runtime build parameters
+### Runtime build parameters
 
 # Project dir
 PWD := $(shell pwd)
 
-# Version & Platform
+## Version & Platform
+
 PYTHONVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\.[0-9]\+\).*/\1/')
 PYTHONMAJORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/\([0-9]\+\)\..*/\1/')
 PYTHONMINORVERSION := $(shell echo $(PYTHONFULLVERSION) | sed 's/[0-9]\.\([0-9]\+\)\..*/\1/')
@@ -133,7 +134,8 @@ PYRUNFULLVERSION = $(PYTHONFULLVERSION)
 PYRUNVERSION = $(PYTHONVERSION)
 PLATFORM := $(shell uname -s -m | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]')
 
-# Python build flags
+## Python build flags
+
 PYTHON_2_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "2" && echo "1")
 PYTHON_27_BUILD := $(shell test "$(PYTHONVERSION)" = "2.7" && echo "1")
 PYTHON_3_BUILD := $(shell test "$(PYTHONMAJORVERSION)" = "3" && echo "1")
@@ -149,7 +151,7 @@ PYTHON_311_BUILD := $(shell test "$(PYTHONVERSION)" = "3.11" && echo "1")
 PYTHON_311_OR_LATER_BUILD := $(shell test $(PYTHONMAJORVERSION) -eq 3 && test $(PYTHONMINORVERSION) -ge 11 && echo "1")
 PYTHON_312_BUILD := $(shell test "$(PYTHONVERSION)" = "3.12" && echo "1")
 
-# Special Python environment setups
+### Special Python environment setups
 
 ifdef PYTHON_3_BUILD
  # We support Python 3.5+ only, which no longer has different versions
@@ -171,7 +173,8 @@ ifdef PYTHON_39_OR_EARLIER_BUILD
  export SETUPTOOLS_USE_DISTUTILS
 endif
 
-# Name of the resulting pyrun executable
+### Name of the resulting pyrun executable
+
 PYRUN_GENERIC = pyrun
 PYRUN = $(PYRUN_GENERIC)$(PYRUNVERSION)
 PYRUN_DEBUG = $(PYRUN)-debug
@@ -187,12 +190,12 @@ else
  PYRUN_SYMLINK = python$(PYTHONVERSION)
 endif
 
-# Archive name to create with "make archive"
-ARCHIVE = $(PYRUN)-$(PYRUNFULLVERSION)-$(PLATFORM)
+### Location of the Python tarball
 
-# Location of the Python tarball
 PYTHONTARBALL = /downloads/python/Python-$(PYTHONFULLVERSION).tgz
 PYTHONSOURCEURL = https://www.python.org/ftp/python/$(PYTHONFULLVERSION)/Python-$(PYTHONFULLVERSION).tgz
+
+### Directory setups
 
 # Base dir used for a PyRun build
 BASEDIR = $(PWD)/build/$(PYTHONVERSION)-$(PYTHONUNICODE)
@@ -214,54 +217,6 @@ else
  PYRUNFREEZEDIR = freeze-3
 endif
 
-# PyRun C compiler optimization settings
-PYRUN_OPT := -g -O3 -Wall -Wstrict-prototypes
-OPT = $(PYRUN_OPT)
-export OPT
-
-# Freeze optimization settings; the freeze.py script is run with these
-# Python optimization settings, which affect the way the stdlib modules are
-# compiled. Note that user code will not automatically use these settings.
-#
-# Produce optimized code, with debug and assertions disabled.
-PYRUNFREEZEOPTIMIZATION = -O
-#
-# Produce optimized code, with doc-string removed, debug and assertions
-# disabled.  This results in a reduction of the compressed PyRun size of
-# about 8%, compared to -O.
-#PYRUNFREEZEOPTIMIZATION = -OO
-
-# Starting with Python 3.11, fine grained error location reporting was
-# added. This requires a lot of extra space for storing the char-in-line
-# information and contributes a lot to the size of the binary.
-#
-# We disable creating those debug ranges for PyRun itself, but leave it
-# enabled for when using PyRun. Use the PYTHONNODEBUGRANGES env var to
-# disable this for code using PyRun as well - when running the code.
-ifdef PYTHON_311_OR_LATER_BUILD
- PYRUNFREEZEDEBUGRANGES = -X no_debug_ranges
-else
- PYRUNFREEZEDEBUGRANGES =
-endif
-
-# Name of the freeze template and executable
-PYRUNPY = $(PYRUN).py
-
-# Name of the special eGenix PyRun Modules/Setup file
-MODULESSETUP = Setup.PyRun-$(PYTHONVERSION)
-
-# Name of the target Modules/Setup file
-ifdef PYTHON_311_OR_LATER_BUILD
- # The logic changed in 3.11 to use Setup.local instead of editing Setup
- # directly
- MODULESSETUPTARGET = Setup.local
-else
- MODULESSETUPTARGET = Setup
-endif
-
-# Name of the pyrun Python patch file
-PYTHONPATCHFILE = Python-$(PYTHONVERSION).patch
-
 # Name of the temporary full Python installation target dir; this is where
 # the patched Python version will get installed prior to using it for
 # freezing pyrun.
@@ -280,11 +235,6 @@ else
  # Python 3.8 returned to the non-ABI dir
  FULLINCLUDEDIR = $(FULLINSTALLDIR)/include/python$(PYTHONVERSION)
 endif
-
-# Path prefix to use in byte code files embedded into the frozen pyrun
-# binary instead of the build time one
-PYRUNLIBDIRCODEPREFIX = "$(FULLLIBDIR)=<pyrun>"
-PYRUNDIRCODEPREFIX = "$(PYRUNDIR)=<pyrun>"
 
 # PyRun build dir.  This is used to prepare all the PyRun parts for
 # installation.  It is used by `make install` as source of the build files.
@@ -317,6 +267,84 @@ endif
 # bundles.
 DISTBUILDDIR  = $(BASEDIR)/pyrun-dist
 
+# Install all binaries, or just the default ones ?  Set to 1 to enable this.
+INSTALLALLBINARIES =
+
+# Installation directories
+PREFIX = /usr/local
+INSTALLBINDIR = $(PREFIX)/bin
+INSTALLLIBDIR = $(PREFIX)/lib
+INSTALLINCLUDEDIR = $(PREFIX)/include
+
+### Distribution archives
+
+# Binary distributions
+DISTDIR = $(PWD)/dist
+BINARY_DISTRIBUTION = $(PACKAGENAME)-$(PACKAGEVERSION)-py$(PYTHONVERSION)_$(PYTHONUNICODE)-$(PLATFORM)
+BINARY_DISTRIBUTION_ARCHIVE = $(DISTDIR)/$(BINARY_DISTRIBUTION).tgz
+
+### PyRun C compiler optimization settings
+
+PYRUN_OPT := -g -O3 -Wall -Wstrict-prototypes
+OPT = $(PYRUN_OPT)
+export OPT
+
+# Freeze optimization settings; the freeze.py script is run with these
+# Python optimization settings, which affect the way the stdlib modules are
+# compiled. Note that user code will not automatically use these settings.
+#
+# Produce optimized code, with debug and assertions disabled.
+PYRUNFREEZEOPTIMIZATION = -O
+#
+# Produce optimized code, with doc-string removed, debug and assertions
+# disabled.  This results in a reduction of the compressed PyRun size of
+# about 8%, compared to -O.
+#PYRUNFREEZEOPTIMIZATION = -OO
+
+# Starting with Python 3.11, fine grained error location reporting was
+# added. This requires a lot of extra space for storing the char-in-line
+# information and contributes a lot to the size of the binary.
+#
+# We disable creating those debug ranges for PyRun itself, but leave it
+# enabled for when using PyRun. Use the PYTHONNODEBUGRANGES env var to
+# disable this for code using PyRun as well - when running the code.
+ifdef PYTHON_311_OR_LATER_BUILD
+ PYRUNFREEZEDEBUGRANGES = -X no_debug_ranges
+else
+ PYRUNFREEZEDEBUGRANGES =
+endif
+
+### Freeze parameters
+
+# Name of the freeze template and executable
+PYRUNPY = $(PYRUN).py
+
+# Path prefix to use in byte code files embedded into the frozen pyrun
+# binary instead of the build time one
+PYRUNLIBDIRCODEPREFIX = "$(FULLLIBDIR)=<pyrun>"
+PYRUNDIRCODEPREFIX = "$(PYRUNDIR)=<pyrun>"
+
+### Modules configuration
+
+# Name of the special eGenix PyRun Modules/Setup file
+MODULESSETUP = Setup.PyRun-$(PYTHONVERSION)
+
+# Name of the target Modules/Setup file
+ifdef PYTHON_311_OR_LATER_BUILD
+ # The logic changed in 3.11 to use Setup.local instead of editing Setup
+ # directly
+ MODULESSETUPTARGET = Setup.local
+else
+ MODULESSETUPTARGET = Setup
+endif
+
+### Python patches
+
+# Name of the pyrun Python patch file
+PYTHONPATCHFILE = Python-$(PYTHONVERSION).patch
+
+### Linker settings
+
 # PyRun rpath setting (used to hardwire linker paths into the binary)
 #
 # See man ld for details. $ORIGIN refers to the location of the binary
@@ -338,19 +366,7 @@ DISTBUILDDIR  = $(BASEDIR)/pyrun-dist
 PYRUNORIGIN = \$$ORIGIN
 PYRUNRPATH := $(PYRUNORIGIN):$(PYRUNORIGIN)/../lib:$(PYRUNORIGIN)/../lib/python$(PYRUNVERSION)/site-packages/OpenSSL
 
-# Install all binaries, or just the default ones ?  Set to 1 to enable this.
-INSTALLALLBINARIES =
-
-# Installation directories
-PREFIX = /usr/local
-INSTALLBINDIR = $(PREFIX)/bin
-INSTALLLIBDIR = $(PREFIX)/lib
-INSTALLINCLUDEDIR = $(PREFIX)/include
-
-# Binary distributions
-DISTDIR = $(PWD)/dist
-BINARY_DISTRIBUTION = $(PACKAGENAME)-$(PACKAGEVERSION)-py$(PYTHONVERSION)_$(PYTHONUNICODE)-$(PLATFORM)
-BINARY_DISTRIBUTION_ARCHIVE = $(DISTDIR)/$(BINARY_DISTRIBUTION).tgz
+### Test configuration
 
 # Test directory used for running tests
 TESTDIR = $(PWD)/testing-$(PYTHONVERSION)-$(PYTHONUNICODE)
@@ -358,21 +374,22 @@ TESTDIR = $(PWD)/testing-$(PYTHONVERSION)-$(PYTHONUNICODE)
 # Directory with PyRun tests
 PYRUNTESTS = $(PWD)/tests
 
-# Python configure options
+### Python configure options
 
 # Default builds
-PYTHON_DEFAULT_CONFIGURE_OPTIONS = "--enable-optimizations"
+PYTHON_DEFAULT_CONFIGURE_OPTIONS = --enable-optimizations
 
 # Release builds
-PYTHON_FINAL_CONFIGURE_OPTIONS = "--enable-optimizations --with-lto=yes"
+PYTHON_FINAL_CONFIGURE_OPTIONS = --enable-optimizations --with-lto=yes
 
 # Dev builds, which don't need to be optimized
-PYTHON_DEV_CONFIGURE_OPTIONS = "--disable-optimizations"
+PYTHON_DEV_CONFIGURE_OPTIONS = --disable-optimizations
 
 # ... use the default options for regular builds
 PYTHON_CONFIGURE_OPTIONS = $(PYTHON_DEFAULT_CONFIGURE_OPTIONS)
 
-# Build platform
+### Build platform
+
 LINUX_PLATFORM := $(shell test "`uname -s`" = "Linux" && echo "1")
 MACOSX_PLATFORM := $(shell test "`uname -s`" = "Darwin" && echo "1")
 MACOSX_PPC_PLATFORM := $(shell test "`uname -s -p`" = "Darwin powerpc" && echo "1")
@@ -380,7 +397,8 @@ MACOSX_INTEL_PLATFORM := $(shell test "`uname -s -p`" = "Darwin i386" && echo "1
 FREEBSD_PLATFORM := $(shell test "`uname -s`" = "FreeBSD" && echo "1")
 RASPI_PLATFORM := $(shell test "`uname -s -m`" = "Linux armv6l" && echo "1")
 
-# Special OS environment setups
+### Special OS environment setups
+
 ifdef MACOSX_PPC_PLATFORM
  # On PPC Macs, we use the 10.4 SDK to build universal PPC/i386 binaries
  export MACOSX_DEPLOYMENT_TARGET=10.4
@@ -392,7 +410,8 @@ ifdef MACOSX_INTEL_PLATFORM
  PYTHON_CONFIGURE_OPTIONS = MACOSX_DEPLOYMENT_TARGET=10.5
 endif
 
-# Tools
+### Tools
+
 TAR = tar
 # MAKE is a predefined variable
 RM = /bin/rm
@@ -427,6 +446,8 @@ endif
 # linking. See #792. Use -S to only strip the debug information like
 # on Linux
 STRIPOPTIONS = -S
+
+### Logging
 
 # ANSI screen codes
 BOLD := `$(TPUT) bold`
@@ -752,6 +773,14 @@ all-distributions:
 	  $(MAKE) distribution PYTHONFULLVERSION=$$i; $(ECHO) ""; \
 	done
 
+release-distributions:
+	@for i in $(PYTHONVERSIONS); do \
+	  $(MAKE) distribution \
+		PYTHONFULLVERSION=$$i \
+		PYTHON_CONFIGURE_OPTIONS="$(PYTHON_FINAL_CONFIGURE_OPTIONS)"; \
+	  $(ECHO) ""; \
+	done
+
 # These targets should not be used for building production
 # distributions; it's meant to be used during development, since it runs
 # builds in parallel, without PGO and without logging.
@@ -992,7 +1021,7 @@ versions:
 	echo "PyRun Python version: $(PYRUNFULLVERSION)"
 	echo "PyRun platform: $(PLATFORM)"
 	echo "PyRun Unicode: $(PYTHONUNICODE)"
-	echo "PyRun archive base name: $(ARCHIVE)"
+	echo "PyRun distribution name: $(BINARY_DISTRIBUTION).tgz"
 	echo "PyRun binary: $(BINDIR)/$(PYRUN)"
 	echo "PyRun SSL dir: $(PYRUN_SSL)"
 
