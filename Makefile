@@ -100,10 +100,10 @@ PACKAGENAME = egenix-pyrun
 
 # Package version
 #
-# Note that you have to keep this in sync with runtime/makepyrun.py
+# Note that you have to keep this in sync with pyrun/makepyrun.py
 #
 PACKAGEVERSION = 2.6.0
-#PACKAGEVERSION = $(shell cd runtime; python -c "from makepyrun import __version__; print __version__")
+#PACKAGEVERSION = $(shell cd pyrun; python -c "from makepyrun import __version__; print __version__")
 
 # OpenSSL installation to compile and link against. If an environment
 # variable SSL is given we use that.  Otherwise, We check a few custom
