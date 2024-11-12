@@ -91,7 +91,7 @@ The tests need a few extra libs:
 
 Some additional development packages may be useful to add, depending on your
 needs. These are for stdlib modules, which are not included in the PyRun binary,
-but still built as shared lib, if you need them:
+but still built as shared libs, if you need them:
 
 - readline-devel / libreadline-dev
 - libuuid-devel / uuid-dev
@@ -316,6 +316,7 @@ Please [contact us](mailto:sales@egenix.com) for more information.
 
 - Added support for Python 3.12
 - Added support for LTO release builds
+- Added dev build targets for development; these don't use PGO and thus build faster
 
 ## 2.5.0
 
