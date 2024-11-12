@@ -455,6 +455,15 @@ if [ "$PYTHON_VERSION" == "2.7" ]; then
     fi
 fi
 
+if [ "$PYTHON_VERSION" == "3.8" ]; then
+    # setuptools dropped Python 3.8 support in setuptools 75.4.0, so
+    # force to use the last compatible setuptools version
+    if [[ "$SETUPTOOLS_VERSION" > "75.4.0" || "$SETUPTOOLS_VERSION" == "latest" ]]; then
+	echo "WARNING: setuptools $SETUPTOOLS_VERSION is not compatible with Python 3.8; using setuptools 75.3.0" 2>&1 | tee -a $LOG_FILE
+	SETUPTOOLS_VERSION="75.3.0"
+    fi
+fi
+
 # eGenix PyRun distribution to use
 if [ -z "$PYRUN_DISTRIBUTION" ]; then
     PYRUN_DISTRIBUTION=egenix-pyrun-$PYRUN_VERSION-py${PYTHON_VERSION}_$PYTHON_UNICODE_VERSION-$PLATFORM.tgz
