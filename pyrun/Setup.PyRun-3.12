@@ -164,7 +164,7 @@ _crypt _cryptmodule.c
 # Linux: -luuid, BSD/AIX: libc's uuid_create()
 _uuid _uuidmodule.c
 
-# needs -lffi and -ldl
+# needs -lffi and -ldl (not sure about this one; the final .so does not depend on libdl)
 MODULE__CTYPES_LDFLAGS=-lffi -dl
 _ctypes _ctypes/_ctypes.c _ctypes/callbacks.c _ctypes/callproc.c _ctypes/stgdict.c _ctypes/cfield.c
 
@@ -186,11 +186,6 @@ readline readline.c
 
 # AIX has shadow passwords, but does not provide getspent API
 spwd spwdmodule.c
-
-# Some testing modules MUST be built as shared libraries.
-#_testimportmultiple _testimportmultiple.c
-#_testmultiphase _testmultiphase.c
-#_ctypes_test _ctypes/_ctypes_test.c
 
 # Limited API template modules; must be built as shared modules.
 #xxlimited xxlimited.c

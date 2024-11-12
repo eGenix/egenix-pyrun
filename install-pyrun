@@ -19,13 +19,13 @@ OPTIONS:
            have pip install the given requirements (only works
            if pip is installed as part of the pyrun installation)
 
-       --python=3.10
-           install PyRun for Python version 2.7, 3.7 - 3.10 (default)
+       --python=3.12
+           install PyRun for Python version 2.7, 3.8 - 3.12 (default)
        --python-unicode=ucs2
            install PyRun for Python Unicode version
            ucs2 (default for Python 2) or ucs4 (default for Python 3)
-       --pyrun=2.5.0
-           install PyRun version 2.5.0 (default)
+       --pyrun=2.6.0
+           install PyRun version 2.6.0 (default)
 
        --platform=linux-i686
            install PyRun for the given platform; this is usually
@@ -93,7 +93,7 @@ COPYRIGHT='
 '
 
 # Script version
-VERSION=1.7.0
+VERSION=1.7.1
 
 # Generate debug output ?
 DEBUG=0
@@ -112,13 +112,13 @@ macosx-10.5-x86_64
 ### Configuration
 
 # Select Python version (major.minor)
-PYTHON_VERSION=3.10
+PYTHON_VERSION=3.12
 
 # Select Python Unicode version (ucs2 or ucs4 depending on Python version)
 PYTHON_UNICODE_VERSION=
 
 # Select PyRun version (major.minor.patch)
-PYRUN_VERSION=2.5.0
+PYRUN_VERSION=2.6.0
 
 # Platform string on the PyRun binary distribution (usually
 # auto-detected, see below)
