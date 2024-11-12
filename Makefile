@@ -105,6 +105,9 @@ PACKAGENAME = egenix-pyrun
 PACKAGEVERSION = 2.6.0
 #PACKAGEVERSION = $(shell cd pyrun; python -c "from makepyrun import __version__; print __version__")
 
+# Tag to use for releases
+RELEASETAG := 'egenix-pyrun-$(PACKAGEVERSION)'
+
 # OpenSSL installation to compile and link against. If an environment
 # variable SSL is given we use that.  Otherwise, We check a few custom
 # locations which possibly more recent versions before going to the standard
@@ -780,6 +783,10 @@ release-distributions:
 		PYTHON_CONFIGURE_OPTIONS="$(PYTHON_FINAL_CONFIGURE_OPTIONS)"; \
 	  $(ECHO) ""; \
 	done
+
+tag-release:
+	git tag -a $(RELEASETAG) -m "eGenix PyRun Release $(PACKAGEVERSION)"
+	git push origin --tags
 
 # These targets should not be used for building production
 # distributions; it's meant to be used during development, since it runs
