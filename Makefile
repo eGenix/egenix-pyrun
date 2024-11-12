@@ -825,6 +825,7 @@ $(TESTDIR)/bin/$(PYRUN):	$(BINARY_DISTRIBUTION_ARCHIVE)
 		--log \
 		--setuptools-version=latest \
 		--pip-version=latest \
+		--python=$(PYTHONVERSION) \
 		--pyrun-distribution=$(BINARY_DISTRIBUTION_ARCHIVE) \
 		$(TESTDIR)
 	touch $@
@@ -986,7 +987,7 @@ distclean-all:
 	done
 
 spring-clean:
-	$(RM) -rf Python-2.* Python-3.* tmp-* test-pyrun-* build-*
+	$(RM) -rf Python-2.* Python-3.* tmp-* test-pyrun-* build
 
 ### Misc other targets
 
