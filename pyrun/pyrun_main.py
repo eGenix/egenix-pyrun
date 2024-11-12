@@ -31,6 +31,8 @@ from pyrun_config import (
     pyrun_binary,
     pyrun_prefix,
     pyrun_bindir,
+    pyrun_argv,
+    pyrun_path,
     )
 
 ### Globals
@@ -38,9 +40,6 @@ from pyrun_config import (
 # PyRun properties (set in pyrun_main() below)
 pyrun_mode = 'script'
 pyrun_app = 'pyrun'
-
-# Settings
-pyrun_argv = sys.argv[:] # save original sys.argv
 
 # Options
 pyrun_verbose = int(os.environ.get('PYRUN_VERBOSE', 0))
@@ -187,6 +186,7 @@ pyrun_build = %(pyrun_build)r
 # Files and directories
 pyrun_executable = %(pyrun_executable)r
 pyrun_argv = %(pyrun_argv)r
+pyrun_path = %(pyrun_path)r
 pyrun_dir = %(pyrun_dir)r
 pyrun_binary = %(pyrun_binary)r
 pyrun_prefix = %(pyrun_prefix)r

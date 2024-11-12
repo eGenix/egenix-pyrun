@@ -51,7 +51,7 @@ except ImportError:
 #
 # Keep this in sync with the PACKAGEVERSION in the top-level Makefile
 #
-__version__ = '2.5.0'
+__version__ = '2.6.0'
 
 # Debug level
 _debug = 1
